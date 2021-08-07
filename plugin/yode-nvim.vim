@@ -2,7 +2,7 @@ if exists('g:loaded_yode_nvim') | finish | endif
 
 " expose vim commands and interface here
 " nnoremap <Plug>PlugCommand :lua require(...).plug_command()<CR>
-command! YodeNvim lua require'yode-nvim.init'.yodeNvim()
+command! YodeNvim lua require'yode-nvim'.yodeNvim()
 
 let s:save_cpo = &cpo
 set cpo&vim

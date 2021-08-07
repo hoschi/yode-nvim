@@ -9,3 +9,4 @@ yarn-error.log*
 tags
 nvim.log
 neomake.log
+lua/yode-nvim/deps/
