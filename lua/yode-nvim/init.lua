@@ -1,7 +1,7 @@
 local defaultConfig = require('yode-nvim.defaultConfig')
 local logging = require('yode-nvim.logging')
 local h = require('yode-nvim.helper')
-local R = require('yode-nvim.deps.lamda')
+local R = require('yode-nvim.deps.lamda.dist.lamda')
 
 local M = {
     config = {},

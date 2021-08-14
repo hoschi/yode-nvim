@@ -1,4 +1,4 @@
-local R = require('yode-nvim.deps.lamda')
+local R = require('yode-nvim.deps.lamda.dist.lamda')
 local M = {}
 
 M.map = function(fn, data)
