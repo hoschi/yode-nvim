@@ -38,11 +38,13 @@ end
 
 M.yodeRedux = function()
     local log = logging.create('yodeRedux')
-    print('Redux Test --------------------')
+    log.debug('Redux Test --------------------')
     log.debug('inital state:', store.getState())
-    store.dispatch(tabs.actions.updateName('my name'))
-    log.debug('after action:', store.getState())
-    print('End ---------------------------')
+    tabs.actions.updateName('my name')
+    tabs.actions.updateAge(10)
+    log.debug('current name:', tabs.selectors.getName())
+    log.debug('is kiddo?', tabs.selectors.isKid(5, 18))
+    log.debug('End ---------------------------')
 end
 
 return M

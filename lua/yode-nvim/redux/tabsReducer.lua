@@ -1,6 +1,12 @@
 local R = require('yode-nvim.deps.lamda.dist.lamda')
+local createReducer = require('yode-nvim.redux.createReducer')
 
-local M = { actions = {} }
+local M = { actions = {}, selectors = {} }
+
+local initalState = {
+    name = '',
+    age = 0,
+}
 
 M.actions.updateName = function(name)
     return {
@@ -16,10 +22,10 @@ M.actions.updateAge = function(age)
     }
 end
 
-local initState = {
-    name = '',
-    age = 0,
-}
+M.selectors.getName = R.prop('name')
+M.selectors.isKid = function(min, max, state)
+    return state.age > min and state.age < max
+end
 
 local handlers = {
     ['PROFILE_UPDATE_NAME'] = function(state, action)
@@ -30,14 +36,6 @@ local handlers = {
         return R.assoc('age', action.age, state)
     end,
 }
-
-M.reducer = function(state, action)
-    state = state or initState
-    local handler = handlers[action.type]
-    if handler then
-        return handler(state, action)
-    end
-    return state
-end
+M.reducer = createReducer(initalState, handlers)
 
 return M
