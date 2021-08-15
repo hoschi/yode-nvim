@@ -1,0 +1,6 @@
+[submodule "lua/yode-nvim/deps/lamda"]
+	path = lua/yode-nvim/deps/lamda
+	url = https://github.com/moriyalb/lamda.git
+[submodule "lua/yode-nvim/deps/redux-lua"]
+	path = lua/yode-nvim/deps/redux-lua
+	url = https://github.com/pyericz/redux-lua.git

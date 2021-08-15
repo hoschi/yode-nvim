@@ -1,7 +1,10 @@
 local defaultConfig = require('yode-nvim.defaultConfig')
 local logging = require('yode-nvim.logging')
 local h = require('yode-nvim.helper')
-local R = require('yode-nvim.deps.lamda')
+local R = require('yode-nvim.deps.lamda.dist.lamda')
+local redux = require('yode-nvim.redux.index')
+local store = redux.store
+local tabs = redux.tabs
 
 local M = {
     config = {},
@@ -31,6 +34,17 @@ M.yodeNvim = function()
     end, s)
     log.debug('my stuff', cp)
     count = count + 1
+end
+
+M.yodeRedux = function()
+    local log = logging.create('yodeRedux')
+    log.debug('Redux Test --------------------')
+    log.debug('inital state:', store.getState())
+    tabs.actions.updateName('my name')
+    tabs.actions.updateAge(10)
+    log.debug('current name:', tabs.selectors.getName())
+    log.debug('is kiddo?', tabs.selectors.isKid(5, 18))
+    log.debug('End ---------------------------')
 end
 
 return M
