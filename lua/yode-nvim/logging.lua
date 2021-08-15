@@ -21,7 +21,7 @@ M.setup = function(options)
 end
 
 M.create = function(name)
-    local prefix = name..":"
+    local prefix = name .. ':'
     return R.reduce(function(obj, mode)
         return R.assoc(mode, function(...)
             return base[mode](prefix, ...)

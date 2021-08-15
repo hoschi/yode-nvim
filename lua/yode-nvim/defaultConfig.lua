@@ -1,5 +1,5 @@
 local M = {
-    log = {}
+    log = {},
 }
 
 M.log.level = 'warn'
