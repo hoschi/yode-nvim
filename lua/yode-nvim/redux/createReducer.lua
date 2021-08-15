@@ -1,7 +1,8 @@
-local createReducer = function(initalState, handlers)
+local createReducer = function(initalState, reducerFunctions)
     return function(stateParam, action)
         local state = stateParam or initalState
-        return handlers[action.type] and handlers[action.type](state, action) or state
+        return reducerFunctions[action.type] and reducerFunctions[action.type](state, action)
+            or state
     end
 end
 

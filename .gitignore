@@ -9,3 +9,5 @@ yarn-error.log*
 tags
 nvim.log
 neomake.log
+env/
+.ignore

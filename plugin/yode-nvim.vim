@@ -4,10 +4,17 @@ if exists('g:loaded_yode_nvim') | finish | endif
 " nnoremap <Plug>PlugCommand :lua require(...).plug_command()<CR>
 command! YodeNvim lua require'yode-nvim'.yodeNvim()
 
+augroup YodeNvim
+    autocmd!
+    autocmd BufEnter * lua require'yode-nvim.changeSyncing'.subscribeToBuffer()
+    autocmd BufDelete * call luaeval("require'yode-nvim.changeSyncing'.unsubscribeFromBuffer(tonumber(_A))", expand('<abuf>'))
+    autocmd BufWriteCmd yode://* lua require'yode-nvim.seditor'.writeSeditor()
+    autocmd BufWritePost * lua require'yode-nvim.fileEditor'.writeFileEditor()
+augroup END
+
 let s:save_cpo = &cpo
 set cpo&vim
 
-" FIXME yode-nvim was an error
 let g:loaded_yode_nvim = 1
 
 let &cpo = s:save_cpo

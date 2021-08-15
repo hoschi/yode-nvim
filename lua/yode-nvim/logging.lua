@@ -24,7 +24,7 @@ M.create = function(name)
     local prefix = name .. ':'
     return R.reduce(function(obj, mode)
         return R.assoc(mode, function(...)
-            return base[mode](prefix, ...)
+            return base[mode]("\n", "🔹"..prefix, ...)
         end, obj)
     end, base, modes)
 end
