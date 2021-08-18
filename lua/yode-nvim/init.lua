@@ -28,6 +28,18 @@ M.yodeTesting = function()
     log.debug(n)
 end
 
+M.yodeArgsLogger = function(...)
+    local log = logging.create('yodeArgsLogger')
+    log.debug(...)
+end
+
+M.yodeNeomakeGetSeditorInfo = function(bufId)
+    local log = logging.create('yodeNeomakeGetSeditorInfo')
+    local win = tabs.selectors.getSwindowBySeditorBufferId(bufId)
+    log.debug(bufId, win)
+    return win
+end
+
 M.yodeRedux = function()
     local log = logging.create('yodeRedux')
     log.debug('Redux Test --------------------')

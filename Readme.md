@@ -25,6 +25,10 @@ Yode plugin for Neovim.
     * `tail -f ~/.cache/nvim/yode-nvim.log | grep -v "^\["`
     * last part removes the file name lines
 * format all files: `stylua lua/yode-nvim/*.lua lua/yode-nvim/redux/**.lua`
+* see `local.vimrc` for enhancements
+    * rename to `.local.vimrc` to use it
+    * [install nvim plugin for it](https://github.com/thinca/vim-localrc)
+    * start Neovim with `YODE=true DEBUG_YODE='debug' nvim` to enable special parts for testing
 * install local Lua
     * install [Hererocks](https://github.com/mpeterv/hererocks)
     * setup environment with `hererocks env -l5.1 -rlatest`
@@ -37,3 +41,5 @@ Yode plugin for Neovim.
     * require installed luarocks packages, e.g. `inspect = require('inspect')`
     * require local deps by copy/paste from source, e.g. `R = require('yode-nvim.deps.lamda.dist.lamda')`
     * play with the code which works, everything using `vim.XYZ` will fail
+* test JS development
+    * `npm ci` to install dependencies

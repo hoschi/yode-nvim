@@ -1,0 +1,19 @@
+{
+  "name": "yode-nvim-fake",
+  "version": "1.0.0",
+  "description": "JS project to install stuff through NPM easily, for testing",
+  "main": "index.js",
+  "scripts": {},
+  "devDependencies": {
+    "eslint": "7.2.0",
+    "eslint-config-prettier": "6.11.0",
+    "eslint-plugin-jest": "23.13.2",
+    "prettier": "2.0.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hoschi/yode-nvim.git"
+  },
+  "author": "Stefan Gojan",
+  "license": "MIT"
+}

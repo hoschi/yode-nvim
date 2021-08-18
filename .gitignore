@@ -11,3 +11,4 @@ nvim.log
 neomake.log
 env/
 .ignore
+node_modules
