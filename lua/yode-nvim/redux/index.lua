@@ -1,17 +1,17 @@
 local createStore = require('yode-nvim.deps.redux-lua.src.createStore')
 local applyMiddleware = require('yode-nvim.deps.redux-lua.src.applyMiddleware')
 local combineReducers = require('yode-nvim.deps.redux-lua.src.combineReducers')
-local tabsReducer = require('yode-nvim.redux.tabsReducer')
+local seditorsReducer = require('yode-nvim.redux.seditorsReducer')
 local stateLogger = require('yode-nvim.redux.stateLogger')
 local ReduxEnv = require('yode-nvim.deps.redux-lua.src.env')
 ReduxEnv.setDebug(false)
 local h = require('yode-nvim.helper')
 local R = require('yode-nvim.deps.lamda.dist.lamda')
 
-local M = { store = {}, tabs = {} }
+local M = { store = {}, seditors = {} }
 
-local STATE_PATH_TABS = { 'tabs' }
-local reducerMap = R.pipe(R.assocPath(STATE_PATH_TABS, tabsReducer.reducer))({})
+local STATE_PATH_SEDITORS = { 'seditors' }
+local reducerMap = R.pipe(R.assocPath(STATE_PATH_SEDITORS, seditorsReducer.reducer))({})
 local reducers = combineReducers(reducerMap)
 
 local globalizeSelectors = function(rootPath, selectors)
@@ -30,9 +30,9 @@ local wrapWithDispatch = h.map(function(action)
 end)
 
 M.store = createStore(reducers, applyMiddleware(stateLogger))
-M.tabs = {
-    actions = wrapWithDispatch(tabsReducer.actions),
-    selectors = globalizeSelectors(STATE_PATH_TABS, tabsReducer.selectors),
+M.seditors = {
+    actions = wrapWithDispatch(seditorsReducer.actions),
+    selectors = globalizeSelectors(STATE_PATH_SEDITORS, seditorsReducer.selectors),
 }
 
 return M

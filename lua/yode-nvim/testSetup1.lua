@@ -2,7 +2,7 @@ local h = require('yode-nvim.helper')
 local logging = require('yode-nvim.logging')
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
-local tabs = storeBundle.tabs
+local seditors = storeBundle.seditors
 local createSeditor = require('yode-nvim.createSeditor')
 
 local textTopLevelNode = h.multiLineTextToArray([[
@@ -53,7 +53,6 @@ local textSecondLevelNode = h.multiLineTextToArray([[
 local testSetup1 = function()
     local log = logging.create('testSetup1')
     vim.cmd('e ./testData/basic.js')
-    tabs.actions.initNewTab({ tabId = vim.fn.tabpagenr() })
     local fileBufferId = vim.fn.bufnr('%')
 
     createSeditor({
@@ -78,7 +77,7 @@ local testSetup1 = function()
         startLine = 60,
     })
 
-    log.debug('state:', store.getState().tabs['1'])
+    log.debug('state:', store.getState().seditors['1'])
 end
 
 return testSetup1

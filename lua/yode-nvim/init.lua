@@ -4,7 +4,7 @@ local h = require('yode-nvim.helper')
 local R = require('yode-nvim.deps.lamda.dist.lamda')
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
-local tabs = storeBundle.tabs
+local seditors = storeBundle.seditors
 
 local M = {
     config = {},
@@ -35,7 +35,7 @@ end
 
 M.yodeNeomakeGetSeditorInfo = function(bufId)
     local log = logging.create('yodeNeomakeGetSeditorInfo')
-    local win = tabs.selectors.getSwindowBySeditorBufferId(bufId)
+    local win = seditors.selectors.getSeditorById(bufId)
     log.debug(bufId, win)
     return win
 end
@@ -44,20 +44,17 @@ M.yodeRedux = function()
     local log = logging.create('yodeRedux')
     log.debug('Redux Test --------------------')
     log.debug('inital state:', store.getState())
-    tabs.actions.initNewTab({ tabId = 5 })
-    tabs.actions.initNewSwindow({
-        tabId = 5,
-        winId = 100,
+    seditors.actions.initSeditor({
+        seditorBufferId = 105,
         data = {
-            seditorBufferId = 105,
             fileBufferId = 205,
             visible = true,
             startLine = 11,
             indentCount = 4,
         },
     })
-    tabs.actions.changeWinPosition({ tabId = 5, winId = 100, amount = 6 })
-    log.debug('selector', tabs.selectors.getSwindowById(5, 100))
+    seditors.actions.changeStartLine({ seditorBufferId = 105, amount = 6 })
+    log.debug('selector', seditors.selectors.getSeditorById(5, 100))
     log.debug('End ---------------------------')
 end
 

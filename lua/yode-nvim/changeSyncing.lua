@@ -2,7 +2,7 @@ local h = require('yode-nvim.helper')
 local logging = require('yode-nvim.logging')
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
-local tabs = storeBundle.tabs
+local seditors = storeBundle.seditors
 local R = require('yode-nvim.deps.lamda.dist.lamda')
 local seditor = require('yode-nvim.seditor')
 
@@ -44,43 +44,39 @@ local onBufferDetach = function(_event, bufId)
     deactivateBuffer(log, bufId)
 end
 
-local createOnSeditorBufferLines = function(tabId, winId)
-    local log = logging.create('createOnSeditorBufferLines')
-    log.debug(tabId, winId)
-    log = logging.create('onSeditorBufferLines')
-    return function(_event, bufId, _tick, firstline, lastline, newLastline)
-        if currentBuffer ~= bufId then
-            deactivateBuffer(log, bufId)
-            return true
-        end
-
-        local linedata = vim.api.nvim_buf_get_lines(bufId, firstline, newLastline, true)
-        local seditorWindow = tabs.selectors.getSwindowById(tabId, winId)
-        local lineData = seditorWindow.indentCount
-                and h.map(
-                    R.concat(h.createWhiteSpace(seditorWindow.indentCount)),
-                    linedata
-                )
-            or linedata
-
-        log.debug(bufId, {
-            firstline = firstline,
-            lastline = lastline,
-            newLastline = newLastline,
-            lineData = lineData,
-        })
-        -- NOTICE needed, because `:h textlock` is active and you get a E523 without it
-        vim.schedule(function()
-            vim.api.nvim_buf_set_lines(
-                seditorWindow.fileBufferId,
-                firstline + seditorWindow.startLine,
-                lastline + seditorWindow.startLine,
-                true,
-                lineData
-            )
-            seditor.checkIndentCount(seditorWindow)
-        end)
+local onSeditorBufferLines = function(_event, bufId, _tick, firstline, lastline, newLastline)
+    local log = logging.create('onSeditorBufferLines')
+    if currentBuffer ~= bufId then
+        deactivateBuffer(log, bufId)
+        return true
     end
+
+    local linedata = vim.api.nvim_buf_get_lines(bufId, firstline, newLastline, true)
+    local seditorWindow = seditors.selectors.getSeditorById(bufId)
+    local lineData = seditorWindow.indentCount
+            and h.map(
+                R.concat(h.createWhiteSpace(seditorWindow.indentCount)),
+                linedata
+            )
+        or linedata
+
+    log.debug(bufId, {
+        firstline = firstline,
+        lastline = lastline,
+        newLastline = newLastline,
+        lineData = lineData,
+    })
+    -- NOTICE needed, because `:h textlock` is active and you get a E523 without it
+    vim.schedule(function()
+        vim.api.nvim_buf_set_lines(
+            seditorWindow.fileBufferId,
+            firstline + seditorWindow.startLine,
+            lastline + seditorWindow.startLine,
+            true,
+            lineData
+        )
+        seditor.checkIndentCount(seditorWindow)
+    end)
 end
 
 local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, newLastline)
@@ -100,14 +96,14 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
     local operationType = h.getOperationOfBufLinesEvent(firstline, lastline, linedata)
     log.debug(bufId, 'lines:', operationType, firstline, lastline, newLastline, linedata)
 
-    local swindowsConnected = tabs.selectors.getSeditorsConnected(bufId)
-    if R.isEmpty(swindowsConnected) then
+    local sedsConnected = seditors.selectors.getSeditorsConnected(bufId)
+    if R.isEmpty(sedsConnected) then
         return
     end
 
-    R.forEach(function(win)
-        local seditorLength = #vim.api.nvim_buf_get_lines(win.seditorBufferId, 0, -1, true)
-        local seditorStartLine = win.startLine
+    R.forEach(function(sed)
+        local seditorLength = #vim.api.nvim_buf_get_lines(sed.seditorBufferId, 0, -1, true)
+        local seditorStartLine = sed.startLine
         local seditorEndLine = seditorStartLine + seditorLength
 
         local lineLength = lastline - firstline
@@ -116,7 +112,7 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
             startLine = firstline - seditorStartLine,
             endLine = lastline - seditorStartLine,
         }
-        log.debug('-- buf:', win.seditorBufferId, {
+        log.debug('-- buf:', sed.seditorBufferId, {
             seditorStartLine = seditorStartLine,
             seditorEndLine = seditorEndLine,
             seditorLength = seditorLength,
@@ -128,13 +124,14 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
         -- conditions can be easier
         if operationType == h.BUF_LINES_OP_DELETE then
             if lastline <= seditorStartLine then
-                -- change was above win
+                -- change was above sed
                 --
                 -- delete: shift
                 log.debug('---- shift by', -lineLength)
-                tabs.actions.changeWinPosition(
-                    R.merge(R.pick({ 'tabId', 'winId' }, win), { amount = -lineLength })
-                )
+                seditors.actions.changeStartLine({
+                    seditorBufferId = sed.seditorBufferId,
+                    amount = -lineLength,
+                })
                 return
             elseif firstline >= seditorEndLine then
                 -- change was below window
@@ -143,20 +140,20 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                 ((firstline >= seditorStartLine) and (lastline <= seditorEndLine))
                 and not ((firstline == seditorStartLine) and (lastline == seditorEndLine))
             then
-                -- change was in win, but not the whole window
+                -- change was in sed, but not the whole window
                 --
                 -- delete: apply changes and relayout
                 log.debug('---- delete lines and relayout', evData)
                 vim.schedule(function()
                     vim.api.nvim_buf_set_lines(
-                        win.seditorBufferId,
+                        sed.seditorBufferId,
                         evData.startLine,
                         evData.endLine,
                         true,
                         linedata
                     )
                 end)
-                needsRelayout = R.append(win, needsRelayout)
+                needsRelayout = R.append(sed, needsRelayout)
                 return
             elseif
                 ((lastline <= seditorEndLine) or (firstline >= seditorStartLine))
@@ -167,73 +164,75 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                 --
                 -- second third OR case: changes spans over the whole window
                 --
-                -- delete: remove win, relayout
-                log.debug('---- delete win/buffer and relayout', win.seditorBufferId)
-                tabs.actions.removeSwindow(R.pick({ 'tabId', 'winId' }, win))
+                -- delete: remove sed, relayout
+                log.debug('---- delete sed/buffer and relayout', sed.seditorBufferId)
+                seditors.actions.removeSeditor({ seditorBufferId = sed.seditorBufferId })
                 vim.schedule(function()
-                    vim.cmd('bd! ' .. win.seditorBufferId)
+                    vim.cmd('bd! ' .. sed.seditorBufferId)
                 end)
-                needsRelayout = R.append(win, needsRelayout)
+                needsRelayout = R.append(sed, needsRelayout)
                 return
             end
             log.debug('########## unhandled op ##########')
         elseif operationType == h.BUF_LINES_OP_ADD then
             if firstline <= seditorStartLine then
-                -- change was above win
+                -- change was above sed
                 --
                 -- add: shift
                 log.debug('---- shift by', dataLength)
-                tabs.actions.changeWinPosition(
-                    R.merge(R.pick({ 'tabId', 'winId' }, win), { amount = dataLength })
-                )
+                seditors.actions.changeStartLine({
+                    seditorBufferId = sed.seditorBufferId,
+                    amount = dataLength,
+                })
                 return
             elseif firstline >= seditorEndLine then
                 -- change was below window
                 return
             elseif (firstline > seditorStartLine) and (firstline < seditorEndLine) then
-                -- change was in win
+                -- change was in sed
                 --
                 -- add: apply changes and relayout
-                local indentCount = seditor.checkLineDataIndentCount(win, linedata)
+                local indentCount = seditor.checkLineDataIndentCount(sed, linedata)
                 local lineData = h.map(R.drop(indentCount), linedata)
                 log.debug('---- add lines and relayout', evData, lineData)
                 vim.schedule(function()
                     vim.api.nvim_buf_set_lines(
-                        win.seditorBufferId,
+                        sed.seditorBufferId,
                         evData.startLine,
                         evData.endLine,
                         true,
                         lineData
                     )
                 end)
-                needsRelayout = R.append(win, needsRelayout)
+                needsRelayout = R.append(sed, needsRelayout)
                 return
             end
             log.debug('########## unhandled op ##########')
         elseif operationType == h.BUF_LINES_OP_CHANGE_ADD then
             if lastline <= seditorStartLine then
-                -- change was above win
+                -- change was above sed
                 --
                 -- changeAdd: shift by added portion
                 log.debug('---- shift by', dataLength - lineLength)
-                tabs.actions.changeWinPosition(
-                    R.merge(R.pick({ 'tabId', 'winId' }, win), { amount = dataLength - lineLength })
-                )
+                seditors.actions.changeStartLine({
+                    seditorBufferId = sed.seditorBufferId,
+                    amount = dataLength - lineLength,
+                })
                 return
             elseif firstline >= seditorEndLine then
                 -- change was below window
                 return
             elseif (firstline >= seditorStartLine) and (lastline <= seditorEndLine) then
-                -- change was in win
+                -- change was in sed
                 --
                 -- changeAdd: apply changes and relayout
-                local indentCount = seditor.checkLineDataIndentCount(win, linedata)
+                local indentCount = seditor.checkLineDataIndentCount(sed, linedata)
                 local lineData = h.map(R.drop(indentCount), linedata)
                 log.debug('---- changeAdd lines and relayout', evData, lineData)
-                needsRelayout = R.append(win, needsRelayout)
+                needsRelayout = R.append(sed, needsRelayout)
                 vim.schedule(function()
                     vim.api.nvim_buf_set_lines(
-                        win.seditorBufferId,
+                        sed.seditorBufferId,
                         evData.startLine,
                         evData.endLine,
                         true,
@@ -242,36 +241,36 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                 end)
                 return
             elseif (firstline < seditorStartLine) and (lastline > seditorEndLine) then
-                -- change encloses win fully
+                -- change encloses sed fully
                 --
                 -- // findOrRemove: check if this window was removed, if yes: remove it from state and relayout
                 -- changeAdd: findOrRemove, relayout by return value
                 -- TODO implement "find" logic later, just remove for now
-                log.debug('---- delete win/buffer and relayout', win.seditorBufferId)
-                tabs.actions.removeSwindow(R.pick({ 'tabId', 'winId' }, win))
+                log.debug('---- delete sed/buffer and relayout', sed.seditorBufferId)
+                seditors.actions.removeSeditor({ seditorBufferId = sed.seditorBufferId })
                 vim.schedule(function()
-                    vim.cmd('bd! ' .. win.seditorBufferId)
+                    vim.cmd('bd! ' .. sed.seditorBufferId)
                 end)
-                needsRelayout = R.append(win, needsRelayout)
+                needsRelayout = R.append(sed, needsRelayout)
             end
             log.debug('########## unhandled op ##########')
         elseif operationType == h.BUF_LINES_OP_CHANGE then
             if lastline <= seditorStartLine then
-                -- change was above win
+                -- change was above sed
                 return
             elseif firstline >= seditorEndLine then
                 -- change was below window
                 return
             elseif (firstline >= seditorStartLine) and (lastline <= seditorEndLine) then
-                -- change was in win
+                -- change was in sed
                 --
                 -- change: apply changes
-                local indentCount = seditor.checkLineDataIndentCount(win, linedata)
+                local indentCount = seditor.checkLineDataIndentCount(sed, linedata)
                 local lineData = h.map(R.drop(indentCount), linedata)
                 log.debug('------ change lines', evData, lineData)
                 vim.schedule(function()
                     vim.api.nvim_buf_set_lines(
-                        win.seditorBufferId,
+                        sed.seditorBufferId,
                         evData.startLine,
                         evData.endLine,
                         true,
@@ -299,12 +298,12 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                     R.take(restrictedEvData.endLine - restrictedEvData.startLine)
                 )(linedata)
 
-                local indentCount = seditor.checkLineDataIndentCount(win, restrictedLineData)
+                local indentCount = seditor.checkLineDataIndentCount(sed, restrictedLineData)
                 restrictedLineData = h.map(R.drop(indentCount), restrictedLineData)
                 log.debug('---- change restricted lines', restrictedEvData, restrictedLineData)
                 vim.schedule(function()
                     vim.api.nvim_buf_set_lines(
-                        win.seditorBufferId,
+                        sed.seditorBufferId,
                         restrictedEvData.startLine,
                         restrictedEvData.endLine,
                         true,
@@ -315,15 +314,15 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
             end
             log.debug('########## unhandled op ##########')
         end
-    end, swindowsConnected)
+    end, sedsConnected)
 
     vim.schedule(function()
         -- NOTICE refresh state, in case some were removed
-        R.forEach(seditor.checkIndentCount, tabs.selectors.getSeditorsConnected(bufId))
+        R.forEach(seditor.checkIndentCount, seditors.selectors.getSeditorsConnected(bufId))
     end)
 
     local relayout = function()
-        log.debug('relayout:', R.pluck('winId', needsRelayout))
+        log.debug('relayout:', R.pluck('seditorBufferId', needsRelayout))
     end
     if not R.isEmpty(needsRelayout) then
         relayout()
@@ -335,14 +334,14 @@ M.subscribeToBuffer = function()
     local bufId = vim.fn.bufnr('%')
     log.debug('checking:', { bufId = bufId, currentBuffer = currentBuffer }, activeBuffers)
 
-    local win = tabs.selectors.getSwindowBySeditorBufferId(bufId)
-    if win then
-        activateBuffer('seditor', bufId, createOnSeditorBufferLines(win.tabId, win.winId))
+    local sed = seditors.selectors.getSeditorById(bufId)
+    if sed then
+        activateBuffer('seditor', bufId, onSeditorBufferLines)
         return
     end
 
-    local swindowsConnected = tabs.selectors.getSeditorsConnected(bufId)
-    if not R.isEmpty(swindowsConnected) then
+    local sedsConnected = seditors.selectors.getSeditorsConnected(bufId)
+    if not R.isEmpty(sedsConnected) then
         activateBuffer('file editor', bufId, onFileBufferLines)
         return
     end
@@ -355,21 +354,21 @@ M.unsubscribeFromBuffer = function(bufId)
 
     log.debug('checking:', { bufId = bufId, currentBuffer = currentBuffer })
 
-    local win = tabs.selectors.getSwindowBySeditorBufferId(bufId)
-    if win then
+    local sed = seditors.selectors.getSeditorById(bufId)
+    if sed then
         deactivateBuffer(log, bufId)
-        tabs.actions.removeSwindow(R.pick({ 'tabId', 'winId' }, win))
+        seditors.actions.removeSeditor({ seditorBufferId = sed.seditorBufferId })
         return
     end
 
-    local swindowsConnected = tabs.selectors.getSeditorsConnected(bufId)
-    if not R.isEmpty(swindowsConnected) then
+    local sedsConnected = seditors.selectors.getSeditorsConnected(bufId)
+    if not R.isEmpty(sedsConnected) then
         deactivateBuffer(log, bufId)
         R.forEach(function(connectedWin)
             deactivateBuffer(log, connectedWin.seditorBufferId)
-            tabs.actions.removeSwindow(R.pick({ 'tabId', 'winId' }, connectedWin))
+            seditors.actions.removeSeditor({ seditorBufferId = sed.seditorBufferId })
             vim.cmd('bd! ' .. connectedWin.seditorBufferId)
-        end, swindowsConnected)
+        end, sedsConnected)
         return
     end
 
