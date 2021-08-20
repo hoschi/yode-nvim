@@ -9,7 +9,6 @@ local seditors = storeBundle.seditors
 local M = {
     config = {},
 }
-local count = 1
 
 M.setup = function(options)
     M.config = vim.tbl_deep_extend('force', defaultConfig, options or {})
@@ -54,7 +53,7 @@ M.yodeRedux = function()
         },
     })
     seditors.actions.changeStartLine({ seditorBufferId = 105, amount = 6 })
-    log.debug('selector', seditors.selectors.getSeditorById(5, 100))
+    log.debug('selector', seditors.selectors.getSeditorById(105))
     log.debug('End ---------------------------')
 end
 

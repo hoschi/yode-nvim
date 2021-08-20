@@ -33,7 +33,7 @@ M.getIndentCount = R.pipe(
     M.map(function(s)
         return #s:match('^%s*')
     end),
-    R.reduce(R.min, M.maxPositiveNumber)
+    R.ifElse(R.isEmpty, R.always(0), R.reduce(R.min, M.maxPositiveNumber))
 )
 M.BUF_LINES_OP_ADD = 'BUF_LINES_OP_ADD'
 M.BUF_LINES_OP_CHANGE = 'BUF_LINES_OP_CHANGE'
@@ -52,6 +52,11 @@ M.getOperationOfBufLinesEvent = function(first, last, data)
         -- NOTICE this is also the case for new lines entered in insert mode
         return M.BUF_LINES_OP_CHANGE_ADD
     end
+end
+
+M.getBuffers = function(showHidden)
+    local bufIds = vim.api.nvim_list_bufs()
+    return showHidden and bufIds or R.filter(vim.api.nvim_buf_is_loaded, bufIds)
 end
 
 return M

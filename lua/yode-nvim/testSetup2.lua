@@ -30,7 +30,7 @@ local testSetup2 = function()
         startLine = 3,
     })
 
-    log.debug('state:', store.getState().seditors['1'])
+    log.debug('state:', store.getState())
 end
 
 return testSetup2

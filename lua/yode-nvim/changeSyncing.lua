@@ -366,8 +366,15 @@ M.unsubscribeFromBuffer = function(bufId)
         deactivateBuffer(log, bufId)
         R.forEach(function(connectedWin)
             deactivateBuffer(log, connectedWin.seditorBufferId)
-            seditors.actions.removeSeditor({ seditorBufferId = sed.seditorBufferId })
+            seditors.actions.removeSeditor({ seditorBufferId = connectedWin.seditorBufferId })
             vim.cmd('bd! ' .. connectedWin.seditorBufferId)
+            log.debug(
+                string.format(
+                    'after deleting buf %d the buf %d is visible',
+                    connectedWin.seditorBufferId,
+                    vim.fn.bufnr('%')
+                )
+            )
         end, sedsConnected)
         return
     end

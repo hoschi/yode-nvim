@@ -43,3 +43,7 @@ Yode plugin for Neovim.
     * play with the code which works, everything using `vim.XYZ` will fail
 * test JS development
     * `npm ci` to install dependencies
+    * now you can setup Neomake for the JS files in `testData/`
+* run tests:
+    * install [Plenary and have a look here](https://github.com/nvim-lua/plenary.nvim#plenarytest_harness)
+    * run in shell `nvim --headless -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal.vim'}"`

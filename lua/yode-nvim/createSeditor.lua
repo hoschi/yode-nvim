@@ -26,7 +26,7 @@ local createSeditor = function(opts)
     log.debug(opts.fileBufferId, #opts.text, opts.text[1])
     local indentCount = h.getIndentCount(opts.text)
     local cleanedText = h.map(R.drop(indentCount), opts.text)
-    vim.cmd("call neomake#log#debug('## before creating buffer " .. vim.fn.bufnr('%') .. "')")
+    --vim.cmd("call neomake#log#debug('## before creating buffer " .. vim.fn.bufnr('%') .. "')")
     local seditorBufferId = vim.api.nvim_create_buf(true, false)
     seditors.actions.initSeditor({
         seditorBufferId = seditorBufferId,
@@ -37,7 +37,7 @@ local createSeditor = function(opts)
             indentCount = indentCount,
         },
     })
-    vim.cmd("call neomake#log#debug('## after creating buffer " .. vim.fn.bufnr('%') .. "')")
+    --vim.cmd("call neomake#log#debug('## after creating buffer " .. vim.fn.bufnr('%') .. "')")
     vim.bo[seditorBufferId].ft = vim.bo[opts.fileBufferId].ft
     vim.bo[seditorBufferId].buftype = 'acwrite'
     -- TODO workaround! it seems this isn't set by my editorconfig plugin for
@@ -49,7 +49,7 @@ local createSeditor = function(opts)
     vim.bo[seditorBufferId].modified = false
 
     local windowX, width = getSeditorWidth()
-    vim.api.nvim_open_win(seditorBufferId, true, {
+    local winId = vim.api.nvim_open_win(seditorBufferId, true, {
         relative = 'editor',
         row = opts.windowY,
         col = windowX,
@@ -65,7 +65,7 @@ local createSeditor = function(opts)
 
     changeSyncing.subscribeToBuffer()
 
-    return window, seditorBuffer
+    return winId, seditorBufferId
 end
 
 return createSeditor
