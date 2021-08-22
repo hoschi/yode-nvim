@@ -24,11 +24,10 @@ describe('seditor sync to file editor sync', function()
     it('1', function()
         eq({ seditors = {} }, store.getState())
         local fileBufferId = vim.fn.bufnr('%')
-        tutil.assertEmptyBuffer()
 
         vim.cmd('e ./testData/small.js')
 
-        local win, seditorBufferId = createSeditor({
+        local seditorBufferId, win = createSeditor({
             fileBufferId = fileBufferId,
             text = textTopLevelNode,
             windowY = 0,
@@ -37,8 +36,8 @@ describe('seditor sync to file editor sync', function()
         })
 
         eq({
-            [fileBufferId] = './testData/small.js',
-            [seditorBufferId] = 'yode://./testData/small.js:4.js',
+            [fileBufferId] = 'testData/small.js',
+            [seditorBufferId] = 'yode://testData/small.js:4.js',
         }, tutil.getHumanBufferList())
 
         eq(vim.fn.bufnr('%'), seditorBufferId)

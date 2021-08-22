@@ -3,6 +3,8 @@ if exists('g:loaded_yode_nvim') | finish | endif
 " expose vim commands and interface here
 " nnoremap <Plug>PlugCommand :lua require(...).plug_command()<CR>
 command! YodeNvim lua require'yode-nvim'.yodeNvim()
+command! -range YodeCreateSeditorFloating call luaeval("require('yode-nvim').createSeditorFloating(_A[1], _A[2])", [<line1>, <line2>])
+command! -range YodeCreateSeditorReplace call luaeval("require('yode-nvim').createSeditorReplace(_A[1], _A[2])", [<line1>, <line2>])
 
 augroup YodeNvim
     autocmd!

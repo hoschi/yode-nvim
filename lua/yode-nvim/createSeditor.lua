@@ -48,6 +48,11 @@ local createSeditor = function(opts)
     vim.api.nvim_buf_set_lines(seditorBufferId, 0, -1, true, cleanedText)
     vim.bo[seditorBufferId].modified = false
 
+    local name = getFileBufferName(opts.fileBufferId, seditorBufferId)
+    if opts.dontFloat then
+        return seditorBufferId, name
+    end
+
     local windowX, width = getSeditorWidth()
     local winId = vim.api.nvim_open_win(seditorBufferId, true, {
         relative = 'editor',
@@ -61,11 +66,10 @@ local createSeditor = function(opts)
     })
     vim.wo.wrap = false
 
-    vim.cmd('file ' .. getFileBufferName(opts.fileBufferId, seditorBufferId))
-
+    vim.cmd('file ' .. name)
     changeSyncing.subscribeToBuffer()
 
-    return winId, seditorBufferId
+    return seditorBufferId, winId
 end
 
 return createSeditor

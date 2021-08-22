@@ -23,11 +23,10 @@ describe('createSeditor', function()
     it('create', function()
         eq({ seditors = {} }, store.getState())
         local fileBufferId = vim.fn.bufnr('%')
-        tutil.assertEmptyBuffer()
 
         vim.cmd('e ./testData/small.js')
 
-        local winId, seditorBufferId = createSeditor({
+        local seditorBufferId, winId = createSeditor({
             fileBufferId = fileBufferId,
             text = textTopLevelNode,
             windowY = 0,

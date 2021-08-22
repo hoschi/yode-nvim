@@ -32,7 +32,8 @@ local reducerFunctions = {
             a.seditorBufferId,
             R.mergeDeepRight({
                 seditorBufferId = a.seditorBufferId,
-                -- same number vim shows you as row in number column
+                -- zero based index, decrease line number you see in vim number
+                -- column by one. Same logic as `nvim_buf_get_lines`.
                 startLine = nil,
                 visible = nil,
                 fileBufferId = nil,

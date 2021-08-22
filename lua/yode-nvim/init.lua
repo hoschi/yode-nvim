@@ -5,6 +5,8 @@ local R = require('yode-nvim.deps.lamda.dist.lamda')
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
 local seditors = storeBundle.seditors
+local createSeditor = require('yode-nvim.createSeditor')
+local changeSyncing = require('yode-nvim.changeSyncing')
 
 local M = {
     config = {},
@@ -25,6 +27,55 @@ M.yodeTesting = function()
     local log = logging.create('yodeTesting')
     local n = h.getIndentCount({ 'foo', '    bar' })
     log.debug(n)
+end
+
+M.createSeditorFloating = function(firstline, lastline)
+    local log = logging.create('createSeditorFloating')
+    log.debug(
+        string.format(
+            'firstline %d to lastline %d (count: %d)',
+            firstline,
+            lastline,
+            lastline - firstline
+        )
+    )
+
+    local bufId = vim.fn.bufnr('%')
+    local text = vim.api.nvim_buf_get_lines(bufId, firstline - 1, lastline, true)
+    createSeditor({
+        fileBufferId = bufId,
+        text = text,
+        windowY = 0,
+        windowHeight = #text,
+        startLine = firstline - 1,
+    })
+end
+
+M.createSeditorReplace = function(firstline, lastline)
+    local log = logging.create('createSeditorReplace')
+    log.debug(
+        string.format(
+            'firstline %d to lastline %d (count: %d)',
+            firstline,
+            lastline,
+            lastline - firstline
+        )
+    )
+
+    local bufId = vim.fn.bufnr('%')
+    local text = vim.api.nvim_buf_get_lines(bufId, firstline - 1, lastline, true)
+    local seditorBufferId, name = createSeditor({
+        fileBufferId = bufId,
+        text = text,
+        windowY = 0,
+        windowHeight = #text,
+        startLine = firstline - 1,
+        dontFloat = true,
+    })
+
+    vim.cmd('b ' .. seditorBufferId)
+    vim.cmd('file ' .. name)
+    changeSyncing.subscribeToBuffer()
 end
 
 M.yodeArgsLogger = function(...)
