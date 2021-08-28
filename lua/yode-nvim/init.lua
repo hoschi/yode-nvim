@@ -75,7 +75,26 @@ M.createSeditorReplace = function(firstline, lastline)
 
     vim.cmd('b ' .. seditorBufferId)
     vim.cmd('file ' .. name)
+    vim.cmd([[
+		nmap <buffer> <leader>bl :YodeGoToAlternateBuffer<cr>
+		imap <buffer> <leader>bl <esc>:YodeGoToAlternateBuffer<cr>
+    ]])
+
     changeSyncing.subscribeToBuffer()
+end
+
+M.goToAlternateBuffer = function()
+    local log = logging.create('goToAlternateBuffer')
+    local bufId = vim.fn.bufnr('%')
+    local sed = seditors.selectors.getSeditorById(bufId)
+
+    if sed == nil then
+        log.debug('no seditor found for ' .. bufId)
+    end
+
+    -- TODO only do this when not in floating window. When in float, open file
+    -- buffer in main area?!
+    vim.cmd('b ' .. sed.fileBufferId)
 end
 
 M.yodeArgsLogger = function(...)
@@ -85,9 +104,9 @@ end
 
 M.yodeNeomakeGetSeditorInfo = function(bufId)
     local log = logging.create('yodeNeomakeGetSeditorInfo')
-    local win = seditors.selectors.getSeditorById(bufId)
-    log.debug(bufId, win)
-    return win
+    local sed = seditors.selectors.getSeditorById(bufId)
+    log.debug(bufId, sed)
+    return sed
 end
 
 M.yodeRedux = function()

@@ -68,6 +68,10 @@ local createSeditor = function(opts)
 
     vim.cmd('file ' .. name)
     changeSyncing.subscribeToBuffer()
+    vim.cmd([[
+		nmap <buffer> <leader>bl :YodeGoToAlternateBuffer<cr>
+		imap <buffer> <leader>bl <esc>:YodeGoToAlternateBuffer<cr>
+    ]])
 
     return seditorBufferId, winId
 end
