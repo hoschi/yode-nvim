@@ -18,7 +18,6 @@ local textTopLevelNode = h.multiLineTextToArray([[
     }
 ]])
 
-require('yode-nvim.init').setup()
 describe('createSeditor', function()
     it('create', function()
         eq({ seditors = {} }, store.getState())
@@ -53,6 +52,6 @@ describe('createSeditor', function()
             modified = false,
         })
         tutil.assertAccessorMap(vim.wo[winId], { wrap = false })
-        eq('yode://testData/small.js:4.js', vim.fn.bufname('%'))
+        eq('yode://./testData/small.js:2.js', vim.fn.bufname('%'))
     end)
 end)

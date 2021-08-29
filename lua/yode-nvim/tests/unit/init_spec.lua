@@ -4,7 +4,6 @@ local store = storeBundle.store
 
 local eq = assert.are.same
 
-require('yode-nvim.init').setup()
 describe('yode-nvim (init.lua)', function()
     it('redux state', function()
         eq({ seditors = {} }, store.getState())

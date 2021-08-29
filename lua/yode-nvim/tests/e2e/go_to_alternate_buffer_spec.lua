@@ -5,7 +5,6 @@ local tutil = require('yode-nvim.tests.util')
 local eq = assert.are.same
 local eqn = assert.are_not.same
 
-require('yode-nvim.init').setup()
 describe('go to alternate buffer -', function()
     it('from seditor in full view to file buffer', function()
         vim.cmd('e ./testData/basic.js')
@@ -20,8 +19,8 @@ describe('go to alternate buffer -', function()
         local smallBufId = vim.fn.bufnr('%')
 
         eq({
-            [fileBufferId] = 'testData/basic.js',
-            [seditorBufferId] = 'yode://testData/basic.js:4.js',
+            [fileBufferId] = './testData/basic.js',
+            [seditorBufferId] = 'yode://./testData/basic.js:2.js',
             [smallBufId] = './testData/small.js',
         }, tutil.getHumanBufferList())
 

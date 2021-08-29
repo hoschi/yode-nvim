@@ -19,7 +19,6 @@ export default async function () {
 }
 ]])
 
-require('yode-nvim.init').setup()
 describe('seditor sync to file editor sync', function()
     it('1', function()
         eq({ seditors = {} }, store.getState())
@@ -36,8 +35,8 @@ describe('seditor sync to file editor sync', function()
         })
 
         eq({
-            [fileBufferId] = 'testData/small.js',
-            [seditorBufferId] = 'yode://testData/small.js:4.js',
+            [fileBufferId] = './testData/small.js',
+            [seditorBufferId] = 'yode://./testData/small.js:2.js',
         }, tutil.getHumanBufferList())
 
         eq(vim.fn.bufnr('%'), seditorBufferId)

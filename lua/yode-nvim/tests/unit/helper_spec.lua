@@ -3,7 +3,6 @@ local R = require('yode-nvim.deps.lamda.dist.lamda')
 
 local eq = assert.are.same
 
-require('yode-nvim.init').setup()
 describe('helper', function()
     it('maxPositiveNumber', function()
         assert.True(h.maxPositiveNumber > 999999999999999999999999)

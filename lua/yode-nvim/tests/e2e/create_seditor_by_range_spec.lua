@@ -4,7 +4,6 @@ local tutil = require('yode-nvim.tests.util')
 
 local eq = assert.are.same
 
-require('yode-nvim.init').setup()
 describe('create seditor', function()
     it('floating', function()
         eq({ seditors = {} }, store.getState())
@@ -28,8 +27,8 @@ plugin.registerCommand(
         local seditorBufferId = vim.fn.bufnr('%')
 
         eq({
-            [fileBufferId] = 'testData/basic.js',
-            [seditorBufferId] = 'yode://testData/basic.js:4.js',
+            [fileBufferId] = './testData/basic.js',
+            [seditorBufferId] = 'yode://./testData/basic.js:2.js',
         }, tutil.getHumanBufferList())
         eq({
             seditors = {
@@ -50,8 +49,8 @@ plugin.registerCommand(
     it('replace', function()
         local fileBufferId = vim.fn.bufnr('%')
         eq({
-            [fileBufferId] = 'testData/basic.js',
-            [4] = 'yode://testData/basic.js:4.js',
+            [fileBufferId] = './testData/basic.js',
+            [2] = 'yode://./testData/basic.js:2.js',
         }, tutil.getHumanBufferList())
 
         vim.cmd('3,9YodeCreateSeditorReplace')
@@ -67,14 +66,14 @@ const getSeditorWidth = async (nvim) => {
         local seditorBufferId = vim.fn.bufnr('%')
 
         eq({
-            [fileBufferId] = 'testData/basic.js',
-            [4] = 'yode://testData/basic.js:4.js',
-            [seditorBufferId] = 'yode://testData/basic.js:5.js',
+            [fileBufferId] = './testData/basic.js',
+            [2] = 'yode://./testData/basic.js:2.js',
+            [seditorBufferId] = 'yode://./testData/basic.js:3.js',
         }, tutil.getHumanBufferList())
         eq({
             seditors = {
-                [4] = {
-                    seditorBufferId = 4,
+                [2] = {
+                    seditorBufferId = 2,
                     fileBufferId = fileBufferId,
                     visible = true,
                     startLine = 48,

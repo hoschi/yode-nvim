@@ -24,7 +24,9 @@ Yode plugin for Neovim.
 * see log file:
     * `tail -f ~/.cache/nvim/yode-nvim.log | grep -v "^\["`
     * last part removes the file name lines
-* format all files: `stylua lua/yode-nvim/*.lua lua/yode-nvim/redux/**.lua`
+* format files
+    * install `stylua`
+    * `make format`
 * see `local.vimrc` for enhancements
     * rename to `.local.vimrc` to use it
     * [install nvim plugin for it](https://github.com/thinca/vim-localrc)
@@ -45,5 +47,9 @@ Yode plugin for Neovim.
     * `npm ci` to install dependencies
     * now you can setup Neomake for the JS files in `testData/`
 * run tests:
-    * install [Plenary and have a look here](https://github.com/nvim-lua/plenary.nvim#plenarytest_harness)
-    * run in shell `nvim --headless -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal.vim'}"`
+    * running tests requires
+      [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) to be checked
+      out in the parent directory of *this* repository
+    * run all tests: `make test`
+    * run single test: `nvim --headless -c "PlenaryBustedDirectory lua/yode-nvim/tests/e2e/seditor_to_file_editor_sync_spec.lua {minimal_init = 'lua/yode-nvim/tests/minimal.vim'}"`
+    * [more infos, see Plenary docs here](https://github.com/nvim-lua/plenary.nvim#plenarytest_harness)
