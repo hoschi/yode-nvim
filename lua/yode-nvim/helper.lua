@@ -59,4 +59,11 @@ M.getBuffers = function(showHidden)
     return showHidden and bufIds or R.filter(vim.api.nvim_buf_is_loaded, bufIds)
 end
 
+-- FIXME test this
+M.showBufferInFloatingWindow = function(bufId, winConfig)
+    local id = vim.api.nvim_open_win(bufId, true, winConfig)
+    vim.wo.wrap = false
+    return id
+end
+
 return M

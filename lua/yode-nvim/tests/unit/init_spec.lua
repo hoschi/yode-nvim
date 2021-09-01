@@ -6,18 +6,18 @@ local eq = assert.are.same
 
 describe('yode-nvim (init.lua)', function()
     it('redux state', function()
-        eq({ seditors = {} }, store.getState())
+        eq({ seditors = {}, layout = { tabs = {} } }, store.getState())
         yodeNvim.yodeRedux()
         eq({
             seditors = {
                 [105] = {
                     seditorBufferId = 105,
                     fileBufferId = 205,
-                    visible = true,
                     startLine = 11 + 6,
                     indentCount = 4,
                 },
             },
+            layout = { tabs = {} },
         }, store.getState())
     end)
 end)

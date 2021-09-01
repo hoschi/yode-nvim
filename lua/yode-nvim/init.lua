@@ -5,6 +5,7 @@ local R = require('yode-nvim.deps.lamda.dist.lamda')
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
 local seditors = storeBundle.seditors
+local layout = storeBundle.layout
 local createSeditor = require('yode-nvim.createSeditor')
 local changeSyncing = require('yode-nvim.changeSyncing')
 
@@ -19,7 +20,8 @@ end
 
 M.yodeNvim = function()
     local log = logging.create('yodeNvim')
-    require('yode-nvim.testSetup1')()
+    vim.cmd('3,9YodeCreateSeditorFloating')
+    --require('yode-nvim.testSetup1')()
     --require('yode-nvim.testSetup2')()
 end
 
@@ -40,14 +42,14 @@ M.createSeditorFloating = function(firstline, lastline)
         )
     )
 
-    local bufId = vim.fn.bufnr('%')
-    local text = vim.api.nvim_buf_get_lines(bufId, firstline - 1, lastline, true)
-    createSeditor({
-        fileBufferId = bufId,
-        text = text,
-        windowY = 0,
-        windowHeight = #text,
-        startLine = firstline - 1,
+    local seditorBufferId = createSeditor({
+        firstline = firstline,
+        lastline = lastline,
+    })
+    layout.actions.createFloatingWindow({
+        tabId = vim.api.nvim_tabpage_get_number(0),
+        bufId = seditorBufferId,
+        data = {},
     })
 end
 
@@ -62,25 +64,11 @@ M.createSeditorReplace = function(firstline, lastline)
         )
     )
 
-    local bufId = vim.fn.bufnr('%')
-    local text = vim.api.nvim_buf_get_lines(bufId, firstline - 1, lastline, true)
-    local seditorBufferId, name = createSeditor({
-        fileBufferId = bufId,
-        text = text,
-        windowY = 0,
-        windowHeight = #text,
-        startLine = firstline - 1,
-        dontFloat = true,
+    local seditorBufferId = createSeditor({
+        firstline = firstline,
+        lastline = lastline,
     })
-
     vim.cmd('b ' .. seditorBufferId)
-    vim.cmd('file ' .. name)
-    vim.cmd([[
-		nmap <buffer> <leader>bl :YodeGoToAlternateBuffer<cr>
-		imap <buffer> <leader>bl <esc>:YodeGoToAlternateBuffer<cr>
-    ]])
-
-    changeSyncing.subscribeToBuffer()
 end
 
 M.goToAlternateBuffer = function()
@@ -117,7 +105,6 @@ M.yodeRedux = function()
         seditorBufferId = 105,
         data = {
             fileBufferId = 205,
-            visible = true,
             startLine = 11,
             indentCount = 4,
         },

@@ -7,39 +7,21 @@ local tutil = require('yode-nvim.tests.util')
 local R = require('yode-nvim.deps.lamda.dist.lamda')
 
 local eq = assert.are.same
-local textTopLevelNode = h.multiLineTextToArray([[
-export default async function () {
-    return {
-        relative:
-            'editor' +
-            'fooooooooooooooooooo' +
-            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar' +
-            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar',
-    }
-}
-]])
 
 describe('seditor sync to file editor sync', function()
     it('1', function()
-        eq({ seditors = {} }, store.getState())
+        eq({ seditors = {}, layout = { tabs = {} } }, store.getState())
+        vim.cmd('e ./testData/small.js')
         local fileBufferId = vim.fn.bufnr('%')
 
-        vim.cmd('e ./testData/small.js')
-
-        local seditorBufferId, win = createSeditor({
-            fileBufferId = fileBufferId,
-            text = textTopLevelNode,
-            windowY = 0,
-            windowHeight = #textTopLevelNode,
-            startLine = 3,
-        })
+        vim.cmd('4,12YodeCreateSeditorFloating')
+        local seditorBufferId = vim.fn.bufnr('%')
 
         eq({
             [fileBufferId] = './testData/small.js',
             [seditorBufferId] = 'yode://./testData/small.js:2.js',
         }, tutil.getHumanBufferList())
 
-        eq(vim.fn.bufnr('%'), seditorBufferId)
         vim.api.nvim_feedkeys('jjItest_', 'x', false)
 
         tutil.assertBufferContentString([[

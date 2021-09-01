@@ -35,7 +35,6 @@ local reducerFunctions = {
                 -- zero based index, decrease line number you see in vim number
                 -- column by one. Same logic as `nvim_buf_get_lines`.
                 startLine = nil,
-                visible = nil,
                 fileBufferId = nil,
                 indentCount = nil,
             }, a.data),
