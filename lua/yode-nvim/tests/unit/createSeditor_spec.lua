@@ -14,12 +14,13 @@ describe('createSeditor', function()
         vim.cmd('e ./testData/small.js')
         local fileBufferId = vim.fn.bufnr('%')
 
-        local seditorBufferId= createSeditor({
-                firstline=4,
-                lastline=12
+        local seditorBufferId = createSeditor({
+            firstline = 4,
+            lastline = 12,
         })
 
-        tutil.assertBufferContentString([[
+        tutil.assertBufferContentString(
+            [[
 export default async function () {
     return {
         relative:
@@ -28,7 +29,9 @@ export default async function () {
             'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar' +
             'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar',
     }
-}]], seditorBufferId)
+}]],
+            seditorBufferId
+        )
         eq({
             seditors = {
                 [seditorBufferId] = {
@@ -38,7 +41,7 @@ export default async function () {
                     indentCount = 0,
                 },
             },
-            layout={tabs={}}
+            layout = { tabs = {} },
         }, store.getState())
 
         eq({

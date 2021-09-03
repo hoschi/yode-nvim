@@ -47,6 +47,7 @@ M.layout = {
         -- "tabId" automatically?! When it is only copied from "sharedActions"
         -- ... probably remove?
         createFloatingWindow = sharedActions.actions.createFloatingWindow,
+        onWindowClosed = sharedActions.actions.onWindowClosed,
     }),
 }
 

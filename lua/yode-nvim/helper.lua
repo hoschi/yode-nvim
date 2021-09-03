@@ -9,6 +9,19 @@ M.map = R.curry2(function(fn, data)
     return R.zipObj(R.keys(data), R.map(fn, data))
 end)
 
+local mapWithIndex = function(fn, data)
+    return R.reduce(function(acc, cur)
+        return R.append(fn(cur, #acc + 1, data), acc)
+    end, {}, data)
+end
+M.mapWithIndex = R.curry2(function(fn, data)
+    if vim.tbl_islist(data) then
+        return mapWithIndex(fn, data)
+    end
+
+    return R.zipObj(R.keys(data), mapWithIndex(fn, R.values(data)))
+end)
+
 M.maxPositiveNumber = math.pow(2, 1024)
 --M.maxNegative = M.maxPositiveNumber * -1
 

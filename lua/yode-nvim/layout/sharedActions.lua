@@ -8,11 +8,10 @@ M.actions.createFloatingWindow = R.pipe(
     R.assoc('type', M.actionNames.CREATE_FLOATING_WINDOW)
 )
 
--- FIXME doesn't need command, but autocmd subscription
-M.actionNames.CLOSE_WINDOW = 'CLOSE_WINDOW'
-M.actions.closeWindow = R.pipe(
+M.actionNames.ON_WINDOW_CLOSED = 'ON_WINDOW_CLOSED'
+M.actions.onWindowClosed = R.pipe(
     R.pick({ 'tabId', 'winId' }),
-    R.assoc('type', M.actionNames.CLOSE_WINDOW)
+    R.assoc('type', M.actionNames.ON_WINDOW_CLOSED)
 )
 
 return M

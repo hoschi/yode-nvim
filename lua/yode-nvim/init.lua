@@ -20,7 +20,13 @@ end
 
 M.yodeNvim = function()
     local log = logging.create('yodeNvim')
-    vim.cmd('3,9YodeCreateSeditorFloating')
+    vim.cmd([[
+        3,9YodeCreateSeditorFloating
+        wincmd h
+        11,25YodeCreateSeditorFloating
+        wincmd h
+        49,58YodeCreateSeditorFloating
+    ]])
     --require('yode-nvim.testSetup1')()
     --require('yode-nvim.testSetup2')()
 end
@@ -83,6 +89,15 @@ M.goToAlternateBuffer = function()
     -- TODO only do this when not in floating window. When in float, open file
     -- buffer in main area?!
     vim.cmd('b ' .. sed.fileBufferId)
+end
+
+M.onWindowClosed = function(winId)
+    local log = logging.create('onWindowClosed')
+    log.debug(winId)
+    layout.actions.onWindowClosed({
+        tabId = vim.api.nvim_tabpage_get_number(0),
+        winId = winId,
+    })
 end
 
 M.yodeArgsLogger = function(...)

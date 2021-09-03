@@ -17,6 +17,28 @@ describe('helper', function()
         eq({ 101, 102 }, R.map(R.add(100), { foo = 1, bar = 2 }))
     end)
 
+    it('mapWithIndex', function()
+        eq(
+            { '5:1:567', '6:2:567', '7:3:567' },
+            h.mapWithIndex(function(data, i, all)
+                return data .. ':' .. i .. ':' .. R.join('', all)
+            end, {
+                5,
+                6,
+                7,
+            })
+        )
+        eq(
+            { foo = '10:1:1020', bar = '20:2:1020' },
+            h.mapWithIndex(function(data, i, all)
+                return data .. ':' .. i .. ':' .. R.join('', all)
+            end, {
+                foo = 10,
+                bar = 20,
+            })
+        )
+    end)
+
     it('lenses', function()
         local list = { 10, 20, 30, 40 }
         local tbl = { foo = 'my foo', bar = 'other foo', baz = 'even more foo!', l = list }
