@@ -94,6 +94,9 @@ local reducerFunctions = {
             state
         )
     end,
+    [sharedActions.actionNames.ON_VIM_RESIZED] = function(state)
+        return state
+    end,
 }
 M.reducer = createReducer(nil, reducerFunctions)
 

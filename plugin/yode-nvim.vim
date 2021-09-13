@@ -15,6 +15,7 @@ augroup YodeNvim
     autocmd BufWritePost * lua require'yode-nvim.fileEditor'.writeFileEditor()
 
     autocmd WinClosed * call luaeval("require'yode-nvim'.onWindowClosed(tonumber(_A))", expand('<afile>'))
+    autocmd VimResized * lua require'yode-nvim'.onVimResized()
 augroup END
 
 let s:save_cpo = &cpo

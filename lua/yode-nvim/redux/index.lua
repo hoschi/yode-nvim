@@ -48,6 +48,7 @@ M.layout = {
         -- ... probably remove?
         createFloatingWindow = sharedActions.actions.createFloatingWindow,
         onWindowClosed = sharedActions.actions.onWindowClosed,
+        onVimResized = sharedActions.actions.onVimResized,
     }),
 }
 

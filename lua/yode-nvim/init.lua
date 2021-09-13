@@ -94,6 +94,12 @@ M.onWindowClosed = function(winId)
     })
 end
 
+M.onVimResized = function()
+    layout.actions.onVimResized({
+        tabId = vim.api.nvim_tabpage_get_number(0),
+    })
+end
+
 M.yodeArgsLogger = function(...)
     local log = logging.create('yodeArgsLogger')
     log.debug(...)

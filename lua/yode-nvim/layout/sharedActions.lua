@@ -14,4 +14,7 @@ M.actions.onWindowClosed = R.pipe(
     R.assoc('type', M.actionNames.ON_WINDOW_CLOSED)
 )
 
+M.actionNames.ON_VIM_RESIZED = 'ON_VIM_RESIZED'
+M.actions.onVimResized = R.pipe(R.pick({ 'tabId' }), R.assoc('type', M.actionNames.ON_VIM_RESIZED))
+
 return M
