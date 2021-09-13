@@ -36,7 +36,7 @@ export default async function () {
 }]])
         vim.cmd('wincmd h')
 
-        eq(vim.fn.bufnr('%'), fileBufferId)
+        eq(fileBufferId, vim.fn.bufnr('%'))
         -- TODO doesn't work, I don't know what is the problem
         --tutil.assertBufferContentString([[
         --/**

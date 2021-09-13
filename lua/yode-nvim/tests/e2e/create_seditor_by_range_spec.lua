@@ -42,7 +42,7 @@ plugin.registerCommand(
         tutil.assertAccessorMap(vim.wo, { wrap = false })
 
         vim.cmd('wincmd h')
-        eq(vim.fn.bufnr('%'), fileBufferId)
+        eq(fileBufferId, vim.fn.bufnr('%'))
     end)
 
     it('replace', function()

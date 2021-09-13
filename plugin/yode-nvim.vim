@@ -6,6 +6,7 @@ command! YodeNvim lua require'yode-nvim'.yodeNvim()
 command! -range YodeCreateSeditorFloating call luaeval("require('yode-nvim').createSeditorFloating(_A[1], _A[2])", [<line1>, <line2>])
 command! -range YodeCreateSeditorReplace call luaeval("require('yode-nvim').createSeditorReplace(_A[1], _A[2])", [<line1>, <line2>])
 command! YodeGoToAlternateBuffer lua require'yode-nvim'.goToAlternateBuffer()
+command! YodeCloneCurrentIntoFloat lua require'yode-nvim'.cloneCurrentIntoFloat()
 
 augroup YodeNvim
     autocmd!

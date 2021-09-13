@@ -50,7 +50,7 @@ const getSeditorWidth = async (nvim) => {
         )
 
         vim.cmd('wincmd h')
-        eq(vim.fn.bufnr('%'), fileBufferId)
+        eq(fileBufferId, vim.fn.bufnr('%'))
 
         -- seditor 2
         vim.cmd('11,25YodeCreateSeditorFloating')
@@ -89,7 +89,7 @@ async function createSeditor(nvim, text, row, height) {
         )
 
         vim.cmd('wincmd h')
-        eq(vim.fn.bufnr('%'), fileBufferId)
+        eq(fileBufferId, vim.fn.bufnr('%'))
 
         -- seditor 3
         vim.cmd('49,58YodeCreateSeditorFloating')

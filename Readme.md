@@ -53,3 +53,4 @@ Yode plugin for Neovim.
     * run all tests: `make test`
     * run single test: `nvim --headless -c "PlenaryBustedDirectory lua/yode-nvim/tests/e2e/seditor_to_file_editor_sync_spec.lua {minimal_init = 'lua/yode-nvim/tests/minimal.vim'}"`
     * [more infos, see Plenary docs here](https://github.com/nvim-lua/plenary.nvim#plenarytest_harness)
+    * run all tests on file changes `nodemon -e lua,vim --exec 'make test'`

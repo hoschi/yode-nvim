@@ -85,6 +85,24 @@ M.goToAlternateBuffer = function()
     vim.cmd('b ' .. sed.fileBufferId)
 end
 
+M.cloneCurrentIntoFloat = function()
+    local log = logging.create('cloneCurrentIntoFloat')
+    local bufId = vim.fn.bufnr('%')
+    local winId = vim.fn.win_getid()
+    local config = vim.api.nvim_win_get_config(0)
+    if R.contains(config.relative, { 'editor', 'window', 'cursor' }) then
+        log.debug('floats already, aborting:', winId, bufId)
+        return
+    end
+    log.debug('cloning to float:', winId, bufId)
+    layout.actions.createFloatingWindow({
+        tabId = vim.api.nvim_tabpage_get_number(0),
+        bufId = bufId,
+        data = {},
+    })
+    vim.fn.win_gotoid(winId)
+end
+
 M.onWindowClosed = function(winId)
     local log = logging.create('onWindowClosed')
     log.debug(winId)

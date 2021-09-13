@@ -1,5 +1,3 @@
-local storeBundle = require('yode-nvim.redux.index')
-local store = storeBundle.store
 local tutil = require('yode-nvim.tests.util')
 
 local eq = assert.are.same
@@ -26,6 +24,6 @@ describe('go to alternate buffer -', function()
 
         vim.cmd('b ' .. seditorBufferId)
         vim.cmd('YodeGoToAlternateBuffer')
-        eq(vim.fn.bufnr('%'), fileBufferId)
+        eq(fileBufferId, vim.fn.bufnr('%'))
     end)
 end)

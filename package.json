@@ -8,6 +8,7 @@
     "eslint": "7.2.0",
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-jest": "23.13.2",
+    "nodemon": "2.0.12",
     "prettier": "2.0.5"
   },
   "repository": {
