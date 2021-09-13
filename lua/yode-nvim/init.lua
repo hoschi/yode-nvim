@@ -8,6 +8,7 @@ local seditors = storeBundle.seditors
 local layout = storeBundle.layout
 local createSeditor = require('yode-nvim.createSeditor')
 local changeSyncing = require('yode-nvim.changeSyncing')
+local testSetup = require('yode-nvim.testSetup')
 
 local M = {
     config = {},
@@ -20,15 +21,8 @@ end
 
 M.yodeNvim = function()
     local log = logging.create('yodeNvim')
-    vim.cmd([[
-        3,9YodeCreateSeditorFloating
-        wincmd h
-        11,25YodeCreateSeditorFloating
-        wincmd h
-        49,58YodeCreateSeditorFloating
-    ]])
-    --require('yode-nvim.testSetup1')()
-    --require('yode-nvim.testSetup2')()
+    testSetup.setup1()
+    --testSetup.setup2()
 end
 
 M.yodeTesting = function()

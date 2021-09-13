@@ -12,19 +12,6 @@ local getSeditorWidth = function()
     return x, width
 end
 
---[[
-TODO actions:
-* shift (possible invisible) float by index to top, others shift one down
-* shift win up/down
-* push master into first float (so master is free to show other buffer)
-
-* focus other float (probably invisible) -- can be done by Neovim already, is enough for start
-* close window and delete seditor
-* replace master with seditor of float and close float
-* swap floating and master
-* move win to other tab??
-]]
-
 local createWindowState = R.always({
     -- Neovim props. Provide every single one, even when some layouts treat
     -- it as static. Like "x" of Mosaic is calculated from config, rather
@@ -112,7 +99,6 @@ M.reducer = createReducer(nil, reducerFunctions)
 
 M.stateToNeovim = function(state)
     local log = logging.create('stateToNeovim')
-    -- TODO calculate by `state.config.columnWidthMax/Min` and window width
     local x, width = getSeditorWidth()
 
     local windowsUpdated = h.map(function(window)
