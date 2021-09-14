@@ -22,13 +22,16 @@ end
 M.yodeNvim = function()
     local log = logging.create('yodeNvim')
     testSetup.setup1()
+    -- FIXME comment out
+    --vim.cmd('wincmd h')
+    --vim.api.nvim_feedkeys('ggjjjj', 'x', false)
+
     --testSetup.setup2()
 end
 
 M.yodeTesting = function()
     local log = logging.create('yodeTesting')
-    local n = h.getIndentCount({ 'foo', '    bar' })
-    log.debug(n)
+    log.debug('!!!!!!!!!!', vim.fn.bufnr('%'))
 end
 
 M.createSeditorFloating = function(firstline, lastline)
@@ -90,8 +93,19 @@ M.cloneCurrentIntoFloat = function()
     local bufId = vim.fn.bufnr('%')
     local winId = vim.fn.win_getid()
     local config = vim.api.nvim_win_get_config(0)
-    if R.contains(config.relative, { 'editor', 'window', 'cursor' }) then
-        log.debug('floats already, aborting:', winId, bufId)
+
+    local floatWin = layout.selectors.getWindowBySomeId(
+        vim.api.nvim_tabpage_get_number(0),
+        { bufId = bufId }
+    )
+    if floatWin then
+        log.warn('buffer is already visible as floating window!')
+        return
+    end
+
+    local sed = seditors.selectors.getSeditorById(bufId)
+    if sed == nil then
+        log.debug('no seditor. Can only float seditors, aborting', winId, bufId)
         return
     end
     log.debug('cloning to float:', winId, bufId)
@@ -106,7 +120,7 @@ end
 M.onWindowClosed = function(winId)
     local log = logging.create('onWindowClosed')
     log.debug(winId)
-    layout.actions.onWindowClosed({
+    layout.actions.removeFloatingWindow({
         tabId = vim.api.nvim_tabpage_get_number(0),
         winId = winId,
     })
@@ -116,6 +130,26 @@ M.onVimResized = function()
     layout.actions.onVimResized({
         tabId = vim.api.nvim_tabpage_get_number(0),
     })
+end
+
+M.onBufWinEnter = function()
+    local log = logging.create('onBufWinEnter')
+    local winId = vim.fn.win_getid()
+    local floatWin = layout.selectors.getWindowBySomeId(
+        vim.api.nvim_tabpage_get_number(0),
+        { winId = winId }
+    )
+    if floatWin == nil then
+        return
+    end
+
+    local bufId = vim.fn.bufnr('%')
+    local sed = seditors.selectors.getSeditorById(bufId)
+    if sed == nil then
+        log.warn('only seditors are supported in floating windows at the moment!')
+        vim.cmd('e #')
+        return
+    end
 end
 
 M.yodeArgsLogger = function(...)

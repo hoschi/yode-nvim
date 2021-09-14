@@ -13,5 +13,12 @@ set hidden
 color peachpuff
 
 lua << EOF
-require("yode-nvim").setup()
+local isDebug = require('yode-nvim.isDebug')
+require('yode-nvim').setup({
+    log = {
+        use_console = false,
+        highlights = false,
+        use_file = isDebug,
+    },
+})
 EOF

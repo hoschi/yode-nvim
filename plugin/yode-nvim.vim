@@ -14,6 +14,7 @@ augroup YodeNvim
     autocmd BufDelete * call luaeval("require'yode-nvim.changeSyncing'.unsubscribeFromBuffer(tonumber(_A))", expand('<abuf>'))
     autocmd BufWriteCmd yode://* lua require'yode-nvim.seditor'.writeSeditor()
     autocmd BufWritePost * lua require'yode-nvim.fileEditor'.writeFileEditor()
+    autocmd BufWinEnter * lua require'yode-nvim'.onBufWinEnter()
 
     autocmd WinClosed * call luaeval("require'yode-nvim'.onWindowClosed(tonumber(_A))", expand('<afile>'))
     autocmd VimResized * lua require'yode-nvim'.onVimResized()

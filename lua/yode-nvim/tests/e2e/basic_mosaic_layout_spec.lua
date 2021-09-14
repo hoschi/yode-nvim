@@ -3,6 +3,7 @@ local store = storeBundle.store
 local tutil = require('yode-nvim.tests.util')
 local R = require('yode-nvim.deps.lamda.dist.lamda')
 local h = require('yode-nvim.helper')
+local layout = storeBundle.layout
 
 local eq = assert.are.same
 
@@ -42,9 +43,18 @@ const getSeditorWidth = async (nvim) => {
             store.getState().layout.tabs[1]
         ))
         eq(
-            { { y = 0, height = 7, id = 1002, relative = 'editor', data = { visible = true } } },
+            {
+                {
+                    y = 0,
+                    height = 7,
+                    id = 1002,
+                    bufId = seditor1,
+                    relative = 'editor',
+                    data = { visible = true },
+                },
+            },
             h.map(
-                R.pick({ 'id', 'data', 'height', 'relative', 'y' }),
+                R.pick({ 'id', 'data', 'height', 'relative', 'y', 'bufId' }),
                 store.getState().layout.tabs[1].windows
             )
         )
@@ -79,11 +89,25 @@ async function createSeditor(nvim, text, row, height) {
         }, tutil.getHumanBufferList())
         eq(
             {
-                { y = 0, height = 15, id = 1003, relative = 'editor', data = { visible = true } },
-                { y = 16, height = 7, id = 1002, relative = 'editor', data = { visible = true } },
+                {
+                    y = 0,
+                    height = 15,
+                    id = 1003,
+                    bufId = seditor2,
+                    relative = 'editor',
+                    data = { visible = true },
+                },
+                {
+                    y = 16,
+                    height = 7,
+                    id = 1002,
+                    bufId = seditor1,
+                    relative = 'editor',
+                    data = { visible = true },
+                },
             },
             h.map(
-                R.pick({ 'id', 'data', 'height', 'relative', 'y' }),
+                R.pick({ 'id', 'data', 'height', 'relative', 'y', 'bufId' }),
                 store.getState().layout.tabs[1].windows
             )
         )
@@ -114,15 +138,77 @@ plugin.registerCommand(
         }, tutil.getHumanBufferList())
         eq(
             {
-                { y = 0, height = 10, id = 1004, relative = 'editor', data = { visible = true } },
-                { y = 11, height = 15, id = 1003, relative = 'editor', data = { visible = true } },
-                { y = 27, height = 7, id = 1002, relative = 'editor', data = { visible = true } },
+                {
+                    y = 0,
+                    height = 10,
+                    id = 1004,
+                    bufId = seditor3,
+                    relative = 'editor',
+                    data = { visible = true },
+                },
+                {
+                    y = 11,
+                    height = 15,
+                    id = 1003,
+                    bufId = seditor2,
+                    relative = 'editor',
+                    data = { visible = true },
+                },
+                {
+                    y = 27,
+                    height = 7,
+                    id = 1002,
+                    bufId = seditor1,
+                    relative = 'editor',
+                    data = { visible = true },
+                },
             },
             h.map(
-                R.pick({ 'id', 'data', 'height', 'relative', 'y' }),
+                R.pick({ 'id', 'data', 'height', 'relative', 'y', 'bufId' }),
                 store.getState().layout.tabs[1].windows
             )
         )
+    end)
+
+    it('selecting window by some id works', function()
+        eq(
+            {
+                id = 1002,
+                bufId = seditor1,
+            },
+            R.pick(
+                { 'id', 'bufId' },
+                layout.selectors.getWindowBySomeId(vim.api.nvim_tabpage_get_number(0), {
+                    bufId = seditor1,
+                })
+            )
+        )
+
+        eq(
+            {
+                id = 1002,
+                bufId = seditor1,
+            },
+            R.pick(
+                { 'id', 'bufId' },
+                layout.selectors.getWindowBySomeId(vim.api.nvim_tabpage_get_number(0), {
+                    winId = 1002,
+                })
+            )
+        )
+    end)
+
+    it("can't switch buffer to non seditor buffer in floating window", function()
+        eq(1004, vim.fn.win_getid())
+        eq(seditor3, vim.fn.bufnr('%'))
+
+        vim.cmd('b ' .. fileBufferId)
+        eq(1004, vim.fn.win_getid())
+        eq(seditor3, vim.fn.bufnr('%'))
+    end)
+
+    it('changing content height, changes layout', function()
+        -- TODO not possible to test atm
     end)
 
     it('delete floating buffer', function()
@@ -134,11 +220,25 @@ plugin.registerCommand(
         }, tutil.getHumanBufferList())
         eq(
             {
-                { y = 0, height = 15, id = 1003, relative = 'editor', data = { visible = true } },
-                { y = 16, height = 7, id = 1002, relative = 'editor', data = { visible = true } },
+                {
+                    y = 0,
+                    height = 15,
+                    id = 1003,
+                    bufId = seditor2,
+                    relative = 'editor',
+                    data = { visible = true },
+                },
+                {
+                    y = 16,
+                    height = 7,
+                    id = 1002,
+                    bufId = seditor1,
+                    relative = 'editor',
+                    data = { visible = true },
+                },
             },
             h.map(
-                R.pick({ 'id', 'data', 'height', 'relative', 'y' }),
+                R.pick({ 'id', 'data', 'height', 'relative', 'y', 'bufId' }),
                 store.getState().layout.tabs[1].windows
             )
         )

@@ -4,7 +4,7 @@ local logging = require('yode-nvim.logging')
 local createReducer = require('yode-nvim.redux.createReducer')
 local sharedActions = require('yode-nvim.layout.sharedActions')
 
-local M = { name = 'mosaic', actions = {} }
+local M = { name = 'mosaic', actions = {}, selectors = {} }
 
 local getSeditorWidth = function()
     local x = math.floor(vim.o.columns / 2)
@@ -25,6 +25,13 @@ local createWindowState = R.always({
     -- windows can be rendered from external GUI without a grid
     x = nil,
     y = nil,
+    -- NOTICE: you can get the managed buffer from a window easily. You can't
+    -- get the window of a buffer id easily as well. It is ambigous as buffers
+    -- can be visible in more windows. Even when you try to focus on floating
+    -- windows only, a user/plugin can show the same buffer as well in a
+    -- floating window. To make things easier we save tha buffer/window
+    -- relation by here.
+    bufId = nil,
     -- `data` contains our props, so they can't collide with (changed in
     -- future) Neovim data props. Set by layout, or not. Mosaic tracks order
     -- in stack for example, probably not needed in Expose.
@@ -33,6 +40,15 @@ local createWindowState = R.always({
 
 local windowsLens = h.lensProp('windows')
 local yLens = h.lensProp('y')
+local findWindowIndexBySomeId = function(state, a)
+    return R.findIndex(
+        R.anyPass(
+            a.bufId == nil and R.F or R.propEq('bufId', a.bufId),
+            a.winId == nil and R.F or R.propEq('id', a.winId)
+        ),
+        state.windows
+    )
+end
 
 --local normalBorderStyle = { '1', '2', '3', '4', '5', '6', '7', '8' }
 local normalBorderStyle = { ' ', ' ', ' ', ' ', '', '', '', ' ' }
@@ -47,6 +63,11 @@ local setBorderStyle = h.mapWithIndex(function(win, i, all)
         or R.assoc('border', lastBorderStyle, win)
 end)
 
+M.selectors.getWindowBySomeId = function(tabId, selectorArgs, state)
+    local idx = findWindowIndexBySomeId(state, selectorArgs)
+    return idx ~= nil and R.path({'windows', idx}, state)
+end
+
 local reducerFunctions = {
     [sharedActions.actionNames.CREATE_FLOATING_WINDOW] = function(state, a)
         local text = vim.api.nvim_buf_get_lines(a.bufId, 0, -1, true)
@@ -57,8 +78,8 @@ local reducerFunctions = {
                 R.prepend(R.mergeDeepRight(createWindowState(), {
                     height = #text,
                     y = 0,
+                    bufId = a.bufId,
                     data = {
-                        bufId = a.bufId,
                         visible = true,
                         initialConfig = {
                             focusable = true,
@@ -70,9 +91,9 @@ local reducerFunctions = {
             state
         )
     end,
-    [sharedActions.actionNames.ON_WINDOW_CLOSED] = function(state, a)
-        local log = logging.create('onWindowClosed')
-        local closedWinIndex = R.findIndex(R.propEq('id', a.winId), state.windows)
+    [sharedActions.actionNames.REMOVE_FLOATING_WINDOW] = function(state, a)
+        local log = logging.create('removeFloatingWindow')
+        local closedWinIndex = findWindowIndexBySomeId(state, a)
 
         if closedWinIndex < 0 then
             log.trace('no managed window', a)
@@ -80,7 +101,7 @@ local reducerFunctions = {
         end
 
         local closedWin = state.windows[closedWinIndex]
-        local shiftBy = 1 + #vim.api.nvim_buf_get_lines(closedWin.seditorBufferId, 0, -1, true)
+        local shiftBy = 1 + #vim.api.nvim_buf_get_lines(closedWin.bufId, 0, -1, true)
         log.trace('removing window from state:', a.winId, closedWin.id, shiftBy)
         return h.over(
             windowsLens,
@@ -88,6 +109,30 @@ local reducerFunctions = {
                 R.without({ closedWin }),
                 R.splitAt(closedWinIndex),
                 h.over(h.lensIndex(2), h.map(h.over(yLens, R.subtract(R.__, shiftBy)))),
+                R.flatten(),
+                setBorderStyle
+            ),
+            state
+        )
+    end,
+    [sharedActions.actionNames.CONTENT_CHANGED] = function(state, a)
+        local log = logging.create('contentChanged')
+        local changedWinIndex = findWindowIndexBySomeId(state, a)
+        local changedWin = state.windows[changedWinIndex]
+        local bufId = vim.api.nvim_win_get_buf(changedWin.id)
+        local shiftBy = #vim.api.nvim_buf_get_lines(bufId, 0, -1, true) - changedWin.height
+        if shiftBy == 0 then
+            log.debug('height still the same, aborting', a)
+            return state
+        end
+
+        log.trace('relayouting after content change in window:', a.winId, changedWin.id, shiftBy)
+        return h.over(
+            windowsLens,
+            R.pipe(
+                R.adjust(R.assoc('height', changedWin.height + shiftBy), changedWinIndex),
+                R.splitAt(changedWinIndex + 1),
+                h.over(h.lensIndex(2), h.map(h.over(yLens, R.add(shiftBy)))),
                 R.flatten(),
                 setBorderStyle
             ),
@@ -117,15 +162,11 @@ M.stateToNeovim = function(state)
         if window.data.visible then
             if window.id == nil then
                 id = h.showBufferInFloatingWindow(
-                    window.data.bufId,
+                    window.bufId,
                     R.merge(window.data.initialConfig, winConfig)
                 )
                 log.debug('created window', id)
-                return R.pipe(
-                    R.assoc('id', id),
-                    R.dissocPath({ 'data', 'bufId' }),
-                    R.dissocPath({ 'data', 'initialConfig' })
-                )(window)
+                return R.pipe(R.assoc('id', id), R.dissocPath({ 'data', 'initialConfig' }))(window)
             else
                 log.debug('updating window', window.id)
                 vim.api.nvim_win_set_config(window.id, winConfig)

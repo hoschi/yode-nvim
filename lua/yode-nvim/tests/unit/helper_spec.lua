@@ -28,12 +28,24 @@ describe('helper', function()
                 7,
             })
         )
+
         eq(
-            { foo = '10:1:1020', bar = '20:2:1020' },
+            { foo = '10:foo:1020', bar = '20:bar:1020' },
             h.mapWithIndex(function(data, i, all)
                 return data .. ':' .. i .. ':' .. R.join('', all)
             end, {
                 foo = 10,
+                bar = 20,
+            })
+        )
+
+        -- this only works when props have values
+        eq(
+            { bar = '20:bar:20' },
+            h.mapWithIndex(function(data, i, all)
+                return data .. ':' .. i .. ':' .. R.join('', all)
+            end, {
+                foo = nil,
                 bar = 20,
             })
         )

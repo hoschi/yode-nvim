@@ -42,6 +42,7 @@ Yode plugin for Neovim.
     * start a REPL with `lua`
     * require installed luarocks packages, e.g. `inspect = require('inspect')`
     * require local deps by copy/paste from source, e.g. `R = require('yode-nvim.deps.lamda.dist.lamda')`
+    * require source code, e.g. `h = require('yode-nvim.helper')`
     * play with the code which works, everything using `vim.XYZ` will fail
 * test JS development
     * `npm ci` to install dependencies

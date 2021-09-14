@@ -3,8 +3,10 @@ local logging = require('yode-nvim.logging')
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
 local seditors = storeBundle.seditors
+local layout = storeBundle.layout
 local R = require('yode-nvim.deps.lamda.dist.lamda')
 local seditor = require('yode-nvim.seditor')
+local sharedLayoutActions = require('yode-nvim.layout.sharedActions')
 
 local M = {}
 
@@ -53,6 +55,7 @@ local onSeditorBufferLines = function(_event, bufId, _tick, firstline, lastline,
 
     local linedata = vim.api.nvim_buf_get_lines(bufId, firstline, newLastline, true)
     local seditorWindow = seditors.selectors.getSeditorById(bufId)
+    local operationType = h.getOperationOfBufLinesEvent(firstline, lastline, linedata)
     local lineData = seditorWindow.indentCount
             and h.map(
                 R.concat(h.createWhiteSpace(seditorWindow.indentCount)),
@@ -60,7 +63,7 @@ local onSeditorBufferLines = function(_event, bufId, _tick, firstline, lastline,
             )
         or linedata
 
-    log.debug(bufId, {
+    log.debug(bufId, operationType, {
         firstline = firstline,
         lastline = lastline,
         newLastline = newLastline,
@@ -76,6 +79,15 @@ local onSeditorBufferLines = function(_event, bufId, _tick, firstline, lastline,
             lineData
         )
         seditor.checkIndentCount(seditorWindow)
+
+        -- NOTICE this event is ignored at the moment for performance reasons
+        -- as we don't need to handle it with the default layout!
+        if operationType ~= h.BUF_LINES_OP_CHANGE then
+            layout.actions.contentChanged({
+                tabId = vim.api.nvim_tabpage_get_number(0),
+                bufId = bufId,
+            })
+        end
     end)
 end
 
@@ -89,8 +101,8 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
         return
     end
 
-    -- TODO not implemented yet, not important at the moment
-    local needsRelayout = {}
+    -- TODO not implemented yet
+    local layoutActions = {}
 
     local linedata = vim.api.nvim_buf_get_lines(bufId, firstline, newLastline, true)
     local operationType = h.getOperationOfBufLinesEvent(firstline, lastline, linedata)
@@ -153,7 +165,13 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                         linedata
                     )
                 end)
-                needsRelayout = R.append(sed, needsRelayout)
+                layoutActions = R.append(
+                    sharedLayoutActions.actions.contentChanged({
+                        tabId = vim.api.nvim_tabpage_get_number(0),
+                        bufId = sed.seditorBufferId,
+                    }),
+                    layoutActions
+                )
                 return
             elseif
                 ((lastline <= seditorEndLine) or (firstline >= seditorStartLine))
@@ -166,11 +184,9 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                 --
                 -- delete: remove sed, relayout
                 log.debug('---- delete sed/buffer and relayout', sed.seditorBufferId)
-                seditors.actions.removeSeditor({ seditorBufferId = sed.seditorBufferId })
                 vim.schedule(function()
                     vim.cmd('bd! ' .. sed.seditorBufferId)
                 end)
-                needsRelayout = R.append(sed, needsRelayout)
                 return
             end
             log.debug('########## unhandled op ##########')
@@ -204,7 +220,13 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                         lineData
                     )
                 end)
-                needsRelayout = R.append(sed, needsRelayout)
+                layoutActions = R.append(
+                    sharedLayoutActions.actions.contentChanged({
+                        tabId = vim.api.nvim_tabpage_get_number(0),
+                        bufId = sed.seditorBufferId,
+                    }),
+                    layoutActions
+                )
                 return
             end
             log.debug('########## unhandled op ##########')
@@ -229,7 +251,13 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                 local indentCount = seditor.checkLineDataIndentCount(sed, linedata)
                 local lineData = h.map(R.drop(indentCount), linedata)
                 log.debug('---- changeAdd lines and relayout', evData, lineData)
-                needsRelayout = R.append(sed, needsRelayout)
+                layoutActions = R.append(
+                    sharedLayoutActions.actions.contentChanged({
+                        tabId = vim.api.nvim_tabpage_get_number(0),
+                        bufId = sed.seditorBufferId,
+                    }),
+                    layoutActions
+                )
                 vim.schedule(function()
                     vim.api.nvim_buf_set_lines(
                         sed.seditorBufferId,
@@ -247,11 +275,9 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                 -- changeAdd: findOrRemove, relayout by return value
                 -- TODO implement "find" logic later, just remove for now
                 log.debug('---- delete sed/buffer and relayout', sed.seditorBufferId)
-                seditors.actions.removeSeditor({ seditorBufferId = sed.seditorBufferId })
                 vim.schedule(function()
                     vim.cmd('bd! ' .. sed.seditorBufferId)
                 end)
-                needsRelayout = R.append(sed, needsRelayout)
             end
             log.debug('########## unhandled op ##########')
         elseif operationType == h.BUF_LINES_OP_CHANGE then
@@ -319,14 +345,15 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
     vim.schedule(function()
         -- NOTICE refresh state, in case some were removed
         R.forEach(seditor.checkIndentCount, seditors.selectors.getSeditorsConnected(bufId))
+        if R.isEmpty(layoutActions) then
+            log.debug('no relayouting needed')
+            -- needs to run in vim.schedule as well, as we need to wait for the
+            -- "change buf lines" calls, which are also scheduled
+        else
+            log.debug('relayouting!')
+            R.forEach(store.dispatch, layoutActions)
+        end
     end)
-
-    local relayout = function()
-        log.debug('relayout:', R.pluck('seditorBufferId', needsRelayout))
-    end
-    if not R.isEmpty(needsRelayout) then
-        relayout()
-    end
 end
 
 M.subscribeToBuffer = function()

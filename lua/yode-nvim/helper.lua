@@ -9,17 +9,26 @@ M.map = R.curry2(function(fn, data)
     return R.zipObj(R.keys(data), R.map(fn, data))
 end)
 
-local mapWithIndex = function(fn, data)
+local mapWithArrayIndex = function(fn, data)
     return R.reduce(function(acc, cur)
         return R.append(fn(cur, #acc + 1, data), acc)
     end, {}, data)
 end
+
+local mapWithObjectKey = function(fn, data)
+    return R.reduce(function(acc, key)
+        return R.assoc(key, fn(data[key], key, data), acc)
+    end, {}, R.keys(
+        data
+    ))
+end
+
 M.mapWithIndex = R.curry2(function(fn, data)
     if vim.tbl_islist(data) then
-        return mapWithIndex(fn, data)
+        return mapWithArrayIndex(fn, data)
     end
 
-    return R.zipObj(R.keys(data), mapWithIndex(fn, R.values(data)))
+    return mapWithObjectKey(fn, data)
 end)
 
 M.maxPositiveNumber = math.pow(2, 1024)

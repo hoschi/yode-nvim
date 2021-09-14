@@ -42,12 +42,14 @@ M.seditors = {
     selectors = globalizeSelectors(STATE_PATH_SEDITORS, seditorsReducer.selectors),
 }
 M.layout = {
+    selectors = globalizeSelectors(STATE_PATH_LAYOUT, layoutReducer.selectors),
     actions = wrapWithDispatch({
         -- FIXME add layout actions somhow here as well. Should we insert
         -- "tabId" automatically?! When it is only copied from "sharedActions"
         -- ... probably remove?
         createFloatingWindow = sharedActions.actions.createFloatingWindow,
-        onWindowClosed = sharedActions.actions.onWindowClosed,
+        removeFloatingWindow = sharedActions.actions.removeFloatingWindow,
+        contentChanged = sharedActions.actions.contentChanged,
         onVimResized = sharedActions.actions.onVimResized,
     }),
 }

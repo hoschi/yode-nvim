@@ -2,6 +2,7 @@ local R = require('yode-nvim.deps.lamda.dist.lamda')
 local logging = require('yode-nvim.logging')
 local createReducer = require('yode-nvim.redux.createReducer')
 local layoutMap = require('yode-nvim.layout.layoutMap')
+local h = require('yode-nvim.helper')
 
 local M = { actions = {}, selectors = {} }
 
@@ -25,6 +26,18 @@ local createTabState = function(name)
         windows = {},
     }
 end
+
+M.selectors = R.reduce(function(selectors, selectorName)
+    local selector = function(tabId, selectorArgs, state)
+        local tabState = state.tabs[tabId] or {}
+        local layoutSelector = R.path({ tabState.name, 'selectors', selectorName }, layoutMap)
+            or h.noop
+        return layoutSelector(tabId, selectorArgs, tabState)
+    end
+    return R.assoc(selectorName, selector, selectors)
+end, {}, {
+    'getWindowBySomeId',
+})
 
 local reducerFunctions = {
     -- FIXME do better
@@ -67,6 +80,7 @@ TODO:
     * what special things do we need to ignore?
         * height: tab row (if visible)
         * width: nerdtree, gundo, ...
+    * check https://github.com/beauwilliams/focus.nvim
 ]]
 
 return M

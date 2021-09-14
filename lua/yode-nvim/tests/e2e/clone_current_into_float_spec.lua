@@ -11,9 +11,14 @@ describe('clone current into float', function()
     local mainWin = 1000
     local floatWin = 1002
 
-    it('from file editor', function()
+    it("can't float normal buffer", function()
         eq(mainWin, vim.fn.win_getid())
         vim.cmd('e ./testData/basic.js')
+        vim.cmd('YodeCloneCurrentIntoFloat')
+        eq(0, #store.getState().layout.tabs)
+    end)
+
+    it('from file editor', function()
         vim.cmd('3,9YodeCreateSeditorReplace')
         eq(seditorBufferId, vim.fn.bufnr('%'))
         eq({
@@ -29,6 +34,16 @@ describe('clone current into float', function()
             [fileBufferId] = './testData/basic.js',
             [seditorBufferId] = 'yode://./testData/basic.js:2.js',
         }, tutil.getHumanBufferList())
+        eq(1, #store.getState().layout.tabs[1].windows)
+
+        vim.cmd('YodeCloneCurrentIntoFloat')
+        eq(mainWin, vim.fn.win_getid())
+        eq(seditorBufferId, vim.fn.bufnr('%'))
+        eq({
+            [fileBufferId] = './testData/basic.js',
+            [seditorBufferId] = 'yode://./testData/basic.js:2.js',
+        }, tutil.getHumanBufferList())
+        -- can't float already floating window again
         eq(1, #store.getState().layout.tabs[1].windows)
 
         eq(floatWin, store.getState().layout.tabs[1].windows[1].id)
