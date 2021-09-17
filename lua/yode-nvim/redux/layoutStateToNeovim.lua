@@ -10,7 +10,7 @@ local layoutStateToNeovim = function(store)
             local state = store.getState()
             local log = logMemo and logMemo or logging.create('layoutStateToNeovim')
             -- TODO find better way to identify layout actions?
-            if action.tabId and action.type ~= 'me' then
+            if action.tabId and action.type ~= 'me' and action.syncToNeovim == true then
                 log.trace('trying it with state', state)
                 tabState = state.layout.tabs[action.tabId]
                 if tabState == nil then

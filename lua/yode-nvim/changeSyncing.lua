@@ -351,7 +351,7 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
             -- "change buf lines" calls, which are also scheduled
         else
             log.debug('relayouting!')
-            R.forEach(store.dispatch, layoutActions)
+            layout.batchProcess(layoutActions)
         end
     end)
 end

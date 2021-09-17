@@ -52,6 +52,12 @@ M.layout = {
         contentChanged = sharedActions.actions.contentChanged,
         onVimResized = sharedActions.actions.onVimResized,
     }),
+    batchProcess = R.pipe(
+        h.mapWithIndex(function(action, i, all)
+            return R.assoc('syncToNeovim', i ~= #all, action)
+        end),
+        R.forEach(M.store.dispatch)
+    ),
 }
 
 return M
