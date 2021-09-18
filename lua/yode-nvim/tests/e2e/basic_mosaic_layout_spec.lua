@@ -12,6 +12,9 @@ describe('basic mosaic layout', function()
     local seditor1 = 2
     local seditor2 = 3
     local seditor3 = 4
+    local seditor1Win = 1002
+    local seditor2Win = 1003
+    local seditor3Win = 1004
 
     it('create floating seditors', function()
         eq({ seditors = {}, layout = { tabs = {} } }, store.getState())
@@ -47,7 +50,7 @@ const getSeditorWidth = async (nvim) => {
                 {
                     y = 0,
                     height = 7,
-                    id = 1002,
+                    id = seditor1Win,
                     bufId = seditor1,
                     relative = 'editor',
                     data = { visible = true },
@@ -92,7 +95,7 @@ async function createSeditor(nvim, text, row, height) {
                 {
                     y = 0,
                     height = 15,
-                    id = 1003,
+                    id = seditor2Win,
                     bufId = seditor2,
                     relative = 'editor',
                     data = { visible = true },
@@ -100,7 +103,7 @@ async function createSeditor(nvim, text, row, height) {
                 {
                     y = 16,
                     height = 7,
-                    id = 1002,
+                    id = seditor1Win,
                     bufId = seditor1,
                     relative = 'editor',
                     data = { visible = true },
@@ -141,7 +144,7 @@ plugin.registerCommand(
                 {
                     y = 0,
                     height = 10,
-                    id = 1004,
+                    id = seditor3Win,
                     bufId = seditor3,
                     relative = 'editor',
                     data = { visible = true },
@@ -149,7 +152,7 @@ plugin.registerCommand(
                 {
                     y = 11,
                     height = 15,
-                    id = 1003,
+                    id = seditor2Win,
                     bufId = seditor2,
                     relative = 'editor',
                     data = { visible = true },
@@ -157,7 +160,7 @@ plugin.registerCommand(
                 {
                     y = 27,
                     height = 7,
-                    id = 1002,
+                    id = seditor1Win,
                     bufId = seditor1,
                     relative = 'editor',
                     data = { visible = true },
@@ -173,7 +176,7 @@ plugin.registerCommand(
     it('selecting window by some id works', function()
         eq(
             {
-                id = 1002,
+                id = seditor1Win,
                 bufId = seditor1,
             },
             R.pick(
@@ -186,25 +189,187 @@ plugin.registerCommand(
 
         eq(
             {
-                id = 1002,
+                id = seditor1Win,
                 bufId = seditor1,
             },
             R.pick(
                 { 'id', 'bufId' },
                 layout.selectors.getWindowBySomeId(vim.api.nvim_tabpage_get_number(0), {
-                    winId = 1002,
+                    winId = seditor1Win,
                 })
             )
         )
     end)
 
     it("can't switch buffer to non seditor buffer in floating window", function()
-        eq(1004, vim.fn.win_getid())
+        eq(seditor3Win, vim.fn.win_getid())
         eq(seditor3, vim.fn.bufnr('%'))
 
         vim.cmd('b ' .. fileBufferId)
-        eq(1004, vim.fn.win_getid())
+        eq(seditor3Win, vim.fn.win_getid())
         eq(seditor3, vim.fn.bufnr('%'))
+    end)
+
+    it('shifting windows', function()
+        eq(seditor3Win, vim.fn.win_getid())
+        eq({
+            {
+                y = 0,
+                height = 10,
+                id = seditor3Win,
+            },
+            {
+                y = 11,
+                height = 15,
+                id = seditor2Win,
+            },
+            {
+                y = 27,
+                height = 7,
+                id = seditor1Win,
+            },
+        }, h.map(
+            R.pick({ 'y', 'height', 'id' }),
+            store.getState().layout.tabs[1].windows
+        ))
+
+        vim.cmd('YodeLayoutShiftWinDown')
+        eq(seditor3Win, vim.fn.win_getid())
+        eq({
+            {
+                y = 0,
+                height = 15,
+                id = seditor2Win,
+            },
+            {
+                y = 16,
+                height = 10,
+                id = seditor3Win,
+            },
+            {
+                y = 27,
+                height = 7,
+                id = seditor1Win,
+            },
+        }, h.map(
+            R.pick({ 'y', 'height', 'id' }),
+            store.getState().layout.tabs[1].windows
+        ))
+
+        vim.cmd('YodeLayoutShiftWinDown')
+        eq(seditor3Win, vim.fn.win_getid())
+        eq({
+            {
+                y = 0,
+                height = 15,
+                id = seditor2Win,
+            },
+            {
+                y = 16,
+                height = 7,
+                id = seditor1Win,
+            },
+            {
+                y = 24,
+                height = 10,
+                id = seditor3Win,
+            },
+        }, h.map(
+            R.pick({ 'y', 'height', 'id' }),
+            store.getState().layout.tabs[1].windows
+        ))
+
+        vim.cmd('YodeLayoutShiftWinTop')
+        eq(seditor3Win, vim.fn.win_getid())
+        eq({
+            {
+                y = 0,
+                height = 10,
+                id = seditor3Win,
+            },
+            {
+                y = 11,
+                height = 15,
+                id = seditor2Win,
+            },
+            {
+                y = 27,
+                height = 7,
+                id = seditor1Win,
+            },
+        }, h.map(
+            R.pick({ 'y', 'height', 'id' }),
+            store.getState().layout.tabs[1].windows
+        ))
+
+        vim.cmd('YodeLayoutShiftWinBottom')
+        eq(seditor3Win, vim.fn.win_getid())
+        eq({
+            {
+                y = 0,
+                height = 15,
+                id = seditor2Win,
+            },
+            {
+                y = 16,
+                height = 7,
+                id = seditor1Win,
+            },
+            {
+                y = 24,
+                height = 10,
+                id = seditor3Win,
+            },
+        }, h.map(
+            R.pick({ 'y', 'height', 'id' }),
+            store.getState().layout.tabs[1].windows
+        ))
+
+        vim.cmd('YodeLayoutShiftWinUp')
+        eq(seditor3Win, vim.fn.win_getid())
+        eq({
+            {
+                y = 0,
+                height = 15,
+                id = seditor2Win,
+            },
+            {
+                y = 16,
+                height = 10,
+                id = seditor3Win,
+            },
+            {
+                y = 27,
+                height = 7,
+                id = seditor1Win,
+            },
+        }, h.map(
+            R.pick({ 'y', 'height', 'id' }),
+            store.getState().layout.tabs[1].windows
+        ))
+
+        vim.cmd('YodeLayoutShiftWinUp')
+        eq(seditor3Win, vim.fn.win_getid())
+        eq({
+            {
+                y = 0,
+                height = 10,
+                id = seditor3Win,
+            },
+            {
+                y = 11,
+                height = 15,
+                id = seditor2Win,
+            },
+            {
+                y = 27,
+                height = 7,
+                id = seditor1Win,
+            },
+        }, h.map(
+            R.pick({ 'y', 'height', 'id' }),
+            store.getState().layout.tabs[1].windows
+        ))
     end)
 
     it('changing content height, changes layout', function()
@@ -223,7 +388,7 @@ plugin.registerCommand(
                 {
                     y = 0,
                     height = 15,
-                    id = 1003,
+                    id = seditor2Win,
                     bufId = seditor2,
                     relative = 'editor',
                     data = { visible = true },
@@ -231,7 +396,7 @@ plugin.registerCommand(
                 {
                     y = 16,
                     height = 7,
-                    id = 1002,
+                    id = seditor1Win,
                     bufId = seditor1,
                     relative = 'editor',
                     data = { visible = true },

@@ -65,7 +65,7 @@ end)
 
 M.selectors.getWindowBySomeId = function(tabId, selectorArgs, state)
     local idx = findWindowIndexBySomeId(state, selectorArgs)
-    return idx ~= nil and R.path({'windows', idx}, state)
+    return idx ~= nil and R.path({ 'windows', idx }, state)
 end
 
 local reducerFunctions = {
@@ -101,7 +101,7 @@ local reducerFunctions = {
         end
 
         local closedWin = state.windows[closedWinIndex]
-        local shiftBy = 1 + #vim.api.nvim_buf_get_lines(closedWin.bufId, 0, -1, true)
+        local shiftBy = 1 + closedWin.height
         log.trace('removing window from state:', a.winId, closedWin.id, shiftBy)
         return h.over(
             windowsLens,
@@ -110,6 +110,123 @@ local reducerFunctions = {
                 R.splitAt(closedWinIndex),
                 h.over(h.lensIndex(2), h.map(h.over(yLens, R.subtract(R.__, shiftBy)))),
                 R.flatten(),
+                setBorderStyle
+            ),
+            state
+        )
+    end,
+    [sharedActions.actionNames.SHIFT_WIN_DOWN] = function(state, a)
+        local log = logging.create('shiftWinDown')
+        if #state.windows <= 1 then
+            log.trace('not possible')
+            return state
+        end
+        local currentWinIndex = findWindowIndexBySomeId(state, a)
+        local otherWinIndex = currentWinIndex + 1
+        if #state.windows < otherWinIndex then
+            -- FIXME test this, should wrap around. Implement
+            -- `getWrappableIndex` in helper. Use module. Handles cases 0 and 1
+            -- of array size. We can then remove the first if.
+            -- Also implement other direction as needed below.
+            -- Probably in two methods?! get(Prev|Next)Index
+            log.trace('not possible')
+            return state
+        end
+        local currentWin = state.windows[currentWinIndex]
+        local otherWin = state.windows[otherWinIndex]
+        log.trace(currentWinIndex, currentWin, otherWin)
+        return h.over(
+            windowsLens,
+            R.pipe(
+                R.update(currentWinIndex, h.set(yLens, currentWin.y, otherWin)),
+                R.update(
+                    otherWinIndex,
+                    h.set(yLens, currentWin.y + otherWin.height + 1, currentWin)
+                ),
+                setBorderStyle
+            ),
+            state
+        )
+    end,
+    [sharedActions.actionNames.SHIFT_WIN_UP] = function(state, a)
+        local log = logging.create('shiftWinUp')
+        if #state.windows <= 1 then
+            log.trace('not possible')
+            return state
+        end
+        local currentWinIndex = findWindowIndexBySomeId(state, a)
+        local otherWinIndex = currentWinIndex - 1
+        if otherWinIndex < 1 then
+            -- FIXME test this, should wrap around. Implement
+            -- `getWrappableIndex` in helper. Use module. Handles cases 0 and 1
+            -- of array size. We can then remove the first if.
+            -- Also implement other direction as needed below.
+            -- Probably in two methods?! get(Prev|Next)Index
+            log.trace('not possible')
+            return state
+        end
+        local currentWin = state.windows[currentWinIndex]
+        local otherWin = state.windows[otherWinIndex]
+        log.trace(currentWinIndex, currentWin, otherWin)
+        return h.over(
+            windowsLens,
+            R.pipe(
+                R.update(otherWinIndex, h.set(yLens, otherWin.y, currentWin)),
+                R.update(
+                    currentWinIndex,
+                    h.set(yLens, otherWin.y + currentWin.height + 1, otherWin)
+                ),
+                setBorderStyle
+            ),
+            state
+        )
+    end,
+    [sharedActions.actionNames.SHIFT_WIN_BOTTOM] = function(state, a)
+        local log = logging.create('shiftWinBottom')
+        if #state.windows <= 1 then
+            log.trace('not possible')
+            return state
+        end
+        local currentWinIndex = findWindowIndexBySomeId(state, a)
+        local otherWinIndex = #state.windows
+        local currentWin = state.windows[currentWinIndex]
+        local otherWin = state.windows[otherWinIndex]
+        log.trace(currentWinIndex, currentWin, otherWin)
+        return h.over(
+            windowsLens,
+            R.pipe(
+                R.without({ currentWin }),
+                h.map(h.over(yLens, R.subtract(R.__, currentWin.height + 1))),
+                R.append(
+                    h.set(
+                        yLens,
+                        (otherWin.y + otherWin.height + 1) - (currentWin.height + 1),
+                        currentWin
+                    )
+                ),
+                setBorderStyle
+            ),
+            state
+        )
+    end,
+    [sharedActions.actionNames.SHIFT_WIN_TOP] = function(state, a)
+        local log = logging.create('shiftWinTop')
+        if #state.windows <= 1 then
+            log.trace('not possible')
+            return state
+        end
+        local currentWinIndex = findWindowIndexBySomeId(state, a)
+        local otherWinIndex = 1
+        local currentWin = state.windows[currentWinIndex]
+        local otherWin = state.windows[otherWinIndex]
+        log.trace(currentWinIndex, currentWin, otherWin)
+        return h.over(
+            windowsLens,
+            R.pipe(
+                R.without({ currentWin }),
+                h.map(h.over(yLens, R.add(R.__, currentWin.height + 1))),
+                R.update(otherWinIndex, h.set(yLens, currentWin.height + 1, otherWin)),
+                R.prepend(h.set(yLens, 0, currentWin)),
                 setBorderStyle
             ),
             state

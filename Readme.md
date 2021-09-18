@@ -4,7 +4,8 @@ Yode plugin for Neovim.
 
 ## interim help
 
-**TODO** move this to Vim help syntax `./doc/yode-nvim.txt`
+**TODO** move this to Vim help syntax `./doc/yode-nvim.txt`.
+[kdheepak/panvimdoc: Write documentation in pandoc markdown. Generate documentation in vimdoc.](https://github.com/kdheepak/panvimdoc)
 
 * install
     * clone with submodules: `git clone --recurse-submodules git@github.com:hoschi/yode-nvim.git`
@@ -55,3 +56,4 @@ Yode plugin for Neovim.
     * run single test: `nvim --headless -c "PlenaryBustedDirectory lua/yode-nvim/tests/e2e/seditor_to_file_editor_sync_spec.lua {minimal_init = 'lua/yode-nvim/tests/minimal.vim'}"`
     * [more infos, see Plenary docs here](https://github.com/nvim-lua/plenary.nvim#plenarytest_harness)
     * run all tests on file changes `nodemon -e lua,vim --exec 'make test'`
+    * run single test on file changes `nodemon -e lua,vim --exec "nvim --headless -c \"PlenaryBustedDirectory lua/yode-nvim/tests/e2e/basic_mosaic_layout_spec.lua {minimal_init = 'lua/yode-nvim/tests/minimal.vim'}\" "`

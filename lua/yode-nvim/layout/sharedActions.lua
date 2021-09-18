@@ -30,4 +30,32 @@ M.actions.onVimResized = R.pipe(
     R.assoc('type', M.actionNames.ON_VIM_RESIZED)
 )
 
+M.actionNames.SHIFT_WIN_DOWN = 'SHIFT_WIN_DOWN'
+M.actions.shiftWinDown = R.pipe(
+    R.merge({ syncToNeovim = true }),
+    R.pick({ 'syncToNeovim', 'tabId', 'winId', 'bufId' }),
+    R.assoc('type', M.actionNames.SHIFT_WIN_DOWN)
+)
+
+M.actionNames.SHIFT_WIN_UP = 'SHIFT_WIN_UP'
+M.actions.shiftWinUp = R.pipe(
+    R.merge({ syncToNeovim = true }),
+    R.pick({ 'syncToNeovim', 'tabId', 'winId', 'bufId' }),
+    R.assoc('type', M.actionNames.SHIFT_WIN_UP)
+)
+
+M.actionNames.SHIFT_WIN_BOTTOM = 'SHIFT_WIN_BOTTOM'
+M.actions.shiftWinBottom = R.pipe(
+    R.merge({ syncToNeovim = true }),
+    R.pick({ 'syncToNeovim', 'tabId', 'winId', 'bufId' }),
+    R.assoc('type', M.actionNames.SHIFT_WIN_BOTTOM)
+)
+
+M.actionNames.SHIFT_WIN_TOP = 'SHIFT_WIN_TOP'
+M.actions.shiftWinTop = R.pipe(
+    R.merge({ syncToNeovim = true }),
+    R.pick({ 'syncToNeovim', 'tabId', 'winId', 'bufId' }),
+    R.assoc('type', M.actionNames.SHIFT_WIN_TOP)
+)
+
 return M

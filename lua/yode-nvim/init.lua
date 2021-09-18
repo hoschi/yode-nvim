@@ -152,6 +152,34 @@ M.onBufWinEnter = function()
     end
 end
 
+M.layoutShiftWinDown = function()
+    layout.actions.shiftWinDown({
+        tabId = vim.api.nvim_tabpage_get_number(0),
+        winId = vim.fn.win_getid(),
+    })
+end
+
+M.layoutShiftWinUp = function()
+    layout.actions.shiftWinUp({
+        tabId = vim.api.nvim_tabpage_get_number(0),
+        winId = vim.fn.win_getid(),
+    })
+end
+
+M.layoutShiftWinBottom = function()
+    layout.actions.shiftWinBottom({
+        tabId = vim.api.nvim_tabpage_get_number(0),
+        winId = vim.fn.win_getid(),
+    })
+end
+
+M.layoutShiftWinTop = function()
+    layout.actions.shiftWinTop({
+        tabId = vim.api.nvim_tabpage_get_number(0),
+        winId = vim.fn.win_getid(),
+    })
+end
+
 M.yodeArgsLogger = function(...)
     local log = logging.create('yodeArgsLogger')
     log.debug(...)

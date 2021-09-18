@@ -51,6 +51,10 @@ M.layout = {
         removeFloatingWindow = sharedActions.actions.removeFloatingWindow,
         contentChanged = sharedActions.actions.contentChanged,
         onVimResized = sharedActions.actions.onVimResized,
+        shiftWinDown = sharedActions.actions.shiftWinDown,
+        shiftWinUp = sharedActions.actions.shiftWinUp,
+        shiftWinBottom = sharedActions.actions.shiftWinBottom,
+        shiftWinTop = sharedActions.actions.shiftWinTop,
     }),
 }
 
