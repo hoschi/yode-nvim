@@ -141,4 +141,31 @@ describe('helper', function()
         eq(2, h.getIndentCount({ '    foo', '  bar' }))
         eq(4, h.getIndentCount({ '    foo', '    bar' }))
     end)
+
+    it('next/prevIndex', function()
+        local data = {100, 200, 300}
+
+        eq(1, h.nextIndex(1, {666}))
+        eq(1, h.prevIndex(1, {666}))
+
+        eq(nil, h.nextIndex(1, {}))
+        eq(nil, h.prevIndex(1, {}))
+
+        eq(nil, h.nextIndex(5, {}))
+        eq(nil, h.prevIndex(5, {}))
+
+        eq(nil, h.nextIndex(1, nil))
+        eq(nil, h.prevIndex(1, nil))
+
+        eq(nil, h.nextIndex(6, nil))
+        eq(nil, h.prevIndex(6, nil))
+
+        eq(2, h.nextIndex(1, data))
+        eq(3, h.nextIndex(2, data))
+        eq(1, h.nextIndex(3, data))
+
+        eq(3, h.prevIndex(1, data))
+        eq(1, h.prevIndex(2, data))
+        eq(2, h.prevIndex(3, data))
+    end)
 end)

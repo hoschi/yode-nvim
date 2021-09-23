@@ -87,4 +87,20 @@ M.showBufferInFloatingWindow = function(bufId, winConfig)
     return id
 end
 
+M.nextIndex = function(idx, data)
+    if data == nil or #data <= 0 then
+        return nil
+    end
+
+    return idx+1 <= #data and idx+1 or 1
+end
+
+M.prevIndex = function(idx, data)
+    if data == nil or #data <= 0 then
+        return nil
+    end
+
+    return idx-1 >= 1 and idx-1 or #data
+end
+
 return M

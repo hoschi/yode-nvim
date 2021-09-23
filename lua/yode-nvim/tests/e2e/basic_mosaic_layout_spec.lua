@@ -370,6 +370,52 @@ plugin.registerCommand(
             R.pick({ 'y', 'height', 'id' }),
             store.getState().layout.tabs[1].windows
         ))
+
+        vim.cmd('YodeLayoutShiftWinUp')
+        eq(seditor3Win, vim.fn.win_getid())
+        eq({
+            {
+                y = 0,
+                height = 15,
+                id = seditor2Win,
+            },
+            {
+                y = 16,
+                height = 7,
+                id = seditor1Win,
+            },
+            {
+                y = 24,
+                height = 10,
+                id = seditor3Win,
+            },
+        }, h.map(
+            R.pick({ 'y', 'height', 'id' }),
+            store.getState().layout.tabs[1].windows
+        ))
+
+        vim.cmd('YodeLayoutShiftWinDown')
+        eq(seditor3Win, vim.fn.win_getid())
+        eq({
+            {
+                y = 0,
+                height = 10,
+                id = seditor3Win,
+            },
+            {
+                y = 11,
+                height = 15,
+                id = seditor2Win,
+            },
+            {
+                y = 27,
+                height = 7,
+                id = seditor1Win,
+            },
+        }, h.map(
+            R.pick({ 'y', 'height', 'id' }),
+            store.getState().layout.tabs[1].windows
+        ))
     end)
 
     it('changing content height, changes layout', function()

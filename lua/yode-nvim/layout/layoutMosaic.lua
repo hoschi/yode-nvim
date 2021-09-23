@@ -63,6 +63,47 @@ local setBorderStyle = h.mapWithIndex(function(win, i, all)
         or R.assoc('border', lastBorderStyle, win)
 end)
 
+local shiftWinBottom = function(log, state, currentWinIndex)
+    local otherWinIndex = #state.windows
+    local currentWin = state.windows[currentWinIndex]
+    local otherWin = state.windows[otherWinIndex]
+    log.trace(currentWinIndex, currentWin, otherWin)
+    return h.over(
+        windowsLens,
+        R.pipe(
+            R.without({ currentWin }),
+            h.map(h.over(yLens, R.subtract(R.__, currentWin.height + 1))),
+            R.append(
+                h.set(
+                    yLens,
+                    (otherWin.y + otherWin.height + 1) - (currentWin.height + 1),
+                    currentWin
+                )
+            ),
+            setBorderStyle
+        ),
+        state
+    )
+end
+
+local shiftWinTop = function(log, state, currentWinIndex)
+    local otherWinIndex = 1
+    local currentWin = state.windows[currentWinIndex]
+    local otherWin = state.windows[otherWinIndex]
+    log.trace(currentWinIndex, currentWin, otherWin)
+    return h.over(
+        windowsLens,
+        R.pipe(
+            R.without({ currentWin }),
+            h.map(h.over(yLens, R.add(R.__, currentWin.height + 1))),
+            R.update(otherWinIndex, h.set(yLens, currentWin.height + 1, otherWin)),
+            R.prepend(h.set(yLens, 0, currentWin)),
+            setBorderStyle
+        ),
+        state
+    )
+end
+
 M.selectors.getWindowBySomeId = function(tabId, selectorArgs, state)
     local idx = findWindowIndexBySomeId(state, selectorArgs)
     return idx ~= nil and R.path({ 'windows', idx }, state)
@@ -118,20 +159,15 @@ local reducerFunctions = {
     [sharedActions.actionNames.SHIFT_WIN_DOWN] = function(state, a)
         local log = logging.create('shiftWinDown')
         if #state.windows <= 1 then
-            log.trace('not possible')
+            log.trace('not possible', #state.windows, currentWinIndex, otherWinIndex)
             return state
         end
         local currentWinIndex = findWindowIndexBySomeId(state, a)
         local otherWinIndex = currentWinIndex + 1
-        if #state.windows < otherWinIndex then
-            -- FIXME test this, should wrap around. Implement
-            -- `getWrappableIndex` in helper. Use module. Handles cases 0 and 1
-            -- of array size. We can then remove the first if.
-            -- Also implement other direction as needed below.
-            -- Probably in two methods?! get(Prev|Next)Index
-            log.trace('not possible')
-            return state
+        if otherWinIndex > #state.windows then
+            return shiftWinTop(log, state, currentWinIndex)
         end
+
         local currentWin = state.windows[currentWinIndex]
         local otherWin = state.windows[otherWinIndex]
         log.trace(currentWinIndex, currentWin, otherWin)
@@ -151,19 +187,13 @@ local reducerFunctions = {
     [sharedActions.actionNames.SHIFT_WIN_UP] = function(state, a)
         local log = logging.create('shiftWinUp')
         if #state.windows <= 1 then
-            log.trace('not possible')
+            log.trace('not possible', #state.windows, currentWinIndex, otherWinIndex)
             return state
         end
         local currentWinIndex = findWindowIndexBySomeId(state, a)
         local otherWinIndex = currentWinIndex - 1
         if otherWinIndex < 1 then
-            -- FIXME test this, should wrap around. Implement
-            -- `getWrappableIndex` in helper. Use module. Handles cases 0 and 1
-            -- of array size. We can then remove the first if.
-            -- Also implement other direction as needed below.
-            -- Probably in two methods?! get(Prev|Next)Index
-            log.trace('not possible')
-            return state
+            return shiftWinBottom(log, state, currentWinIndex)
         end
         local currentWin = state.windows[currentWinIndex]
         local otherWin = state.windows[otherWinIndex]
@@ -188,26 +218,7 @@ local reducerFunctions = {
             return state
         end
         local currentWinIndex = findWindowIndexBySomeId(state, a)
-        local otherWinIndex = #state.windows
-        local currentWin = state.windows[currentWinIndex]
-        local otherWin = state.windows[otherWinIndex]
-        log.trace(currentWinIndex, currentWin, otherWin)
-        return h.over(
-            windowsLens,
-            R.pipe(
-                R.without({ currentWin }),
-                h.map(h.over(yLens, R.subtract(R.__, currentWin.height + 1))),
-                R.append(
-                    h.set(
-                        yLens,
-                        (otherWin.y + otherWin.height + 1) - (currentWin.height + 1),
-                        currentWin
-                    )
-                ),
-                setBorderStyle
-            ),
-            state
-        )
+        return shiftWinBottom(log, state, currentWinIndex)
     end,
     [sharedActions.actionNames.SHIFT_WIN_TOP] = function(state, a)
         local log = logging.create('shiftWinTop')
@@ -216,21 +227,7 @@ local reducerFunctions = {
             return state
         end
         local currentWinIndex = findWindowIndexBySomeId(state, a)
-        local otherWinIndex = 1
-        local currentWin = state.windows[currentWinIndex]
-        local otherWin = state.windows[otherWinIndex]
-        log.trace(currentWinIndex, currentWin, otherWin)
-        return h.over(
-            windowsLens,
-            R.pipe(
-                R.without({ currentWin }),
-                h.map(h.over(yLens, R.add(R.__, currentWin.height + 1))),
-                R.update(otherWinIndex, h.set(yLens, currentWin.height + 1, otherWin)),
-                R.prepend(h.set(yLens, 0, currentWin)),
-                setBorderStyle
-            ),
-            state
-        )
+        return shiftWinTop(log, state, currentWinIndex)
     end,
     [sharedActions.actionNames.CONTENT_CHANGED] = function(state, a)
         local log = logging.create('contentChanged')
