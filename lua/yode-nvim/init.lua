@@ -153,6 +153,16 @@ M.onBufWinEnter = function()
 end
 
 M.layoutShiftWinDown = function()
+    local winId = vim.fn.win_getid()
+    local floatWin = layout.selectors.getWindowBySomeId(
+        vim.api.nvim_tabpage_get_number(0),
+        { winId = winId }
+    )
+    if floatWin == nil then
+        vim.cmd('wincmd r')
+        return
+    end
+
     layout.actions.shiftWinDown({
         tabId = vim.api.nvim_tabpage_get_number(0),
         winId = vim.fn.win_getid(),
@@ -160,6 +170,16 @@ M.layoutShiftWinDown = function()
 end
 
 M.layoutShiftWinUp = function()
+    local winId = vim.fn.win_getid()
+    local floatWin = layout.selectors.getWindowBySomeId(
+        vim.api.nvim_tabpage_get_number(0),
+        { winId = winId }
+    )
+    if floatWin == nil then
+        vim.cmd('wincmd R')
+        return
+    end
+
     layout.actions.shiftWinUp({
         tabId = vim.api.nvim_tabpage_get_number(0),
         winId = vim.fn.win_getid(),
@@ -167,6 +187,16 @@ M.layoutShiftWinUp = function()
 end
 
 M.layoutShiftWinBottom = function()
+    local winId = vim.fn.win_getid()
+    local floatWin = layout.selectors.getWindowBySomeId(
+        vim.api.nvim_tabpage_get_number(0),
+        { winId = winId }
+    )
+    if floatWin == nil then
+        vim.cmd('wincmd J')
+        return
+    end
+
     layout.actions.shiftWinBottom({
         tabId = vim.api.nvim_tabpage_get_number(0),
         winId = vim.fn.win_getid(),
@@ -174,6 +204,16 @@ M.layoutShiftWinBottom = function()
 end
 
 M.layoutShiftWinTop = function()
+    local winId = vim.fn.win_getid()
+    local floatWin = layout.selectors.getWindowBySomeId(
+        vim.api.nvim_tabpage_get_number(0),
+        { winId = winId }
+    )
+    if floatWin == nil then
+        vim.cmd('wincmd K')
+        return
+    end
+
     layout.actions.shiftWinTop({
         tabId = vim.api.nvim_tabpage_get_number(0),
         winId = vim.fn.win_getid(),

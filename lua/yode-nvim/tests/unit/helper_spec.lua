@@ -143,10 +143,10 @@ describe('helper', function()
     end)
 
     it('next/prevIndex', function()
-        local data = {100, 200, 300}
+        local data = { 100, 200, 300 }
 
-        eq(1, h.nextIndex(1, {666}))
-        eq(1, h.prevIndex(1, {666}))
+        eq(1, h.nextIndex(1, { 666 }))
+        eq(1, h.prevIndex(1, { 666 }))
 
         eq(nil, h.nextIndex(1, {}))
         eq(nil, h.prevIndex(1, {}))

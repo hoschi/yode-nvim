@@ -25,14 +25,6 @@ augroup YodeNvim
     autocmd VimResized * lua require'yode-nvim'.onVimResized()
 augroup END
 
-" " FIXME put this is my vimrc and add it to Readme. Command should do what it
-" says only if window is floating. if not floating, use `wincmd` to do vims
-" normal thing
-" FIXME <C-W>r YodeLayoutShiftWinDown
-" FIXME <C-W>R YodeLayoutShiftWinUp
-" FIXME <C-W>J YodeLayoutShiftWinBottom
-" FIXME <C-W>K YodeLayoutShiftWinTop
-
 let s:save_cpo = &cpo
 set cpo&vim
 

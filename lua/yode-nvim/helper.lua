@@ -92,7 +92,7 @@ M.nextIndex = function(idx, data)
         return nil
     end
 
-    return idx+1 <= #data and idx+1 or 1
+    return idx + 1 <= #data and idx + 1 or 1
 end
 
 M.prevIndex = function(idx, data)
@@ -100,7 +100,7 @@ M.prevIndex = function(idx, data)
         return nil
     end
 
-    return idx-1 >= 1 and idx-1 or #data
+    return idx - 1 >= 1 and idx - 1 or #data
 end
 
 return M
