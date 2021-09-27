@@ -96,8 +96,8 @@ local shiftWinTop = function(log, state, currentWinIndex)
         R.pipe(
             R.without({ currentWin }),
             h.map(h.over(yLens, R.add(R.__, currentWin.height + 1))),
-            R.update(otherWinIndex, h.set(yLens, currentWin.height + 1, otherWin)),
-            R.prepend(h.set(yLens, 0, currentWin)),
+            R.update(otherWinIndex, h.set(yLens, currentWin.height + 2, otherWin)),
+            R.prepend(h.set(yLens, 1, currentWin)),
             setBorderStyle
         ),
         state
@@ -118,7 +118,7 @@ local reducerFunctions = {
                 h.map(h.over(yLens, R.add(#text + 1))),
                 R.prepend(R.mergeDeepRight(createWindowState(), {
                     height = #text,
-                    y = 0,
+                    y = 1,
                     bufId = a.bufId,
                     data = {
                         visible = true,

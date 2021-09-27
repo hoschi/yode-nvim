@@ -48,7 +48,7 @@ const getSeditorWidth = async (nvim) => {
         eq(
             {
                 {
-                    y = 0,
+                    y = 1,
                     height = 7,
                     id = seditor1Win,
                     bufId = seditor1,
@@ -93,7 +93,7 @@ async function createSeditor(nvim, text, row, height) {
         eq(
             {
                 {
-                    y = 0,
+                    y = 1,
                     height = 15,
                     id = seditor2Win,
                     bufId = seditor2,
@@ -101,7 +101,7 @@ async function createSeditor(nvim, text, row, height) {
                     data = { visible = true },
                 },
                 {
-                    y = 16,
+                    y = 17,
                     height = 7,
                     id = seditor1Win,
                     bufId = seditor1,
@@ -142,7 +142,7 @@ plugin.registerCommand(
         eq(
             {
                 {
-                    y = 0,
+                    y = 1,
                     height = 10,
                     id = seditor3Win,
                     bufId = seditor3,
@@ -150,7 +150,7 @@ plugin.registerCommand(
                     data = { visible = true },
                 },
                 {
-                    y = 11,
+                    y = 12,
                     height = 15,
                     id = seditor2Win,
                     bufId = seditor2,
@@ -158,7 +158,7 @@ plugin.registerCommand(
                     data = { visible = true },
                 },
                 {
-                    y = 27,
+                    y = 28,
                     height = 7,
                     id = seditor1Win,
                     bufId = seditor1,
@@ -214,17 +214,17 @@ plugin.registerCommand(
         eq(seditor3Win, vim.fn.win_getid())
         eq({
             {
-                y = 0,
+                y = 1,
                 height = 10,
                 id = seditor3Win,
             },
             {
-                y = 11,
+                y = 12,
                 height = 15,
                 id = seditor2Win,
             },
             {
-                y = 27,
+                y = 28,
                 height = 7,
                 id = seditor1Win,
             },
@@ -237,17 +237,17 @@ plugin.registerCommand(
         eq(seditor3Win, vim.fn.win_getid())
         eq({
             {
-                y = 0,
+                y = 1,
                 height = 15,
                 id = seditor2Win,
             },
             {
-                y = 16,
+                y = 17,
                 height = 10,
                 id = seditor3Win,
             },
             {
-                y = 27,
+                y = 28,
                 height = 7,
                 id = seditor1Win,
             },
@@ -260,17 +260,17 @@ plugin.registerCommand(
         eq(seditor3Win, vim.fn.win_getid())
         eq({
             {
-                y = 0,
+                y = 1,
                 height = 15,
                 id = seditor2Win,
             },
             {
-                y = 16,
+                y = 17,
                 height = 7,
                 id = seditor1Win,
             },
             {
-                y = 24,
+                y = 25,
                 height = 10,
                 id = seditor3Win,
             },
@@ -283,17 +283,17 @@ plugin.registerCommand(
         eq(seditor3Win, vim.fn.win_getid())
         eq({
             {
-                y = 0,
+                y = 1,
                 height = 10,
                 id = seditor3Win,
             },
             {
-                y = 11,
+                y = 12,
                 height = 15,
                 id = seditor2Win,
             },
             {
-                y = 27,
+                y = 28,
                 height = 7,
                 id = seditor1Win,
             },
@@ -306,17 +306,17 @@ plugin.registerCommand(
         eq(seditor3Win, vim.fn.win_getid())
         eq({
             {
-                y = 0,
+                y = 1,
                 height = 15,
                 id = seditor2Win,
             },
             {
-                y = 16,
+                y = 17,
                 height = 7,
                 id = seditor1Win,
             },
             {
-                y = 24,
+                y = 25,
                 height = 10,
                 id = seditor3Win,
             },
@@ -329,17 +329,17 @@ plugin.registerCommand(
         eq(seditor3Win, vim.fn.win_getid())
         eq({
             {
-                y = 0,
+                y = 1,
                 height = 15,
                 id = seditor2Win,
             },
             {
-                y = 16,
+                y = 17,
                 height = 10,
                 id = seditor3Win,
             },
             {
-                y = 27,
+                y = 28,
                 height = 7,
                 id = seditor1Win,
             },
@@ -352,17 +352,17 @@ plugin.registerCommand(
         eq(seditor3Win, vim.fn.win_getid())
         eq({
             {
-                y = 0,
+                y = 1,
                 height = 10,
                 id = seditor3Win,
             },
             {
-                y = 11,
+                y = 12,
                 height = 15,
                 id = seditor2Win,
             },
             {
-                y = 27,
+                y = 28,
                 height = 7,
                 id = seditor1Win,
             },
@@ -375,17 +375,17 @@ plugin.registerCommand(
         eq(seditor3Win, vim.fn.win_getid())
         eq({
             {
-                y = 0,
+                y = 1,
                 height = 15,
                 id = seditor2Win,
             },
             {
-                y = 16,
+                y = 17,
                 height = 7,
                 id = seditor1Win,
             },
             {
-                y = 24,
+                y = 25,
                 height = 10,
                 id = seditor3Win,
             },
@@ -398,17 +398,17 @@ plugin.registerCommand(
         eq(seditor3Win, vim.fn.win_getid())
         eq({
             {
-                y = 0,
+                y = 1,
                 height = 10,
                 id = seditor3Win,
             },
             {
-                y = 11,
+                y = 12,
                 height = 15,
                 id = seditor2Win,
             },
             {
-                y = 27,
+                y = 28,
                 height = 7,
                 id = seditor1Win,
             },
@@ -432,7 +432,7 @@ plugin.registerCommand(
         eq(
             {
                 {
-                    y = 0,
+                    y = 1,
                     height = 15,
                     id = seditor2Win,
                     bufId = seditor2,
@@ -440,7 +440,7 @@ plugin.registerCommand(
                     data = { visible = true },
                 },
                 {
-                    y = 16,
+                    y = 17,
                     height = 7,
                     id = seditor1Win,
                     bufId = seditor1,

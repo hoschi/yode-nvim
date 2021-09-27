@@ -25,6 +25,8 @@ map <C-W>r :YodeLayoutShiftWinDown<CR>
 map <C-W>R :YodeLayoutShiftWinUp<CR>
 map <C-W>J :YodeLayoutShiftWinBottom<CR>
 map <C-W>K :YodeLayoutShiftWinTop<CR>
+" at the moment this is needed to have no gap for floating windows
+showtabline=2
 ```
 
 ## Development
