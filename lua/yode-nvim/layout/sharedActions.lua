@@ -30,6 +30,13 @@ M.actions.onVimResized = R.pipe(
     R.assoc('type', M.actionNames.ON_VIM_RESIZED)
 )
 
+M.actionNames.ON_TAB_CLOSED = 'ON_TAB_CLOSED'
+M.actions.onTabClosed = R.pipe(
+    R.merge({ syncToNeovim = false }),
+    R.pick({ 'syncToNeovim', 'tabId' }),
+    R.assoc('type', M.actionNames.ON_TAB_CLOSED)
+)
+
 M.actionNames.SHIFT_WIN_DOWN = 'SHIFT_WIN_DOWN'
 M.actions.shiftWinDown = R.pipe(
     R.merge({ syncToNeovim = true }),

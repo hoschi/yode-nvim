@@ -3,6 +3,7 @@ local logging = require('yode-nvim.logging')
 local createReducer = require('yode-nvim.redux.createReducer')
 local layoutMap = require('yode-nvim.layout.layoutMap')
 local h = require('yode-nvim.helper')
+local sharedActions = require('yode-nvim.layout.sharedActions')
 
 local M = { actions = {}, selectors = {} }
 
@@ -38,6 +39,9 @@ local reducerFunctions = {
     -- FIXME do better
     me = function(state, a)
         return R.assocPath({ 'tabs', a.tabId }, a.data, state)
+    end,
+    [sharedActions.actionNames.ON_TAB_CLOSED] = function(state, a)
+        return R.dissocPath({ 'tabs', a.tabId }, state)
     end,
 }
 

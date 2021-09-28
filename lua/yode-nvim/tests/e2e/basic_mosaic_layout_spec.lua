@@ -435,9 +435,13 @@ plugin.registerCommand(
         }, tutil.getHumanBufferList())
         -- with tab numbers it would be {1, 2}
         eq({ 1, 3 }, R.keys(store.getState().layout.tabs))
+    end)
+
+    it('tab close is handled', function()
+        vim.cmd('tabclose')
+        eq({ 1 }, R.keys(store.getState().layout.tabs))
 
         -- cleanup
-        vim.cmd('tabclose')
         vim.cmd('bd 5')
         vim.cmd('bd 6')
     end)

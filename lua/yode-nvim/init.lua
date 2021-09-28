@@ -14,6 +14,8 @@ local M = {
     config = {},
 }
 
+local lastTabId = 1
+
 M.setup = function(options)
     M.config = vim.tbl_deep_extend('force', defaultConfig, options or {})
     logging.setup(M.config.log)
@@ -130,6 +132,19 @@ end
 M.onVimResized = function()
     layout.actions.onVimResized({
         tabId = vim.api.nvim_get_current_tabpage(),
+    })
+end
+
+M.onTabLeave = function()
+    lastTabId = vim.api.nvim_get_current_tabpage()
+end
+
+M.onTabClosed = function()
+    local log = logging.create('onTabClosed')
+    layout.actions.onTabClosed({
+        -- TODO can't find a conversion of tab number to tab id. You can
+        -- get tab nr as arg when you eval <afile>, see help.
+        tabId = lastTabId,
     })
 end
 
