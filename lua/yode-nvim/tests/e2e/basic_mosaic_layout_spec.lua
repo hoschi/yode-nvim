@@ -451,35 +451,46 @@ plugin.registerCommand(
     end)
 
     it('delete floating buffer', function()
-        vim.cmd('bd')
+        vim.cmd('tab split')
+        vim.cmd('b ' .. seditor2)
+        vim.cmd('YodeCloneCurrentIntoFloat')
+        vim.cmd('b ' .. seditor1)
+        vim.cmd('YodeCloneCurrentIntoFloat')
+        vim.cmd('b ' .. fileBufferId)
+        vim.cmd('wincmd w')
         eq({
             [fileBufferId] = './testData/basic.js',
             [seditor1] = 'yode://./testData/basic.js:2.js',
             [seditor2] = 'yode://./testData/basic.js:3.js',
+            [seditor3] = 'yode://./testData/basic.js:4.js',
         }, tutil.getHumanBufferList())
+        eq(seditor1, vim.fn.bufnr('%'))
+        eq({ 1, 4 }, R.keys(store.getState().layout.tabs))
         eq(
-            {
-                {
-                    y = 1,
-                    height = 15,
-                    id = seditor2Win,
-                    bufId = seditor2,
-                    relative = 'editor',
-                    data = { visible = true },
-                },
-                {
-                    y = 17,
-                    height = 7,
-                    id = seditor1Win,
-                    bufId = seditor1,
-                    relative = 'editor',
-                    data = { visible = true },
-                },
-            },
-            h.map(
-                R.pick({ 'id', 'data', 'height', 'relative', 'y', 'bufId' }),
-                store.getState().layout.tabs[1].windows
-            )
+            { seditor3, seditor2, seditor1 },
+            R.pluck('bufId', store.getState().layout.tabs[1].windows)
         )
+        eq({ seditor1, seditor2 }, R.pluck('bufId', store.getState().layout.tabs[4].windows))
+
+        vim.cmd('bd')
+        eq(fileBufferId, vim.fn.bufnr('%'))
+        eq({ 1, 4 }, R.keys(store.getState().layout.tabs))
+        eq({ seditor3, seditor2 }, R.pluck('bufId', store.getState().layout.tabs[1].windows))
+        eq({ seditor2 }, R.pluck('bufId', store.getState().layout.tabs[4].windows))
+
+        vim.cmd('wincmd w')
+        eq(seditor2, vim.fn.bufnr('%'))
+
+        vim.cmd('bd')
+        eq(fileBufferId, vim.fn.bufnr('%'))
+        eq({ 1, 4 }, R.keys(store.getState().layout.tabs))
+        eq({ seditor3 }, R.pluck('bufId', store.getState().layout.tabs[1].windows))
+        eq({}, R.pluck('bufId', store.getState().layout.tabs[4].windows))
+
+        -- TODO change window layout before deleting last buffer, when we have
+        -- more of them. Should keep tab state. Assert layout name is still
+        -- 'the other layout'. When user floats the next window, his selected
+        -- layout should be still active!
+        eq('mosaic', store.getState().layout.tabs[4].name)
     end)
 end)

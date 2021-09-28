@@ -23,13 +23,14 @@ end
 
 M.yodeNvim = function()
     local log = logging.create('yodeNvim')
-    testSetup.setup1()
+    --testSetup.setup1()
+    --testSetup.setup2()
+    testSetup.setup3()
+
     -- FIXME comment out
     --vim.cmd('wincmd h')
     --vim.api.nvim_feedkeys('ggjjjj', 'x', false)
-    vim.cmd('tabnew')
-
-    --testSetup.setup2()
+    --vim.cmd('tabnew')
 end
 
 M.yodeTesting = function()

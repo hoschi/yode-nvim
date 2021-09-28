@@ -65,4 +65,11 @@ M.actions.shiftWinTop = R.pipe(
     R.assoc('type', M.actionNames.SHIFT_WIN_TOP)
 )
 
+M.actionNames.MULTI_TAB_REMOVE_SEDITOR = 'MULTI_TAB_REMOVE_SEDITOR'
+M.actions.multiTabRemoveSeditor = R.pipe(
+    R.merge({ syncToNeovim = false }),
+    R.pick({ 'syncToNeovim', 'winId', 'bufId' }),
+    R.assoc('type', M.actionNames.MULTI_TAB_REMOVE_SEDITOR)
+)
+
 return M

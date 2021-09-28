@@ -56,6 +56,7 @@ M.layout = {
         shiftWinUp = sharedActions.actions.shiftWinUp,
         shiftWinBottom = sharedActions.actions.shiftWinBottom,
         shiftWinTop = sharedActions.actions.shiftWinTop,
+        multiTabRemoveSeditor = sharedActions.actions.multiTabRemoveSeditor,
     }),
 }
 

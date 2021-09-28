@@ -11,6 +11,13 @@ initialState = {
     tabs = {},
 }
 
+local multiTabActionMap = {
+    [sharedActions.actionNames.MULTI_TAB_REMOVE_SEDITOR] = R.pipe(
+        R.omit({ 'type', 'syncToNeovim' }),
+        sharedActions.actions.removeFloatingWindow
+    ),
+}
+
 local createTabState = function(name)
     return {
         name = name,
@@ -45,28 +52,46 @@ local reducerFunctions = {
     end,
 }
 
+local reduceSingleTab = function(state, action)
+    local log = logging.create('reduceSingleTab')
+    local tabState = state.tabs[action.tabId] or createTabState('mosaic')
+    local layout = layoutMap[tabState.name]
+    local tabStateData = layout.reducer(tabState, action)
+
+    if tabStateData == nil then
+        log.warn(string.format("layout %s can't handle action ", tabState.name or 'mosaic'), action)
+        return state
+    end
+
+    return R.assocPath({ 'tabs', action.tabId }, tabStateData, state)
+end
+
 M.reducer = function(stateParam, action)
-    local tabState, tabStateData, tabStateNeovim, layout
+    local tabIds, singleTabActionCreator
     local log = logging.create('reducer')
     local state = stateParam or initialState
     if reducerFunctions[action.type] then
         return reducerFunctions[action.type](state, action)
     end
 
-    if action.tabId then
-        tabState = state.tabs[action.tabId] or createTabState('mosaic')
-        layout = layoutMap[tabState.name]
-        tabStateData = layout.reducer(tabState, action)
-
-        if tabStateData == nil then
-            log.warn(
-                string.format("layout %s can't handle action ", tabState.name or 'mosaic'),
-                action
+    singleTabActionCreator = multiTabActionMap[action.type]
+    if singleTabActionCreator then
+        tabIds = R.keys(state.tabs)
+        log.trace(
+            string.format('mapping multi tab action %s to single tab action: ', action.type),
+            tabIds
+        )
+        return R.reduce(function(prevState, tabId)
+            log.trace('reducing tabId', tabId)
+            return reduceSingleTab(
+                prevState,
+                singleTabActionCreator(R.assoc('tabId', tabId, action))
             )
-            return state
-        end
+        end, state, tabIds)
+    end
 
-        return R.assocPath({ 'tabs', action.tabId }, tabStateData, state)
+    if action.tabId then
+        return reduceSingleTab(state, action)
     end
 
     return state

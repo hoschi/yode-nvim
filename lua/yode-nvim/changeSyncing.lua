@@ -385,6 +385,9 @@ M.unsubscribeFromBuffer = function(bufId)
     if sed then
         deactivateBuffer(log, bufId)
         seditors.actions.removeSeditor({ seditorBufferId = sed.seditorBufferId })
+        layout.actions.multiTabRemoveSeditor({
+            bufId = sed.seditorBufferId,
+        })
         return
     end
 
@@ -394,6 +397,9 @@ M.unsubscribeFromBuffer = function(bufId)
         R.forEach(function(connectedEditor)
             deactivateBuffer(log, connectedEditor.seditorBufferId)
             seditors.actions.removeSeditor({ seditorBufferId = connectedEditor.seditorBufferId })
+            layout.actions.multiTabRemoveSeditor({
+                bufId = connectedEditor.seditorBufferId,
+            })
             vim.cmd('bd! ' .. connectedEditor.seditorBufferId)
             log.debug(
                 string.format(
