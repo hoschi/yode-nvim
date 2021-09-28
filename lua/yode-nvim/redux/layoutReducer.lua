@@ -7,11 +7,6 @@ local h = require('yode-nvim.helper')
 local M = { actions = {}, selectors = {} }
 
 initialState = {
-    -- FIXME if we keep tabId then we must change storage when tabs are closed,
-    -- moved and so on! We could also just save "layoutId" or more abstract
-    -- "tabId" as tabvar in a tab to have an distict identifier. you get all
-    -- tabs with their vars via `vim.ft.gettabinfo()`. you can get/set via api
-    -- `nvim_tabpage_set_var` or the short hand thingies.
     tabs = {},
 }
 

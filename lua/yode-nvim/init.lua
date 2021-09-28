@@ -51,7 +51,7 @@ M.createSeditorFloating = function(firstline, lastline)
         lastline = lastline,
     })
     layout.actions.createFloatingWindow({
-        tabId = vim.api.nvim_tabpage_get_number(0),
+        tabId = vim.api.nvim_get_current_tabpage(),
         bufId = seditorBufferId,
         data = {},
     })
@@ -96,7 +96,7 @@ M.cloneCurrentIntoFloat = function()
     local config = vim.api.nvim_win_get_config(0)
 
     local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_tabpage_get_number(0),
+        vim.api.nvim_get_current_tabpage(),
         { bufId = bufId }
     )
     if floatWin then
@@ -111,7 +111,7 @@ M.cloneCurrentIntoFloat = function()
     end
     log.debug('cloning to float:', winId, bufId)
     layout.actions.createFloatingWindow({
-        tabId = vim.api.nvim_tabpage_get_number(0),
+        tabId = vim.api.nvim_get_current_tabpage(),
         bufId = bufId,
         data = {},
     })
@@ -122,14 +122,14 @@ M.onWindowClosed = function(winId)
     local log = logging.create('onWindowClosed')
     log.debug(winId)
     layout.actions.removeFloatingWindow({
-        tabId = vim.api.nvim_tabpage_get_number(0),
+        tabId = vim.api.nvim_get_current_tabpage(),
         winId = winId,
     })
 end
 
 M.onVimResized = function()
     layout.actions.onVimResized({
-        tabId = vim.api.nvim_tabpage_get_number(0),
+        tabId = vim.api.nvim_get_current_tabpage(),
     })
 end
 
@@ -137,7 +137,7 @@ M.onBufWinEnter = function()
     local log = logging.create('onBufWinEnter')
     local winId = vim.fn.win_getid()
     local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_tabpage_get_number(0),
+        vim.api.nvim_get_current_tabpage(),
         { winId = winId }
     )
     if floatWin == nil then
@@ -156,7 +156,7 @@ end
 M.layoutShiftWinDown = function()
     local winId = vim.fn.win_getid()
     local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_tabpage_get_number(0),
+        vim.api.nvim_get_current_tabpage(),
         { winId = winId }
     )
     if floatWin == nil then
@@ -165,7 +165,7 @@ M.layoutShiftWinDown = function()
     end
 
     layout.actions.shiftWinDown({
-        tabId = vim.api.nvim_tabpage_get_number(0),
+        tabId = vim.api.nvim_get_current_tabpage(),
         winId = vim.fn.win_getid(),
     })
 end
@@ -173,7 +173,7 @@ end
 M.layoutShiftWinUp = function()
     local winId = vim.fn.win_getid()
     local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_tabpage_get_number(0),
+        vim.api.nvim_get_current_tabpage(),
         { winId = winId }
     )
     if floatWin == nil then
@@ -182,7 +182,7 @@ M.layoutShiftWinUp = function()
     end
 
     layout.actions.shiftWinUp({
-        tabId = vim.api.nvim_tabpage_get_number(0),
+        tabId = vim.api.nvim_get_current_tabpage(),
         winId = vim.fn.win_getid(),
     })
 end
@@ -190,7 +190,7 @@ end
 M.layoutShiftWinBottom = function()
     local winId = vim.fn.win_getid()
     local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_tabpage_get_number(0),
+        vim.api.nvim_get_current_tabpage(),
         { winId = winId }
     )
     if floatWin == nil then
@@ -199,7 +199,7 @@ M.layoutShiftWinBottom = function()
     end
 
     layout.actions.shiftWinBottom({
-        tabId = vim.api.nvim_tabpage_get_number(0),
+        tabId = vim.api.nvim_get_current_tabpage(),
         winId = vim.fn.win_getid(),
     })
 end
@@ -207,7 +207,7 @@ end
 M.layoutShiftWinTop = function()
     local winId = vim.fn.win_getid()
     local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_tabpage_get_number(0),
+        vim.api.nvim_get_current_tabpage(),
         { winId = winId }
     )
     if floatWin == nil then
@@ -216,7 +216,7 @@ M.layoutShiftWinTop = function()
     end
 
     layout.actions.shiftWinTop({
-        tabId = vim.api.nvim_tabpage_get_number(0),
+        tabId = vim.api.nvim_get_current_tabpage(),
         winId = vim.fn.win_getid(),
     })
 end

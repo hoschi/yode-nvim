@@ -84,7 +84,7 @@ local onSeditorBufferLines = function(_event, bufId, _tick, firstline, lastline,
         -- as we don't need to handle it with the default layout!
         if operationType ~= h.BUF_LINES_OP_CHANGE then
             layout.actions.contentChanged({
-                tabId = vim.api.nvim_tabpage_get_number(0),
+                tabId = vim.api.nvim_get_current_tabpage(),
                 bufId = bufId,
             })
         end
@@ -167,7 +167,7 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                 end)
                 layoutActions = R.append(
                     sharedLayoutActions.actions.contentChanged({
-                        tabId = vim.api.nvim_tabpage_get_number(0),
+                        tabId = vim.api.nvim_get_current_tabpage(),
                         bufId = sed.seditorBufferId,
                     }),
                     layoutActions
@@ -222,7 +222,7 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                 end)
                 layoutActions = R.append(
                     sharedLayoutActions.actions.contentChanged({
-                        tabId = vim.api.nvim_tabpage_get_number(0),
+                        tabId = vim.api.nvim_get_current_tabpage(),
                         bufId = sed.seditorBufferId,
                     }),
                     layoutActions
@@ -253,7 +253,7 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                 log.debug('---- changeAdd lines and relayout', evData, lineData)
                 layoutActions = R.append(
                     sharedLayoutActions.actions.contentChanged({
-                        tabId = vim.api.nvim_tabpage_get_number(0),
+                        tabId = vim.api.nvim_get_current_tabpage(),
                         bufId = sed.seditorBufferId,
                     }),
                     layoutActions

@@ -21,8 +21,6 @@ augroup YodeNvim
     autocmd BufWritePost * lua require'yode-nvim.fileEditor'.writeFileEditor()
     autocmd BufWinEnter * lua require'yode-nvim'.onBufWinEnter()
 
-    autocmd TabNew * lua require'yode-nvim.tabId'.onTabNew()
-
     autocmd WinClosed * call luaeval("require'yode-nvim'.onWindowClosed(tonumber(_A))", expand('<afile>'))
 
     autocmd VimEnter * au! YodeNvimPreStartup
@@ -33,9 +31,8 @@ augroup END
 " TabNew not fired for first tab
 augroup YodeNvimPreStartup
     autocmd!
-    " needed to set tab ids during startup where `TabNew` gets not fired for
-    " first tab. See also `:h -c`
-    autocmd BufEnter * lua require'yode-nvim.tabId'.onBufEnter()
+    " TODO remove when not needed, but was not obvious how to handle this kind
+    " of things, so I leave it here for a while
 augroup END
 
 let s:save_cpo = &cpo

@@ -181,7 +181,7 @@ plugin.registerCommand(
             },
             R.pick(
                 { 'id', 'bufId' },
-                layout.selectors.getWindowBySomeId(vim.api.nvim_tabpage_get_number(0), {
+                layout.selectors.getWindowBySomeId(vim.api.nvim_get_current_tabpage(), {
                     bufId = seditor1,
                 })
             )
@@ -194,7 +194,7 @@ plugin.registerCommand(
             },
             R.pick(
                 { 'id', 'bufId' },
-                layout.selectors.getWindowBySomeId(vim.api.nvim_tabpage_get_number(0), {
+                layout.selectors.getWindowBySomeId(vim.api.nvim_get_current_tabpage(), {
                     winId = seditor1Win,
                 })
             )
@@ -416,6 +416,30 @@ plugin.registerCommand(
             R.pick({ 'y', 'height', 'id' }),
             store.getState().layout.tabs[1].windows
         ))
+    end)
+
+    it('should use tab handles, not tab numbers', function()
+        vim.cmd('tabnew')
+        vim.cmd('tabclose')
+        vim.cmd('tabnew')
+        vim.cmd('b ' .. seditor1)
+        vim.cmd('YodeCloneCurrentIntoFloat')
+
+        eq({
+            [fileBufferId] = './testData/basic.js',
+            [seditor1] = 'yode://./testData/basic.js:2.js',
+            [seditor2] = 'yode://./testData/basic.js:3.js',
+            [seditor3] = 'yode://./testData/basic.js:4.js',
+            [5] = '',
+            [6] = '',
+        }, tutil.getHumanBufferList())
+        -- with tab numbers it would be {1, 2}
+        eq({ 1, 3 }, R.keys(store.getState().layout.tabs))
+
+        -- cleanup
+        vim.cmd('tabclose')
+        vim.cmd('bd 5')
+        vim.cmd('bd 6')
     end)
 
     it('changing content height, changes layout', function()
