@@ -25,6 +25,7 @@ M.yodeNvim = function()
     -- FIXME comment out
     --vim.cmd('wincmd h')
     --vim.api.nvim_feedkeys('ggjjjj', 'x', false)
+    vim.cmd('tabnew')
 
     --testSetup.setup2()
 end
@@ -219,6 +220,10 @@ M.layoutShiftWinTop = function()
         winId = vim.fn.win_getid(),
     })
 end
+
+-----------------------
+-- debug stuff
+-----------------------
 
 M.yodeArgsLogger = function(...)
     local log = logging.create('yodeArgsLogger')

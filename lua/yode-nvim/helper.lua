@@ -103,4 +103,12 @@ M.prevIndex = function(idx, data)
     return idx - 1 >= 1 and idx - 1 or #data
 end
 
+M.getTabId = function(tabNum)
+    if tabNum == 0 then
+        return vim.t.tabId
+    else
+        return vim.api.nvim_tabpage_get_var(tabNum, 'tabId')
+    end
+end
+
 return M
