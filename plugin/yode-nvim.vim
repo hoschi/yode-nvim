@@ -21,6 +21,7 @@ augroup YodeNvim
     autocmd BufWritePost * lua require'yode-nvim.fileEditor'.writeFileEditor()
     autocmd BufWinEnter * lua require'yode-nvim'.onBufWinEnter()
 
+    autocmd TabEnter * lua require'yode-nvim'.onTabEnter()
     autocmd TabLeave * lua require'yode-nvim'.onTabLeave()
     autocmd TabClosed * lua require'yode-nvim'.onTabClosed()
 

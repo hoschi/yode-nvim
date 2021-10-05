@@ -50,6 +50,10 @@ local findWindowIndexBySomeId = function(state, a)
     )
 end
 
+local setDirty = function(state)
+    return R.assoc('isDirty', state.id ~= vim.api.nvim_get_current_tabpage(), state)
+end
+
 --local normalBorderStyle = { '1', '2', '3', '4', '5', '6', '7', '8' }
 local normalBorderStyle = { ' ', ' ', ' ', ' ', '', '', '', ' ' }
 -- WARNING you can't remove the right side only for last border style, this
@@ -144,17 +148,19 @@ local reducerFunctions = {
         local closedWin = state.windows[closedWinIndex]
         local shiftBy = 1 + closedWin.height
         log.trace('removing window from state:', a.winId, closedWin.id, shiftBy)
-        return h.over(
-            windowsLens,
-            R.pipe(
-                R.without({ closedWin }),
-                R.splitAt(closedWinIndex),
-                h.over(h.lensIndex(2), h.map(h.over(yLens, R.subtract(R.__, shiftBy)))),
-                R.flatten(),
-                setBorderStyle
+        return R.pipe(
+            h.over(
+                windowsLens,
+                R.pipe(
+                    R.without({ closedWin }),
+                    R.splitAt(closedWinIndex),
+                    h.over(h.lensIndex(2), h.map(h.over(yLens, R.subtract(R.__, shiftBy)))),
+                    R.flatten(),
+                    setBorderStyle
+                )
             ),
-            state
-        )
+            setDirty
+        )(state)
     end,
     [sharedActions.actionNames.SHIFT_WIN_DOWN] = function(state, a)
         local log = logging.create('shiftWinDown')
@@ -232,6 +238,11 @@ local reducerFunctions = {
     [sharedActions.actionNames.CONTENT_CHANGED] = function(state, a)
         local log = logging.create('contentChanged')
         local changedWinIndex = findWindowIndexBySomeId(state, a)
+        if changedWinIndex < 0 then
+            log.trace('no managed window', a)
+            return state
+        end
+
         local changedWin = state.windows[changedWinIndex]
         local bufId = vim.api.nvim_win_get_buf(changedWin.id)
         local shiftBy = #vim.api.nvim_buf_get_lines(bufId, 0, -1, true) - changedWin.height
@@ -241,20 +252,22 @@ local reducerFunctions = {
         end
 
         log.trace('relayouting after content change in window:', a.winId, changedWin.id, shiftBy)
-        return h.over(
-            windowsLens,
-            R.pipe(
-                R.adjust(R.assoc('height', changedWin.height + shiftBy), changedWinIndex),
-                R.splitAt(changedWinIndex + 1),
-                h.over(h.lensIndex(2), h.map(h.over(yLens, R.add(shiftBy)))),
-                R.flatten(),
-                setBorderStyle
+        return R.pipe(
+            h.over(
+                windowsLens,
+                R.pipe(
+                    R.adjust(R.assoc('height', changedWin.height + shiftBy), changedWinIndex),
+                    R.splitAt(changedWinIndex + 1),
+                    h.over(h.lensIndex(2), h.map(h.over(yLens, R.add(shiftBy)))),
+                    R.flatten(),
+                    setBorderStyle
+                )
             ),
-            state
-        )
+            setDirty
+        )(state)
     end,
     [sharedActions.actionNames.ON_VIM_RESIZED] = function(state)
-        return state
+        return setDirty(state)
     end,
 }
 M.reducer = createReducer(nil, reducerFunctions)
@@ -262,6 +275,7 @@ M.reducer = createReducer(nil, reducerFunctions)
 M.stateToNeovim = function(state)
     local log = logging.create('stateToNeovim')
     local x, width = getSeditorWidth()
+    local currentWinId = vim.fn.win_getid()
 
     local windowsUpdated = h.map(function(window)
         local winConfig = R.merge({
@@ -284,6 +298,13 @@ M.stateToNeovim = function(state)
             else
                 log.debug('updating window', window.id)
                 vim.api.nvim_win_set_config(window.id, winConfig)
+                if window.id == currentWinId then
+                    -- NOTICE this is needed when a dirty tab gets visible, the
+                    -- cursor is in a floating window and the height grows. As
+                    -- the window is always as big as the content scrolling to
+                    -- the bottom sets the very top at the first line again.
+                    vim.api.nvim_feedkeys('zb', 'x', false)
+                end
                 return window
             end
         else
@@ -298,7 +319,7 @@ M.stateToNeovim = function(state)
         end
     end, state.windows)
 
-    return R.assoc('windows', windowsUpdated, state)
+    return R.pipe(R.assoc('windows', windowsUpdated), R.assoc('isDirty', false))(state)
 end
 
 return M

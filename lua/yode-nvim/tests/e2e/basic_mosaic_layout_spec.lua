@@ -38,9 +38,11 @@ const getSeditorWidth = async (nvim) => {
             [seditor1] = 'yode://./testData/basic.js:2.js',
         }, tutil.getHumanBufferList())
         eq({
+            id = 1,
             config = {},
             data = {},
             name = 'mosaic',
+            isDirty = false,
         }, R.omit(
             { 'windows' },
             store.getState().layout.tabs[1]
@@ -466,6 +468,7 @@ plugin.registerCommand(
         }, tutil.getHumanBufferList())
         eq(seditor1, vim.fn.bufnr('%'))
         eq({ 1, 4 }, R.keys(store.getState().layout.tabs))
+        eq({ [1] = false, [4] = false }, R.pluck('isDirty', store.getState().layout.tabs))
         eq(
             { seditor3, seditor2, seditor1 },
             R.pluck('bufId', store.getState().layout.tabs[1].windows)
@@ -475,8 +478,13 @@ plugin.registerCommand(
         vim.cmd('bd')
         eq(fileBufferId, vim.fn.bufnr('%'))
         eq({ 1, 4 }, R.keys(store.getState().layout.tabs))
+        eq({ [1] = true, [4] = false }, R.pluck('isDirty', store.getState().layout.tabs))
         eq({ seditor3, seditor2 }, R.pluck('bufId', store.getState().layout.tabs[1].windows))
         eq({ seditor2 }, R.pluck('bufId', store.getState().layout.tabs[4].windows))
+
+        vim.cmd('tabnext')
+        eq({ [1] = false, [4] = false }, R.pluck('isDirty', store.getState().layout.tabs))
+        vim.cmd('tabnext')
 
         vim.cmd('wincmd w')
         eq(seditor2, vim.fn.bufnr('%'))

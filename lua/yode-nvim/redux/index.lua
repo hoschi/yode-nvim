@@ -49,14 +49,16 @@ M.layout = {
         -- ... probably remove?
         createFloatingWindow = sharedActions.actions.createFloatingWindow,
         removeFloatingWindow = sharedActions.actions.removeFloatingWindow,
-        contentChanged = sharedActions.actions.contentChanged,
-        onVimResized = sharedActions.actions.onVimResized,
-        onTabClosed = sharedActions.actions.onTabClosed,
         shiftWinDown = sharedActions.actions.shiftWinDown,
         shiftWinUp = sharedActions.actions.shiftWinUp,
         shiftWinBottom = sharedActions.actions.shiftWinBottom,
         shiftWinTop = sharedActions.actions.shiftWinTop,
-        multiTabRemoveSeditor = sharedActions.actions.multiTabRemoveSeditor,
+
+        syncTabLayoutToNeovim = layoutReducer.actions.syncTabLayoutToNeovim,
+        onTabClosed = layoutReducer.actions.onTabClosed,
+        multiTabRemoveSeditor = layoutReducer.actions.multiTabRemoveSeditor,
+        multiTabOnVimResized = layoutReducer.actions.multiTabOnVimResized,
+        multiTabContentChanged = layoutReducer.actions.multiTabContentChanged,
     }),
 }
 

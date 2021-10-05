@@ -5,21 +5,70 @@ local layoutMap = require('yode-nvim.layout.layoutMap')
 local h = require('yode-nvim.helper')
 local sharedActions = require('yode-nvim.layout.sharedActions')
 
-local M = { actions = {}, selectors = {} }
+local M = { actions = {}, actionNames = {}, selectors = {} }
 
 initialState = {
     tabs = {},
 }
 
+M.actionNames.SYNC_TAB_LAYOUT_TO_NEOVIM = 'SYNC_TAB_LAYOUT_TO_NEOVIM'
+M.actions.syncTabLayoutToNeovim = function()
+    return {
+        type = M.actionNames.SYNC_TAB_LAYOUT_TO_NEOVIM,
+        syncToNeovim = true,
+        tabId = vim.api.nvim_get_current_tabpage(),
+    }
+end
+
+local ON_TAB_CLOSED = 'ON_TAB_CLOSED'
+M.actions.onTabClosed = R.pipe(
+    R.merge({ syncToNeovim = false }),
+    R.pick({ 'syncToNeovim', 'tabId' }),
+    R.assoc('type', ON_TAB_CLOSED)
+)
+
+local MULTI_TAB_REMOVE_SEDITOR = 'MULTI_TAB_REMOVE_SEDITOR'
+M.actions.multiTabRemoveSeditor = R.pipe(
+    -- NOTICE floating windows in current tab get removed, because window close
+    -- triggers removal as well. This way we don't need a `tabId` and
+    -- `syncToNeovim=true` for the multi action.
+    R.merge({ syncToNeovim = false }),
+    R.pick({ 'syncToNeovim', 'winId', 'bufId' }),
+    R.assoc('type', MULTI_TAB_REMOVE_SEDITOR)
+)
+
+local MULTI_TAB_ON_VIM_RESIZED = 'MULTI_TAB_ON_VIM_RESIZED'
+M.actions.multiTabOnVimResized = R.pipe(
+    R.merge({ syncToNeovim = true }),
+    R.pick({ 'syncToNeovim', 'tabId' }),
+    R.assoc('type', MULTI_TAB_ON_VIM_RESIZED)
+)
+
+local MULTI_TAB_CONTENT_CHANGED = 'MULTI_TAB_CONTENT_CHANGED'
+M.actions.multiTabContentChanged = R.pipe(
+    R.merge({ syncToNeovim = true }),
+    R.pick({ 'syncToNeovim', 'tabId', 'winId', 'bufId' }),
+    R.assoc('type', MULTI_TAB_CONTENT_CHANGED)
+)
+
 local multiTabActionMap = {
-    [sharedActions.actionNames.MULTI_TAB_REMOVE_SEDITOR] = R.pipe(
+    [MULTI_TAB_REMOVE_SEDITOR] = R.pipe(
         R.omit({ 'type', 'syncToNeovim' }),
         sharedActions.actions.removeFloatingWindow
     ),
+    [MULTI_TAB_ON_VIM_RESIZED] = R.pipe(
+        R.omit({ 'type', 'syncToNeovim' }),
+        sharedActions.actions.onVimResized
+    ),
+    [MULTI_TAB_CONTENT_CHANGED] = R.pipe(
+        R.omit({ 'type', 'syncToNeovim' }),
+        sharedActions.actions.contentChanged
+    ),
 }
 
-local createTabState = function(name)
+local createTabState = function(id, name)
     return {
+        id = id,
         name = name,
         -- FIXME: track here for example "align=right|left, columnWidthMin=30,
         -- columnWidthMax=50%" for Mosaic
@@ -27,6 +76,7 @@ local createTabState = function(name)
         -- FIXME place for layout reducer to store data not tied to window, probably not needed?!
         data = {},
         windows = {},
+        isDirty = false,
     }
 end
 
@@ -47,14 +97,14 @@ local reducerFunctions = {
     me = function(state, a)
         return R.assocPath({ 'tabs', a.tabId }, a.data, state)
     end,
-    [sharedActions.actionNames.ON_TAB_CLOSED] = function(state, a)
+    [ON_TAB_CLOSED] = function(state, a)
         return R.dissocPath({ 'tabs', a.tabId }, state)
     end,
 }
 
 local reduceSingleTab = function(state, action)
     local log = logging.create('reduceSingleTab')
-    local tabState = state.tabs[action.tabId] or createTabState('mosaic')
+    local tabState = state.tabs[action.tabId] or createTabState(action.tabId, 'mosaic')
     local layout = layoutMap[tabState.name]
     local tabStateData = layout.reducer(tabState, action)
 
@@ -70,6 +120,11 @@ M.reducer = function(stateParam, action)
     local tabIds, singleTabActionCreator
     local log = logging.create('reducer')
     local state = stateParam or initialState
+
+    if action.type == M.actionNames.SYNC_TAB_LAYOUT_TO_NEOVIM then
+        return state
+    end
+
     if reducerFunctions[action.type] then
         return reducerFunctions[action.type](state, action)
     end

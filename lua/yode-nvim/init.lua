@@ -131,13 +131,17 @@ M.onWindowClosed = function(winId)
 end
 
 M.onVimResized = function()
-    layout.actions.onVimResized({
+    layout.actions.multiTabOnVimResized({
         tabId = vim.api.nvim_get_current_tabpage(),
     })
 end
 
 M.onTabLeave = function()
     lastTabId = vim.api.nvim_get_current_tabpage()
+end
+
+M.onTabEnter = function()
+    layout.actions.syncTabLayoutToNeovim()
 end
 
 M.onTabClosed = function()

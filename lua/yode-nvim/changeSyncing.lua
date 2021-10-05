@@ -83,7 +83,7 @@ local onSeditorBufferLines = function(_event, bufId, _tick, firstline, lastline,
         -- NOTICE this event is ignored at the moment for performance reasons
         -- as we don't need to handle it with the default layout!
         if operationType ~= h.BUF_LINES_OP_CHANGE then
-            layout.actions.contentChanged({
+            layout.actions.multiTabContentChanged({
                 tabId = vim.api.nvim_get_current_tabpage(),
                 bufId = bufId,
             })
