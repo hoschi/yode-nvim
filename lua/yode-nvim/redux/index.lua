@@ -44,9 +44,6 @@ M.seditors = {
 M.layout = {
     selectors = globalizeSelectors(STATE_PATH_LAYOUT, layoutReducer.selectors),
     actions = wrapWithDispatch({
-        -- FIXME add layout actions somhow here as well. Should we insert
-        -- "tabId" automatically?! When it is only copied from "sharedActions"
-        -- ... probably remove?
         createFloatingWindow = sharedActions.actions.createFloatingWindow,
         removeFloatingWindow = sharedActions.actions.removeFloatingWindow,
         shiftWinDown = sharedActions.actions.shiftWinDown,
@@ -56,6 +53,7 @@ M.layout = {
 
         syncTabLayoutToNeovim = layoutReducer.actions.syncTabLayoutToNeovim,
         onTabClosed = layoutReducer.actions.onTabClosed,
+        updateTabState = layoutReducer.actions.updateTabState,
         multiTabRemoveSeditor = layoutReducer.actions.multiTabRemoveSeditor,
         multiTabOnVimResized = layoutReducer.actions.multiTabOnVimResized,
         multiTabContentChanged = layoutReducer.actions.multiTabContentChanged,

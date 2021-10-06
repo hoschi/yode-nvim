@@ -38,10 +38,10 @@ local layoutStateToNeovim = function(store)
                 end
 
                 log.trace('did it! updating state now.')
-                -- FIXME replace 'me'
-                -- FIXME test if we can skip this when tabStateNeovim ==
-                -- tabState and if it is ever true
-                return nextDispatch({ type = 'me', data = tabStateNeovim, tabId = action.tabId })
+                return nextDispatch(layoutReducer.actions.updateTabState({
+                    data = tabStateNeovim,
+                    tabId = action.tabId,
+                }))
             end
 
             log.trace('not for me')

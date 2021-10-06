@@ -27,7 +27,6 @@ M.yodeNvim = function()
     --testSetup.setup2()
     testSetup.setup3()
 
-    -- FIXME comment out
     --vim.cmd('wincmd h')
     --vim.api.nvim_feedkeys('ggjjjj', 'x', false)
     --vim.cmd('tabnew')

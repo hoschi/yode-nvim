@@ -27,6 +27,13 @@ M.actions.onTabClosed = R.pipe(
     R.assoc('type', ON_TAB_CLOSED)
 )
 
+local UPDATE_TAB_STATE = 'UPDATE_TAB_STATE'
+M.actions.updateTabState = R.pipe(
+    R.merge({ syncToNeovim = false }),
+    R.pick({ 'syncToNeovim', 'tabId', 'data' }),
+    R.assoc('type', UPDATE_TAB_STATE)
+)
+
 local MULTI_TAB_REMOVE_SEDITOR = 'MULTI_TAB_REMOVE_SEDITOR'
 M.actions.multiTabRemoveSeditor = R.pipe(
     -- NOTICE floating windows in current tab get removed, because window close
@@ -70,10 +77,10 @@ local createTabState = function(id, name)
     return {
         id = id,
         name = name,
-        -- FIXME: track here for example "align=right|left, columnWidthMin=30,
+        -- TODO: track here for example "align=right|left, columnWidthMin=30,
         -- columnWidthMax=50%" for Mosaic
         config = {},
-        -- FIXME place for layout reducer to store data not tied to window, probably not needed?!
+        -- TODO place for layout reducer to store data not tied to window, probably not needed?!
         data = {},
         windows = {},
         isDirty = false,
@@ -93,8 +100,7 @@ end, {}, {
 })
 
 local reducerFunctions = {
-    -- FIXME do better
-    me = function(state, a)
+    [UPDATE_TAB_STATE] = function(state, a)
         return R.assocPath({ 'tabs', a.tabId }, a.data, state)
     end,
     [ON_TAB_CLOSED] = function(state, a)
