@@ -6,7 +6,7 @@ local eq = assert.are.same
 
 describe('create seditor', function()
     it('floating', function()
-        eq({ seditors = {} }, store.getState())
+        eq({ seditors = {}, layout = { tabs = {} } }, store.getState())
 
         vim.cmd('e ./testData/basic.js')
         local fileBufferId = 1
@@ -31,19 +31,18 @@ plugin.registerCommand(
             [seditorBufferId] = 'yode://./testData/basic.js:2.js',
         }, tutil.getHumanBufferList())
         eq({
-            seditors = {
-                [seditorBufferId] = {
-                    seditorBufferId = seditorBufferId,
-                    fileBufferId = fileBufferId,
-                    visible = true,
-                    startLine = 48,
-                    indentCount = 4,
-                },
+            [seditorBufferId] = {
+                seditorBufferId = seditorBufferId,
+                fileBufferId = fileBufferId,
+                startLine = 48,
+                indentCount = 4,
             },
-        }, store.getState())
+        }, store.getState().seditors)
+        eq(1, #store.getState().layout.tabs[1].windows)
+        tutil.assertAccessorMap(vim.wo, { wrap = false })
 
         vim.cmd('wincmd h')
-        eq(vim.fn.bufnr('%'), fileBufferId)
+        eq(fileBufferId, vim.fn.bufnr('%'))
     end)
 
     it('replace', function()
@@ -71,22 +70,20 @@ const getSeditorWidth = async (nvim) => {
             [seditorBufferId] = 'yode://./testData/basic.js:3.js',
         }, tutil.getHumanBufferList())
         eq({
-            seditors = {
-                [2] = {
-                    seditorBufferId = 2,
-                    fileBufferId = fileBufferId,
-                    visible = true,
-                    startLine = 48,
-                    indentCount = 4,
-                },
-                [seditorBufferId] = {
-                    seditorBufferId = seditorBufferId,
-                    fileBufferId = fileBufferId,
-                    visible = true,
-                    startLine = 2,
-                    indentCount = 0,
-                },
+            [2] = {
+                seditorBufferId = 2,
+                fileBufferId = fileBufferId,
+                startLine = 48,
+                indentCount = 4,
             },
-        }, store.getState())
+            [seditorBufferId] = {
+                seditorBufferId = seditorBufferId,
+                fileBufferId = fileBufferId,
+                startLine = 2,
+                indentCount = 0,
+            },
+        }, store.getState().seditors)
+        eq(1, #store.getState().layout.tabs[1].windows)
+        tutil.assertAccessorMap(vim.wo, { wrap = true })
     end)
 end)

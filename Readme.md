@@ -4,7 +4,8 @@ Yode plugin for Neovim.
 
 ## interim help
 
-**TODO** move this to Vim help syntax `./doc/yode-nvim.txt`
+**TODO** move this to Vim help syntax `./doc/yode-nvim.txt`.
+[kdheepak/panvimdoc: Write documentation in pandoc markdown. Generate documentation in vimdoc.](https://github.com/kdheepak/panvimdoc)
 
 * install
     * clone with submodules: `git clone --recurse-submodules git@github.com:hoschi/yode-nvim.git`
@@ -14,6 +15,19 @@ Yode plugin for Neovim.
       more info.
     * TODO link here how to echo this dir
     * e.g. `~/myuser/.cache/nvim/yode-nvim.log`
+* example setup:
+
+```viml
+lua require('yode-nvim').setup({})
+map <Leader>yr      :YodeCreateSeditorReplace<CR>
+" this commands fall back to overwritten keys when cursor is in split window
+map <C-W>r :YodeLayoutShiftWinDown<CR>
+map <C-W>R :YodeLayoutShiftWinUp<CR>
+map <C-W>J :YodeLayoutShiftWinBottom<CR>
+map <C-W>K :YodeLayoutShiftWinTop<CR>
+" at the moment this is needed to have no gap for floating windows
+set showtabline=2
+```
 
 ## Development
 
@@ -42,6 +56,7 @@ Yode plugin for Neovim.
     * start a REPL with `lua`
     * require installed luarocks packages, e.g. `inspect = require('inspect')`
     * require local deps by copy/paste from source, e.g. `R = require('yode-nvim.deps.lamda.dist.lamda')`
+    * require source code, e.g. `h = require('yode-nvim.helper')`
     * play with the code which works, everything using `vim.XYZ` will fail
 * test JS development
     * `npm ci` to install dependencies
@@ -53,3 +68,5 @@ Yode plugin for Neovim.
     * run all tests: `make test`
     * run single test: `nvim --headless -c "PlenaryBustedDirectory lua/yode-nvim/tests/e2e/seditor_to_file_editor_sync_spec.lua {minimal_init = 'lua/yode-nvim/tests/minimal.vim'}"`
     * [more infos, see Plenary docs here](https://github.com/nvim-lua/plenary.nvim#plenarytest_harness)
+    * run all tests on file changes `nodemon -e lua,vim --exec 'make test'`
+    * run single test on file changes `nodemon -e lua,vim --exec "nvim --headless -c \"PlenaryBustedDirectory lua/yode-nvim/tests/e2e/basic_mosaic_layout_spec.lua {minimal_init = 'lua/yode-nvim/tests/minimal.vim'}\" "`

@@ -48,3 +48,8 @@ map <Leader>yr      :YodeCreateSeditorReplace<CR>
 map <Leader>yt      :YodeNvim<CR>
 map <Leader>yf      :call YFormat()<CR>
 imap <Leader>yf     <Esc>:call YFormat()<CR>
+
+map <C-W>r :YodeLayoutShiftWinDown<CR>
+map <C-W>R :YodeLayoutShiftWinUp<CR>
+map <C-W>J :YodeLayoutShiftWinBottom<CR>
+map <C-W>K :YodeLayoutShiftWinTop<CR>

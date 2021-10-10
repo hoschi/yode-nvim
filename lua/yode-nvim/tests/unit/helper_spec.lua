@@ -17,6 +17,40 @@ describe('helper', function()
         eq({ 101, 102 }, R.map(R.add(100), { foo = 1, bar = 2 }))
     end)
 
+    it('mapWithIndex', function()
+        eq(
+            { '5:1:567', '6:2:567', '7:3:567' },
+            h.mapWithIndex(function(data, i, all)
+                return data .. ':' .. i .. ':' .. R.join('', all)
+            end, {
+                5,
+                6,
+                7,
+            })
+        )
+
+        eq(
+            { foo = '10:foo:1020', bar = '20:bar:1020' },
+            h.mapWithIndex(function(data, i, all)
+                return data .. ':' .. i .. ':' .. R.join('', all)
+            end, {
+                foo = 10,
+                bar = 20,
+            })
+        )
+
+        -- this only works when props have values
+        eq(
+            { bar = '20:bar:20' },
+            h.mapWithIndex(function(data, i, all)
+                return data .. ':' .. i .. ':' .. R.join('', all)
+            end, {
+                foo = nil,
+                bar = 20,
+            })
+        )
+    end)
+
     it('lenses', function()
         local list = { 10, 20, 30, 40 }
         local tbl = { foo = 'my foo', bar = 'other foo', baz = 'even more foo!', l = list }
@@ -106,5 +140,32 @@ describe('helper', function()
         eq(2, h.getIndentCount({ '  foo', '    bar' }))
         eq(2, h.getIndentCount({ '    foo', '  bar' }))
         eq(4, h.getIndentCount({ '    foo', '    bar' }))
+    end)
+
+    it('next/prevIndex', function()
+        local data = { 100, 200, 300 }
+
+        eq(1, h.nextIndex(1, { 666 }))
+        eq(1, h.prevIndex(1, { 666 }))
+
+        eq(nil, h.nextIndex(1, {}))
+        eq(nil, h.prevIndex(1, {}))
+
+        eq(nil, h.nextIndex(5, {}))
+        eq(nil, h.prevIndex(5, {}))
+
+        eq(nil, h.nextIndex(1, nil))
+        eq(nil, h.prevIndex(1, nil))
+
+        eq(nil, h.nextIndex(6, nil))
+        eq(nil, h.prevIndex(6, nil))
+
+        eq(2, h.nextIndex(1, data))
+        eq(3, h.nextIndex(2, data))
+        eq(1, h.nextIndex(3, data))
+
+        eq(3, h.prevIndex(1, data))
+        eq(1, h.prevIndex(2, data))
+        eq(2, h.prevIndex(3, data))
     end)
 end)

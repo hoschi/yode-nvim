@@ -9,6 +9,28 @@ M.map = R.curry2(function(fn, data)
     return R.zipObj(R.keys(data), R.map(fn, data))
 end)
 
+local mapWithArrayIndex = function(fn, data)
+    return R.reduce(function(acc, cur)
+        return R.append(fn(cur, #acc + 1, data), acc)
+    end, {}, data)
+end
+
+local mapWithObjectKey = function(fn, data)
+    return R.reduce(function(acc, key)
+        return R.assoc(key, fn(data[key], key, data), acc)
+    end, {}, R.keys(
+        data
+    ))
+end
+
+M.mapWithIndex = R.curry2(function(fn, data)
+    if vim.tbl_islist(data) then
+        return mapWithArrayIndex(fn, data)
+    end
+
+    return mapWithObjectKey(fn, data)
+end)
+
 M.maxPositiveNumber = math.pow(2, 1024)
 --M.maxNegative = M.maxPositiveNumber * -1
 
@@ -57,6 +79,28 @@ end
 M.getBuffers = function(showHidden)
     local bufIds = vim.api.nvim_list_bufs()
     return showHidden and bufIds or R.filter(vim.api.nvim_buf_is_loaded, bufIds)
+end
+
+M.showBufferInFloatingWindow = function(bufId, winConfig)
+    local id = vim.api.nvim_open_win(bufId, true, winConfig)
+    vim.wo.wrap = false
+    return id
+end
+
+M.nextIndex = function(idx, data)
+    if data == nil or #data <= 0 then
+        return nil
+    end
+
+    return idx + 1 <= #data and idx + 1 or 1
+end
+
+M.prevIndex = function(idx, data)
+    if data == nil or #data <= 0 then
+        return nil
+    end
+
+    return idx - 1 >= 1 and idx - 1 or #data
 end
 
 return M
