@@ -84,6 +84,7 @@ M.goToAlternateBuffer = function()
 
     if sed == nil then
         log.debug('no seditor found for ' .. bufId)
+        return
     end
 
     -- TODO only do this when not in floating window. When in float, open file

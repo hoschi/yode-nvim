@@ -9,6 +9,9 @@ describe('go to alternate buffer -', function()
 
     it('from seditor in full view to file buffer', function()
         vim.cmd('e ./testData/basic.js')
+
+        vim.cmd('YodeGoToAlternateBuffer')
+        -- does nothing on file buffer
         eq(fileBufferId, vim.fn.bufnr('%'))
 
         vim.cmd('3,9YodeCreateSeditorReplace')
