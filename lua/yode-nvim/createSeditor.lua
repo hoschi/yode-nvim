@@ -50,8 +50,8 @@ local createSeditor = function(opts)
     vim.api.nvim_buf_call(seditorBufferId, function()
         vim.cmd('file ' .. name)
         vim.cmd([[
-            nmap <buffer> <leader>bl :YodeGoToAlternateBuffer<cr>
-            imap <buffer> <leader>bl <esc>:YodeGoToAlternateBuffer<cr>
+            nmap <buffer> <leader>bll :YodeGoToAlternateBuffer<cr>
+            imap <buffer> <leader>bll <esc>:YodeGoToAlternateBuffer<cr>
         ]])
     end)
     return seditorBufferId

@@ -18,6 +18,10 @@ Yode plugin for Neovim.
 * example setup:
 
 ```viml
+" toggle between last buffer, matches buffer mappings of seditors
+nmap <Leader>bll <C-^>
+imap <Leader>bll <esc><C-^>
+
 lua require('yode-nvim').setup({})
 map <Leader>yr      :YodeCreateSeditorReplace<CR>
 " this commands fall back to overwritten keys when cursor is in split window
