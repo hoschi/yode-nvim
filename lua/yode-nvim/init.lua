@@ -25,11 +25,15 @@ M.yodeNvim = function()
     local log = logging.create('yodeNvim')
     --testSetup.setup1()
     --testSetup.setup2()
-    testSetup.setup3()
+    --testSetup.setup3()
 
     --vim.cmd('wincmd h')
     --vim.api.nvim_feedkeys('ggjjjj', 'x', false)
     --vim.cmd('tabnew')
+    vim.cmd('e ./testData/basic.js')
+    vim.api.nvim_feedkeys('G', 'x', false)
+    vim.cmd('49,58YodeCreateSeditorReplace')
+    vim.api.nvim_feedkeys('jj^', 'x', false)
 end
 
 M.yodeTesting = function()
@@ -77,8 +81,10 @@ M.createSeditorReplace = function(firstline, lastline)
     vim.cmd('b ' .. seditorBufferId)
 end
 
-M.goToAlternateBuffer = function()
+M.goToAlternateBuffer = function(viewportFocusIndicator)
+    local cursor, setCursor
     local log = logging.create('goToAlternateBuffer')
+    log.debug('viewportFocusIndicator', viewportFocusIndicator)
     local bufId = vim.fn.bufnr('%')
     local sed = seditors.selectors.getSeditorById(bufId)
 
@@ -87,9 +93,29 @@ M.goToAlternateBuffer = function()
         return
     end
 
+    cursor = vim.api.nvim_win_get_cursor(0)
+    setCursor = function()
+        vim.api.nvim_win_set_cursor(0, { cursor[1] + sed.startLine, cursor[2] + sed.indentCount })
+    end
     -- TODO only do this when not in floating window. When in float, open file
     -- buffer in main area?!
     vim.cmd('b ' .. sed.fileBufferId)
+
+    if viewportFocusIndicator == 'z' then
+        setCursor()
+        vim.api.nvim_feedkeys('zz', 'x', false)
+    elseif viewportFocusIndicator == 't' then
+        vim.api.nvim_win_set_cursor(0, { sed.startLine + 1, 0 })
+        vim.api.nvim_feedkeys('zt', 'x', false)
+        setCursor()
+    elseif viewportFocusIndicator == 'b' then
+        vim.api.nvim_win_set_cursor(
+            0,
+            { sed.startLine + #vim.api.nvim_buf_get_lines(bufId, 0, -1, true), 0 }
+        )
+        vim.api.nvim_feedkeys('zb', 'x', false)
+        setCursor()
+    end
 end
 
 M.cloneCurrentIntoFloat = function()

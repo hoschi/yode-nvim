@@ -24,7 +24,7 @@ imap <Leader>bll <esc><C-^>
 
 lua require('yode-nvim').setup({})
 map <Leader>yr      :YodeCreateSeditorReplace<CR>
-" this commands fall back to overwritten keys when cursor is in split window
+" these commands fall back to overwritten keys when cursor is in split window
 map <C-W>r :YodeLayoutShiftWinDown<CR>
 map <C-W>R :YodeLayoutShiftWinUp<CR>
 map <C-W>J :YodeLayoutShiftWinBottom<CR>
