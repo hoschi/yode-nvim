@@ -49,6 +49,9 @@ map <Leader>yt      :YodeNvim<CR>
 map <Leader>yf      :call YFormat()<CR>
 imap <Leader>yf     <Esc>:call YFormat()<CR>
 
+nmap <Leader>bd :YodeBufferDelete<cr>
+imap <Leader>bd <esc>:YodeBufferDelete<cr>
+
 map <C-W>r :YodeLayoutShiftWinDown<CR>
 map <C-W>R :YodeLayoutShiftWinUp<CR>
 map <C-W>J :YodeLayoutShiftWinBottom<CR>

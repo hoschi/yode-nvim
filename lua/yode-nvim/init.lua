@@ -147,6 +147,33 @@ M.cloneCurrentIntoFloat = function()
     vim.fn.win_gotoid(winId)
 end
 
+M.bufferDelete = function()
+    local sed
+    local log = logging.create('bufferDelete')
+    local winId = vim.fn.win_getid()
+    local bufId = vim.fn.bufnr('%')
+    local floatWin = layout.selectors.getWindowBySomeId(
+        vim.api.nvim_get_current_tabpage(),
+        { winId = winId }
+    )
+
+    if floatWin then
+        log.debug('deleting floating window', bufId, winId)
+        vim.cmd('bd')
+        return
+    end
+
+    sed = seditors.selectors.getSeditorById(bufId)
+    if sed then
+        log.debug('deleting seditor buffer and show file buffer', bufId, winId, sed.fileBufferId)
+        vim.cmd('YodeGoToAlternateBuffer t')
+        vim.cmd('bd ' .. bufId)
+        return
+    end
+
+    vim.cmd('bd')
+end
+
 M.onWindowClosed = function(winId)
     local log = logging.create('onWindowClosed')
     log.debug(winId)
