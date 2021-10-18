@@ -23,6 +23,7 @@ nmap <Leader>bll <C-^>
 imap <Leader>bll <esc><C-^>
 
 lua require('yode-nvim').setup({})
+map <Leader>yc :YodeCreateSeditorFloating<CR>
 map <Leader>yr :YodeCreateSeditorReplace<CR>
 nmap <Leader>bd :YodeBufferDelete<cr>
 imap <Leader>bd <esc>:YodeBufferDelete<cr>
