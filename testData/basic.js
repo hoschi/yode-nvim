@@ -58,7 +58,7 @@ module.exports = (plugin) => {
     )
 
     const doSomeRecurseStuff = () => {
-        function namedFunction (arg0, arg1, arg2) {
+        function namedFunction(arg0, arg1, arg2) {
             const foo = arg2 + 'foo'
             if (arg0 > 100) {
                 return 'done with: ' + arg0

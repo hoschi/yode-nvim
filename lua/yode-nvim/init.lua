@@ -24,15 +24,12 @@ end
 M.yodeNvim = function()
     local log = logging.create('yodeNvim')
     --testSetup.setup1()
-    --testSetup.setup2()
+    testSetup.setup2()
     --testSetup.setup3()
 
     --vim.cmd('wincmd h')
     --vim.cmd('tabnew')
-    vim.cmd('e ./testData/basic.js')
-    vim.cmd('normal G')
-    vim.cmd('49,58YodeCreateSeditorReplace')
-    vim.cmd('normal jj^')
+    --vim.cmd('normal G')
 end
 
 M.yodeTesting = function()
