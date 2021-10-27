@@ -303,7 +303,9 @@ M.stateToNeovim = function(state)
                     -- cursor is in a floating window and the height grows. As
                     -- the window is always as big as the content scrolling to
                     -- the bottom sets the very top at the first line again.
-                    vim.api.nvim_feedkeys('zb', 'x', false)
+
+                    -- FIXME this makes the bug!
+                    vim.cmd('normal zb')
                 end
                 return window
             end
