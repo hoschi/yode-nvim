@@ -22,7 +22,7 @@ describe('seditor sync to file editor sync', function()
             [seditorBufferId] = 'yode://./testData/small.js:2.js',
         }, tutil.getHumanBufferList())
 
-        vim.api.nvim_feedkeys('jjItest_', 'x', false)
+        vim.cmd('normal jjItest_')
 
         tutil.assertBufferContentString([[
 export default async function () {

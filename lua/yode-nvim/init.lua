@@ -28,12 +28,11 @@ M.yodeNvim = function()
     --testSetup.setup3()
 
     --vim.cmd('wincmd h')
-    --vim.api.nvim_feedkeys('ggjjjj', 'x', false)
     --vim.cmd('tabnew')
     vim.cmd('e ./testData/basic.js')
-    vim.api.nvim_feedkeys('G', 'x', false)
+    vim.cmd('normal G')
     vim.cmd('49,58YodeCreateSeditorReplace')
-    vim.api.nvim_feedkeys('jj^', 'x', false)
+    vim.cmd('normal jj^')
 end
 
 M.yodeTesting = function()
@@ -103,17 +102,17 @@ M.goToAlternateBuffer = function(viewportFocusIndicator)
 
     if viewportFocusIndicator == 'z' then
         setCursor()
-        vim.api.nvim_feedkeys('zz', 'x', false)
+        vim.cmd('normal zz')
     elseif viewportFocusIndicator == 't' then
         vim.api.nvim_win_set_cursor(0, { sed.startLine + 1, 0 })
-        vim.api.nvim_feedkeys('zt', 'x', false)
+        vim.cmd('normal zt')
         setCursor()
     elseif viewportFocusIndicator == 'b' then
         vim.api.nvim_win_set_cursor(
             0,
             { sed.startLine + #vim.api.nvim_buf_get_lines(bufId, 0, -1, true), 0 }
         )
-        vim.api.nvim_feedkeys('zb', 'x', false)
+        vim.cmd('normal zb')
         setCursor()
     end
 end

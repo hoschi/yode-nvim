@@ -33,7 +33,7 @@ describe('go to alternate buffer -', function()
 
     it('change cursor on switch', function()
         vim.cmd('b ' .. fileBufferId)
-        vim.api.nvim_feedkeys('G^', 'x', false)
+        vim.cmd('normal G^')
         eq({ 81, 0 }, vim.api.nvim_win_get_cursor(0))
 
         vim.cmd('b ' .. smallBufId)
@@ -46,7 +46,7 @@ describe('go to alternate buffer -', function()
         eq({ 11, 0 }, vim.api.nvim_win_get_cursor(0))
 
         vim.cmd('b ' .. fileBufferId)
-        vim.api.nvim_feedkeys('gg^', 'x', false)
+        vim.cmd('normal gg^')
         eq({ 1, 0 }, vim.api.nvim_win_get_cursor(0))
         vim.cmd('49,58YodeCreateSeditorReplace')
         local seditorBottom = vim.fn.bufnr('%')
@@ -59,7 +59,7 @@ describe('go to alternate buffer -', function()
         eq({ 49, 4 }, vim.api.nvim_win_get_cursor(0))
 
         vim.cmd('b ' .. fileBufferId)
-        vim.api.nvim_feedkeys('gg^', 'x', false)
+        vim.cmd('normal gg^')
         eq({ 1, 0 }, vim.api.nvim_win_get_cursor(0))
 
         vim.cmd('b ' .. smallBufId)

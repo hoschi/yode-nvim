@@ -17,10 +17,6 @@ M.assertBufferContentString = function(content, bufIdParam)
     eq(content, R.join('\n', currentLines))
 end
 
-M.typeKeyCombo = function(text)
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(text, true, false, true), '', true)
-end
-
 M.assertAccessorMap = function(accessor, expected)
     local keys = R.keys(expected)
     return eq(
