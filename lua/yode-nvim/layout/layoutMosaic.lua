@@ -305,7 +305,7 @@ M.stateToNeovim = function(state)
                     -- the bottom sets the very top at the first line again.
 
                     -- FIXME this makes the bug!
-                    --vim.api.nvim_feedkeys('zb', 'x', false)
+                    vim.cmd('normal zb')
                 end
                 return window
             end
