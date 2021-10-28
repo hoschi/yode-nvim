@@ -103,4 +103,11 @@ M.prevIndex = function(idx, data)
     return idx - 1 >= 1 and idx - 1 or #data
 end
 
+M.readFile = function(file)
+    local f = assert(io.open(file, 'rb'))
+    local content = f:read('*all')
+    f:close()
+    return content
+end
+
 return M

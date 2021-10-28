@@ -5,57 +5,32 @@ local R = require('yode-nvim.deps.lamda.dist.lamda')
 
 local eq = assert.are.same
 
+local readFiles = function(path)
+    local file = h.readFile(path .. '/file.txt')
+    local seditor = h.readFile(path .. '/seditor.txt')
+    return file, seditor
+end
+
 describe('diffLib -', function()
     it('excerpt', function()
-        local file = [[
-/**
- * My super function!
- */
-export default async function () {
-    return {
-        relative:
-            'editor' +
-            'fooooooooooooooooooo' +
-            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar' +
-            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar',
-    }
-}
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-// foo]]
-
-        local seditor = [[
-export default async function () {
-    return {
-        relative:
-            'editor' +
-            'fooooooooooooooooooo' +
-            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar' +
-            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar',
-    }
-}]]
+        local file, seditor = readFiles('./testData/diff/excerpt')
 
         local diffData = diffLib.diff(file, seditor)
-        eq(75, #diffData)
+        eq(371, #diffData.diffTokens)
 
-        local sameText = R.pipe(
-            h.map(function(record)
-                return record[2] ~= 'same' and '' or record[1]
-            end),
-            R.join('')
-        )(diffData)
-
-        eq(seditor, sameText)
+        local seditorFound = diffLib.findTextBlock(diffData)
+        eq(seditor, seditorFound.text)
+        eq(10, seditorFound.startLine)
     end)
+
+    --it('rename in seditor', function()
+        --local file, seditor = readFiles('./testData/diff/renameInSeditor')
+
+        --local diffData = diffLib.diff(file, seditor)
+        --eq(381, #diffData.diffTokens)
+
+        --local seditorFound = diffLib.findTextBlock(diffData)
+        --eq(seditor, seditorFound.text)
+        --eq(10, seditorFound.startLine)
+    --end)
 end)
