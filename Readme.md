@@ -77,3 +77,8 @@ set showtabline=2
     * [more infos, see Plenary docs here](https://github.com/nvim-lua/plenary.nvim#plenarytest_harness)
     * run all tests on file changes `nodemon -e lua,vim --exec 'make test'`
     * run single test on file changes `nodemon -e lua,vim --exec "nvim --headless -c \"PlenaryBustedDirectory lua/yode-nvim/tests/e2e/basic_mosaic_layout_spec.lua {minimal_init = 'lua/yode-nvim/tests/minimal.vim'}\" "`
+* install BitOp for DMP
+    * install package with pre build BitOp lib with you package maneger
+    * [e.g. this Arch package](https://archlinux.org/packages/community/x86_64/lua51-bitop/)
+    * link the system `bitop.so` into the test env
+      `ln -s /usr/lib/lua/5.1/bit.so ./env/lib/lua/5.1/bit.so`
