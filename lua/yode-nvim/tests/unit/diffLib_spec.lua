@@ -11,6 +11,23 @@ local readFiles = function(path)
     return file, seditor
 end
 
+local text1 = [[
+async function createSeditor(nvim, text, row, height) {
+    const buffer = await nvim.createBuffer(false, false)
+
+    const foo = 'bar'
+    const width = await getSeditorWidth(nvim)
+    const window = await nvim.openWindow(buffer, true, {
+        relative: 'editor',
+        row,
+        col: width,
+        width,
+        height: height,
+        focusable: true,
+    })
+    return window
+}]]
+
 describe('diffLib -', function()
     it('excerpt', function()
         local file, seditor = readFiles('./testData/diff/excerpt')
@@ -18,19 +35,63 @@ describe('diffLib -', function()
         local diffData = diffLib.diff(file, seditor)
         eq(371, #diffData.diffTokens)
 
-        local seditorFound = diffLib.findTextBlock(diffData)
-        eq(seditor, seditorFound.text)
-        eq(10, seditorFound.startLine)
+        local blocks = diffLib.findConnectedBlocks(diffData)
+        eq(1, #blocks)
+        eq(86, #blocks[1].tokens)
+        eq(text1, blocks[1].text)
+
+        local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
+        eq(text1, seditorData.text)
+        eq(10, seditorData.startLine)
     end)
 
-    --it('rename in seditor', function()
-        --local file, seditor = readFiles('./testData/diff/renameInSeditor')
+    it('rename in seditor', function()
+        local file, seditor = readFiles('./testData/diff/renameInSeditor')
 
-        --local diffData = diffLib.diff(file, seditor)
-        --eq(381, #diffData.diffTokens)
+        local diffData = diffLib.diff(file, seditor)
+        eq(381, #diffData.diffTokens)
 
-        --local seditorFound = diffLib.findTextBlock(diffData)
-        --eq(seditor, seditorFound.text)
-        --eq(10, seditorFound.startLine)
+        local blocks = diffLib.findConnectedBlocks(diffData)
+        eq(1, #blocks)
+        eq(86, #blocks[1].tokens)
+        eq(text1, blocks[1].text)
+
+        local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
+        eq(text1, seditorData.text)
+        eq(10, seditorData.startLine)
+    end)
+
+    it('rename in seditor', function()
+        local file, seditor = readFiles('./testData/diff/renameAtEnd')
+
+        local diffData = diffLib.diff(file, seditor)
+        eq(379, #diffData.diffTokens)
+
+        local blocks = diffLib.findConnectedBlocks(diffData)
+        eq(1, #blocks)
+        eq(90, #blocks[1].tokens)
+        eq(text1, blocks[1].text)
+
+        local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
+        eq(text1, seditorData.text)
+        eq(10, seditorData.startLine)
+    end)
+
+    --it('rename in seditor at start and end', function()
+    --local file, seditor = readFiles('./testData/diff/renameAtStartAndEnd')
+
+    --local diffData = diffLib.diff(file, seditor)
+    --eq(381, #diffData.diffTokens)
+
+    --local blocks = diffLib.findConnectedBlocks(diffData)
+    --eq(1, #blocks)
+    --eq(80, #blocks[1].tokens)
+    --eq(text1, blocks[1].text)
+
+    --local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
+    --eq(text1, seditorData.text)
+    --eq(10, seditorData.startLine)
     --end)
+
+    -- FIXME test with zero diffTokens
 end)

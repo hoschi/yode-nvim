@@ -7,3 +7,6 @@
 [submodule "lua/yode-nvim/deps/diff"]
 	path = lua/yode-nvim/deps/diff
 	url = https://github.com/LuaDist/diff.git
+[submodule "lua/yode-nvim/deps/bk-tree"]
+	path = lua/yode-nvim/deps/bk-tree
+	url = https://github.com/profan/lua-bk-tree.git

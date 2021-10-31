@@ -1,8 +1,0 @@
-const createSeditor = (nvim) => {
-    const buffer = await nvim.createBuffer(false, false)
-
-    const foo = 'bar'
-    const width = await getSeditorWidth(nvim)
-    const mainWindow = await nvim.getMainWinodw(width, buffer, foo)
-    return mainWindow
-}
