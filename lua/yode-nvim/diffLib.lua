@@ -23,11 +23,6 @@ M.diff = function(old, new, separator)
 end
 
 local findConnectedBlocks = function(diffData)
-    -- FIXME install googles lib.
-    -- FIXME try match algorithm
-    -- FIXME compare diff algo, the current one always generate an empty token at the beginning
-    -- FIXME check Apache licence then, if we need this lib
-
     -- FIXME concat tokens to lines and count ratio of "same" vs in/out per line. a block continues as long the last line has a ration above 50%. But that doesn't work if one line in between doesn't match at all.
     --
     -- FIXME OR create groups by searching for the next "same" token. add tokens to the this group till. count the continous tokens which are not "same". if count is 10, close group and search for next "same" and repeat the process. if "same" token is again reached while count is less than 10, reset counter and continue with current group.
