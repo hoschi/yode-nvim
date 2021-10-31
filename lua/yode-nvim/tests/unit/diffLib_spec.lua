@@ -1,4 +1,3 @@
-bit32 = require('bit')
 local tutil = require('yode-nvim.tests.util')
 local diffLib = require('yode-nvim.diffLib')
 local h = require('yode-nvim.helper')
@@ -34,8 +33,4 @@ describe('diffLib -', function()
         --eq(seditor, seditorFound.text)
         --eq(10, seditorFound.startLine)
     --end)
-
-    it('match', function()
-        eq(9, diffLib.match('this is my little test', 'my little', 0))
-    end)
 end)

@@ -1,13 +1,8 @@
 local diffLibOrig = require('yode-nvim.deps.diff.diff.lua.diff')
-local dmp = require('yode-nvim.deps.dmp.lua.diff_match_patch')
 local R = require('yode-nvim.deps.lamda.dist.lamda')
 local h = require('yode-nvim.helper')
 
 local M = {}
-
-M.match = function(text, pattern, loc)
-    return dmp.match_main(text, pattern, loc)
-end
 
 M.diff = function(old, new, separator)
     local diffData = diffLibOrig.diff(old, new, separator)
@@ -28,6 +23,7 @@ M.diff = function(old, new, separator)
 end
 
 local findConnectedBlocks = function(diffData)
+    -- FIXME install googles lib.
     -- FIXME try match algorithm
     -- FIXME compare diff algo, the current one always generate an empty token at the beginning
     -- FIXME check Apache licence then, if we need this lib
