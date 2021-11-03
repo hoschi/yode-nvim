@@ -11,6 +11,5 @@ async function createSeditor(nvim, text, row, height) {
         height: height,
         focusable: true,
     })
-    return mainWindow
-    // NOTICE some stuff
+    return mainWindow + foo
  }

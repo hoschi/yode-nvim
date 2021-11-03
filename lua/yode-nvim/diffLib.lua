@@ -5,7 +5,8 @@ local h = require('yode-nvim.helper')
 
 local M = {}
 
-local CONNECTED_TOKEN_BORDER = 10
+local CONNECTED_TOKEN_BORDER = 15
+local START_END_COMPARE_COUNT = 50
 local isSame = R.propEq('status', 'same')
 local isNotSame = R.complement(isSame)
 local getTokensStartingWithSameOne = R.dropWhile(isNotSame)
@@ -35,9 +36,7 @@ M.diff = function(old, new, separator)
         separator
     ))
 
-    local baseText = R.pipe(R.takeLast(CONNECTED_TOKEN_BORDER), M.joinTokenText)(newTokens)
-
-    return { diffTokens = arr, oldTokens = oldTokens, newTokens = newTokens, baseText = baseText }
+    return { diffTokens = arr, oldTokens = oldTokens, newTokens = newTokens }
 end
 
 M.findConnectedBlocks = function(diffData)
@@ -113,40 +112,75 @@ M.findConnectedBlocks = function(diffData)
             return group
         end
 
-        local bestMatch = R.reduce(function(lastMatch, counter)
-            local groupTokens = R.pipe(R.dropLast(counter), R.takeLast(CONNECTED_TOKEN_BORDER))(
-                group
-            )
-            local text = M.joinTokenText(groupTokens)
-            local distance = getEditDistance(diffData.baseText, text)
-
-            if not R.isEmpty(lastMatch) and lastMatch.distance <= distance then
-                return lastMatch
-            end
+        local trailLineEndingCount = R.pipe(
+            R.takeLast(START_END_COMPARE_COUNT),
+            M.joinTokenText,
+            R.split('\n'),
+            R.length
+        )(group)
+        local baseText = R.pipe(
+            M.joinTokenText,
+            R.split('\n'),
+            R.takeLast(trailLineEndingCount),
+            R.join('\n')
+        )(diffData.newTokens)
+        local groupLines = R.pipe(M.joinTokenText, R.split('\n'))(group)
+        local endMatches = h.map(function(counter)
+            local groupLinesMatch = R.pipe(
+                R.dropLast(counter),
+                R.takeLast(trailLineEndingCount - counter)
+            )(groupLines)
+            local text = R.join('\n', groupLinesMatch)
+            local distance = getEditDistance(baseText, text)
 
             return {
-                tokens = groupTokens,
+                counter = counter,
                 text = text,
                 distance = distance,
             }
-        end, {}, R.range(
+        end, R.range(
             0,
-            CONNECTED_TOKEN_BORDER
+            trailLineEndingCount
         ))
 
-        local groupWithHappyEnding = R.dropLastWhile(
-            R.complement(R.propEq('index', R.last(bestMatch.tokens).index)),
-            group
+        local endMatchesSorted = R.sort(R.ascend(R.prop('distance')), endMatches)
+        local bestMatch = R.head(endMatchesSorted)
+
+        local newLinesToRemove = bestMatch.counter
+        local groupWithHappyEnding = R.dropLastWhile(function(t)
+            local count = #R.match('\n', t.token)
+            if count <= 0 then
+                return true
+            elseif newLinesToRemove - count >= 1 then
+                newLinesToRemove = newLinesToRemove - count
+                return true
+            end
+
+            return false
+        end, group)
+
+        local trimToken = R.pipe(
+            R.splitEvery(1),
+            R.reduceRight(function(char, str)
+                if char == '\n' and newLinesToRemove > 0 then
+                    newLinesToRemove = newLinesToRemove - 1
+                    return str
+                end
+
+                return R.concat(char, str)
+            end, '')
         )
         local groupWithHappyEndingTrimmed = h.over(
             h.lensIndex(#groupWithHappyEnding),
-            -- NOTICE this is ... complicated. Seperator for splitting is
-            -- `%s+`. This means a token can contain several new line
-            -- characters. But as Yode seditors are created line wise,
-            -- every valid groups must end without a new line character.
-            h.over(h.lensProp('token'), R.takeWhile(R.complement(R.equals('\n')))),
+            h.over(h.lensProp('token'), trimToken),
             groupWithHappyEnding
         )
+
+        --return endMatchesSorted
+
+        --return h.map(R.omit({ 'tokens' }), endMatchesSorted)
+        --return R.pipe(R.takeLast(CONNECTED_TOKEN_BORDER), M.joinTokenText, R.split('\n'))(group)
+        --return R.pipe(R.takeLast(CONNECTED_TOKEN_BORDER), M.joinTokenText, R.split('\n'))(diffData.newTokens)
 
         return {
             tokens = groupWithHappyEndingTrimmed,
@@ -158,7 +192,7 @@ M.findConnectedBlocks = function(diffData)
 end
 
 M.getSeditorDataFromBlocks = function(blocks, diffData)
-    local block, bestMatch
+    local block, bestMatch, baseText
 
     if #blocks <= 0 then
         return
@@ -167,8 +201,9 @@ M.getSeditorDataFromBlocks = function(blocks, diffData)
     if #blocks == 1 then
         block = R.head(blocks)
     else
+        baseText = M.joinTokenText(newTokens)
         bestMatch = R.reduce(function(lastMatch, currentBlock)
-            local distance = getEditDistance(diffData.baseText, currentBlock.text)
+            local distance = getEditDistance(baseText, currentBlock.text)
             if not R.isEmpty(lastMatch) and lastMatch.distance <= distance then
                 return lastMatch
             end
