@@ -152,5 +152,14 @@ describe('diffLib -', function()
         eq(374, #diffData.diffTokens)
     end)
 
-    -- FIXME test with zero diffTokens
+    it('removed', function()
+        local file, seditor = readFiles('./testData/diff/removed')
+
+        local diffData = diffLib.diff(file, seditor)
+        eq(325, #diffData.diffTokens)
+        local blocks = diffLib.findConnectedBlocks(diffData)
+        eq(0, #blocks)
+        local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
+        eq(nil, seditorData)
+    end)
 end)
