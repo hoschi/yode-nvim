@@ -56,6 +56,7 @@ M.findConnectedBlocks = function(diffData)
     local groupTokens = function(token)
         if token.status == 'same' then
             notSameGroupCounter = 0
+            return true, token
         end
 
         if notSameGroupCounter >= CONNECTED_TOKEN_BORDER then
@@ -76,7 +77,7 @@ M.findConnectedBlocks = function(diffData)
     local allGroups = R.reduce(function(groups, token)
         local currentGroup = R.last(groups)
 
-        if #currentGroup == 1 and token.status ~= 'same' then
+        if #currentGroup == 0 and token.status ~= 'same' then
             return groups
         end
 
@@ -101,90 +102,178 @@ M.findConnectedBlocks = function(diffData)
     end, allGroups)
 
     local lineGroups = h.map(function(group)
-        -- FIXME implement after test created
-        --local newFirstToken = R.pipe(
-        --R.take(group[1].index - 1),
-        --R.reverse,
-        --R.takeWhile(R.complement(R.propEq('text', '\n')))
-        --)(allTokens)
-
+        -- FIXME why did I write this?
         if R.last(group) == R.last(allTokens) then
             return group
         end
 
-        local trailLineEndingCount = R.pipe(
-            R.takeLast(START_END_COMPARE_COUNT),
-            M.joinTokenText,
-            R.split('\n'),
-            R.length
-        )(group)
-        local baseText = R.pipe(
-            M.joinTokenText,
-            R.split('\n'),
-            R.takeLast(trailLineEndingCount),
-            R.join('\n')
-        )(diffData.newTokens)
-        local groupLines = R.pipe(M.joinTokenText, R.split('\n'))(group)
-        local endMatches = h.map(function(counter)
-            local groupLinesMatch = R.pipe(
-                R.dropLast(counter),
-                R.takeLast(trailLineEndingCount - counter)
-            )(groupLines)
-            local text = R.join('\n', groupLinesMatch)
-            local distance = getEditDistance(baseText, text)
+        local sortMatches = R.sort(R.ascend(R.prop('distance')))
 
-            return {
-                counter = counter,
-                text = text,
-                distance = distance,
-            }
-        end, R.range(
-            0,
-            trailLineEndingCount
-        ))
+        local findHappyStart = function(tokens)
+            local takeTokensBeforeCount = R.max(1, tokens[1].index - CONNECTED_TOKEN_BORDER)
+            local diffTokens = R.pipe(
+                R.drop(takeTokensBeforeCount - 1),
+                R.take(CONNECTED_TOKEN_BORDER)
+            )(diffData.diffTokens)
+            local diffLines = R.pipe(
+                R.drop(takeTokensBeforeCount - 1),
+                R.take(R.min(START_END_COMPARE_COUNT, #tokens + CONNECTED_TOKEN_BORDER)),
+                M.joinTokenText,
+                R.split('\n')
+            )(diffData.diffTokens)
+            local lineCount = R.length(diffLines)
+            local baseText =
+                R.pipe(
+                    M.joinTokenText,
+                    R.split('\n'),
+                    R.take(lineCount),
+                    R.join('\n')
+                )(diffData.newTokens)
+            local startMatches = h.map(function(counter)
+                local diffLinesMatch = R.pipe(R.drop(counter), R.take(lineCount - counter))(
+                    diffLines
+                )
+                local text = R.join('\n', diffLinesMatch)
+                local distance = getEditDistance(baseText, text)
 
-        local endMatchesSorted = R.sort(R.ascend(R.prop('distance')), endMatches)
-        local bestMatch = R.head(endMatchesSorted)
+                return {
+                    counter = counter,
+                    text = text,
+                    distance = distance,
+                }
+            end, R.range(
+                0,
+                lineCount
+            ))
 
-        local newLinesToRemove = bestMatch.counter
-        local groupWithHappyEnding = R.dropLastWhile(function(t)
-            local count = #R.match('\n', t.token)
-            if count <= 0 then
-                return true
-            elseif newLinesToRemove - count >= 1 then
-                newLinesToRemove = newLinesToRemove - count
-                return true
+            local startMatchesSorted = sortMatches(startMatches)
+            local bestMatch = R.head(startMatchesSorted)
+            if bestMatch.counter == 0 then
+                return tokens
             end
 
-            return false
-        end, group)
-
-        local trimToken = R.pipe(
-            R.splitEvery(1),
-            R.reduceRight(function(char, str)
-                if char == '\n' and newLinesToRemove > 0 then
-                    newLinesToRemove = newLinesToRemove - 1
-                    return str
+            local newLinesToRemove = bestMatch.counter
+            local additionalTokens = R.dropWhile(function(t)
+                local count = #R.match('\n', t.token)
+                if count <= 0 then
+                    return true
+                elseif newLinesToRemove - count >= 1 then
+                    newLinesToRemove = newLinesToRemove - count
+                    return true
                 end
 
-                return R.concat(char, str)
-            end, '')
-        )
-        local groupWithHappyEndingTrimmed = h.over(
-            h.lensIndex(#groupWithHappyEnding),
-            h.over(h.lensProp('token'), trimToken),
-            groupWithHappyEnding
-        )
+                return false
+            end, diffTokens)
 
-        --return endMatchesSorted
+            if #additionalTokens <= 0 then
+                return tokens
+            end
 
-        --return h.map(R.omit({ 'tokens' }), endMatchesSorted)
-        --return R.pipe(R.takeLast(CONNECTED_TOKEN_BORDER), M.joinTokenText, R.split('\n'))(group)
-        --return R.pipe(R.takeLast(CONNECTED_TOKEN_BORDER), M.joinTokenText, R.split('\n'))(diffData.newTokens)
+            local trimToken = R.pipe(
+                R.splitEvery(1),
+                R.dropWhile(function(char)
+                    if newLinesToRemove > 0 then
+                        if char == '\n' then
+                            newLinesToRemove = newLinesToRemove - 1
+                        end
+                        return true
+                    end
+
+                    return false
+                end),
+                R.join('')
+            )
+            local additionalTokensTrimmed = h.over(
+                h.lensIndex(1),
+                h.over(h.lensProp('token'), trimToken),
+                additionalTokens
+            )
+            local grouWithHappyStart = R.concat(additionalTokensTrimmed, tokens)
+
+            return grouWithHappyStart
+        end
+
+        local findHappyEnd = function(tokens)
+            local trailLineEndingCount = R.pipe(
+                R.takeLast(START_END_COMPARE_COUNT),
+                M.joinTokenText,
+                R.split('\n'),
+                R.length
+            )(tokens)
+            local groupLines = R.pipe(M.joinTokenText, R.split('\n'))(tokens)
+            local baseText = R.pipe(
+                M.joinTokenText,
+                R.split('\n'),
+                R.takeLast(trailLineEndingCount),
+                R.join('\n')
+            )(diffData.newTokens)
+            local endMatches = h.map(function(counter)
+                local groupLinesMatch = R.pipe(
+                    R.dropLast(counter),
+                    R.takeLast(trailLineEndingCount - counter)
+                )(groupLines)
+                local text = R.join('\n', groupLinesMatch)
+                local distance = getEditDistance(baseText, text)
+
+                return {
+                    counter = counter,
+                    text = text,
+                    distance = distance,
+                }
+            end, R.range(
+                0,
+                trailLineEndingCount
+            ))
+
+            local endMatchesSorted = sortMatches(endMatches)
+            local bestMatch = R.head(endMatchesSorted)
+            if bestMatch.counter == 0 then
+                return tokens
+            end
+
+            local newLinesToRemove = bestMatch.counter
+            local groupWithHappyEnding = R.dropLastWhile(function(t)
+                local count = #R.match('\n', t.token)
+                if count <= 0 then
+                    return true
+                elseif newLinesToRemove - count >= 1 then
+                    newLinesToRemove = newLinesToRemove - count
+                    return true
+                end
+
+                return false
+            end, tokens)
+
+            local trimToken = R.pipe(
+                R.splitEvery(1),
+                R.reduceRight(function(char, str)
+                    if char == '\n' and newLinesToRemove > 0 then
+                        newLinesToRemove = newLinesToRemove - 1
+                        return str
+                    end
+
+                    return R.concat(char, str)
+                end, '')
+            )
+            local groupWithHappyEndingTrimmed = h.over(
+                h.lensIndex(#groupWithHappyEnding),
+                h.over(h.lensProp('token'), trimToken),
+                groupWithHappyEnding
+            )
+
+            --return h.map(R.omit({ 'tokens' }), endMatchesSorted)
+            --return R.pipe(R.takeLast(CONNECTED_TOKEN_BORDER), M.joinTokenText, R.split('\n'))(group)
+            --return R.pipe(R.takeLast(CONNECTED_TOKEN_BORDER), M.joinTokenText, R.split('\n'))(diffData.newTokens)
+
+            return groupWithHappyEndingTrimmed
+        end
+
+        local withHappyStart = findHappyStart(group)
+        local withHappyEnd = findHappyEnd(withHappyStart)
 
         return {
-            tokens = groupWithHappyEndingTrimmed,
-            text = M.joinTokenText(groupWithHappyEndingTrimmed),
+            tokens = withHappyEnd,
+            text = M.joinTokenText(withHappyEnd),
         }
     end, validGroups)
 

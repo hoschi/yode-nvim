@@ -11,5 +11,5 @@ const createSeditor = (nvim) => {
         height: height,
         focusable: true,
     })
-    return window // NOTICE stuff!
+    return window
 }
