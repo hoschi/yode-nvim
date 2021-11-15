@@ -101,7 +101,6 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
         return
     end
 
-    -- TODO not implemented yet
     local layoutActions = {}
 
     local linedata = vim.api.nvim_buf_get_lines(bufId, firstline, newLastline, true)
