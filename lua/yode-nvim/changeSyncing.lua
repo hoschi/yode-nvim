@@ -272,8 +272,10 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                 --
                 -- // findOrRemove: check if this window was removed, if yes: remove it from state and relayout
                 -- changeAdd: findOrRemove, relayout by return value
-                -- TODO implement "find" logic later, just remove for now
-                log.debug('---- delete sed/buffer and relayout', sed.seditorBufferId)
+                -- TODO use diffLib to find the seditor again. This is not
+                -- implemented because I can't force this case. When we know
+                -- use case this is we can proceed.
+                log.error('unhandled use case, please file a ticket!!! Deleting seditor', sed.seditorBufferId)
                 vim.schedule(function()
                     vim.cmd('bd! ' .. sed.seditorBufferId)
                 end)
