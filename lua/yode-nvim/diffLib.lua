@@ -2,6 +2,7 @@ local diffLibOrig = require('yode-nvim.deps.diff.diff.lua.diff')
 local bkTree = require('yode-nvim.deps.bk-tree.bk-tree')
 local R = require('yode-nvim.deps.lamda.dist.lamda')
 local h = require('yode-nvim.helper')
+local logging = require('yode-nvim.logging')
 
 local M = {}
 
@@ -11,6 +12,7 @@ local isSame = R.propEq('status', 'same')
 local isNotSame = R.complement(isSame)
 local getTokensStartingWithSameOne = R.dropWhile(isNotSame)
 local getEditDistance = bkTree.levenshtein_dist
+local sortMatches = R.sort(R.ascend(R.prop('distance')))
 
 M.joinTokenText = R.pipe(R.pluck('token'), R.join(''))
 
@@ -40,9 +42,11 @@ M.diff = function(old, new, separator)
 end
 
 M.findConnectedBlocks = function(diffData)
+    local log = logging.create('findConnectedBlocks')
     local allTokens
 
     if #diffData.diffTokens <= 0 then
+        log.debug('diff is empty, returning')
         return {}
     end
 
@@ -94,20 +98,30 @@ M.findConnectedBlocks = function(diffData)
         {},
         --}, R.take( 10, startTokens))
     }, startTokens)
+    log.debug(
+        string.format(
+            'of %d all tokens we start seaching in %d tokens and found %d groups (%s)',
+            #allTokens,
+            #startTokens,
+            #allGroups
+            , R.pipe(h.map(R.length), R.join(','))(allGroups)
+        )
+    )
 
-    local lossFactor = 0.2
+    local lossFactor = 0.4
     local validGroups = R.filter(function(group)
         return #group > R.max(0, #diffData.newTokens * (1 - lossFactor))
             and #group < #diffData.newTokens * (1 + lossFactor)
     end, allGroups)
+    log.debug('valid group count', #validGroups)
 
+    log.debug('searching for line groups')
     local lineGroups = h.map(function(group)
         -- FIXME why did I write this?
         if R.last(group) == R.last(allTokens) then
+            log.debug('- last tokens match, returning group')
             return group
         end
-
-        local sortMatches = R.sort(R.ascend(R.prop('distance')))
 
         local findHappyStart = function(tokens)
             local takeTokensBeforeCount = R.max(1, tokens[1].index - CONNECTED_TOKEN_BORDER)
@@ -148,6 +162,8 @@ M.findConnectedBlocks = function(diffData)
 
             local startMatchesSorted = sortMatches(startMatches)
             local bestMatch = R.head(startMatchesSorted)
+            log.debug(string.format('happy start: found %d matches, the best one has a counter value of %d', #startMatchesSorted, bestMatch.counter))
+
             if bestMatch.counter == 0 then
                 return tokens
             end
@@ -227,6 +243,7 @@ M.findConnectedBlocks = function(diffData)
 
             local endMatchesSorted = sortMatches(endMatches)
             local bestMatch = R.head(endMatchesSorted)
+            log.debug(string.format('happy end: found %d matches, the best one has a counter value of %d', #endMatchesSorted, bestMatch.counter))
             if bestMatch.counter == 0 then
                 return tokens
             end
@@ -276,6 +293,7 @@ M.findConnectedBlocks = function(diffData)
             text = M.joinTokenText(withHappyEnd),
         }
     end, validGroups)
+    log.debug('found line groups:', #lineGroups)
 
     return lineGroups
 end
