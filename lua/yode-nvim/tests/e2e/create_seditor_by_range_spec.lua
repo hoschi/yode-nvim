@@ -36,6 +36,7 @@ plugin.registerCommand(
                 fileBufferId = fileBufferId,
                 startLine = 48,
                 indentCount = 4,
+                isZombie = false,
             },
         }, store.getState().seditors)
         eq(1, #store.getState().layout.tabs[1].windows)
@@ -75,12 +76,14 @@ const getSeditorWidth = async (nvim) => {
                 fileBufferId = fileBufferId,
                 startLine = 48,
                 indentCount = 4,
+                isZombie = false,
             },
             [seditorBufferId] = {
                 seditorBufferId = seditorBufferId,
                 fileBufferId = fileBufferId,
                 startLine = 2,
                 indentCount = 0,
+                isZombie = false,
             },
         }, store.getState().seditors)
         eq(1, #store.getState().layout.tabs[1].windows)

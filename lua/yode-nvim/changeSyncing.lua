@@ -13,6 +13,7 @@ local M = {}
 
 local ZOMBIE_COUNTDOWN_VALUE = 11
 -- FIXME remove `isZombie` and replace with `zombie` which stores all data?
+-- Would at least give better logging
 local zombies = {}
 local decrementZombie = h.over(h.lensProp('countdown'), R.subtract(R.__, 1))
 
@@ -31,7 +32,6 @@ local handleZombies = function(fileBufferId, editLineCount)
     )
     if #zombiesConnected <= 0 then
         log.debug('no zombies for file buffer', fileBufferId)
-
         return zombies
     end
 
@@ -52,21 +52,19 @@ local handleZombies = function(fileBufferId, editLineCount)
 
         local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
         log.debug('recover!', seditorData)
+        local lines = R.split('\n', seditorData.text)
+        local indentCount = h.getIndentCount(lines)
+
+        local cleanedLines = h.map(R.drop(indentCount), lines)
         seditors.actions.changeData({
             seditorBufferId = seditorBufferId,
-            data = { isZombie = false, startLine = seditorData.startLine },
+            data = { isZombie = false, indentCount = indentCount, startLine = seditorData.startLine },
         })
         vim.schedule(function()
             -- FIXME do this in middleware
             vim.bo[seditorBufferId].modifiable = true
-            -- FIXME check indentation and update data with above action
-            vim.api.nvim_buf_set_lines(
-                seditorBufferId,
-                0,
-                -1,
-                true,
-                R.split('\n', seditorData.text)
-            )
+
+            vim.api.nvim_buf_set_lines(seditorBufferId, 0, -1, true, cleanedLines)
         end)
         return R.assoc('countdown', 0, zombie)
     end, zombiesConnected)
@@ -208,6 +206,7 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
 
     local sedsConnected = seditors.selectors.getSeditorsConnected(bufId)
     if R.isEmpty(sedsConnected) then
+        zombies = handleZombies(bufId, editLineCount)
         return
     end
 
@@ -287,8 +286,12 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                 })
                 zombies = R.assoc(sed.seditorBufferId, {
                     seditor = sed,
-                    text = R.join(
-                        '\n',
+                    text = R.pipe(
+                        sed.indentCount
+                                and h.map(R.concat(h.createWhiteSpace(sed.indentCount)))
+                            or R.identity,
+                        R.join('\n')
+                    )(
                         vim.api.nvim_buf_get_lines(sed.seditorBufferId, 0, -1, true)
                     ),
                     countdown = ZOMBIE_COUNTDOWN_VALUE,

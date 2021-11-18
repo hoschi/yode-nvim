@@ -23,7 +23,9 @@ M.selectors.getSeditorById = function(id, state)
     return R.prop(id, state)
 end
 M.selectors.getSeditorsConnected = function(fileBufferId, state)
-    return R.pipe(R.filter(R.allPass(R.propEq('fileBufferId', fileBufferId), R.propEq('isZombie', false))))(state)
+    return R.pipe(
+        R.filter(R.allPass(R.propEq('fileBufferId', fileBufferId), R.propEq('isZombie', false)))
+    )(state)
 end
 
 local reducerFunctions = {
@@ -37,7 +39,7 @@ local reducerFunctions = {
                 startLine = nil,
                 fileBufferId = nil,
                 indentCount = nil,
-                isZombie = false
+                isZombie = false,
             }, a.data),
             state
         )

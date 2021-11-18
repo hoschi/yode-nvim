@@ -8,6 +8,7 @@ local M = {}
 
 local CONNECTED_TOKEN_BORDER = 15
 local START_END_COMPARE_COUNT = 50
+local GROUP_LOSS_FACTOR = 0.4
 local isSame = R.propEq('status', 'same')
 local isNotSame = R.complement(isSame)
 local getTokensStartingWithSameOne = R.dropWhile(isNotSame)
@@ -103,38 +104,42 @@ M.findConnectedBlocks = function(diffData)
             'of %d all tokens we start seaching in %d tokens and found %d groups (%s)',
             #allTokens,
             #startTokens,
-            #allGroups
-            , R.pipe(h.map(R.length), R.join(','))(allGroups)
+            #allGroups,
+            R.pipe(h.map(R.length), R.join(','))(allGroups)
         )
     )
 
-    local lossFactor = 0.4
     local validGroups = R.filter(function(group)
-        return #group > R.max(0, #diffData.newTokens * (1 - lossFactor))
-            and #group < #diffData.newTokens * (1 + lossFactor)
+        return #group > R.max(0, #diffData.newTokens * (1 - GROUP_LOSS_FACTOR))
+            and #group < #diffData.newTokens * (1 + GROUP_LOSS_FACTOR)
     end, allGroups)
     log.debug('valid group count', #validGroups)
 
     log.debug('searching for line groups')
     local lineGroups = h.map(function(group)
-        -- FIXME why did I write this?
-        if R.last(group) == R.last(allTokens) then
-            log.debug('- last tokens match, returning group')
-            return group
-        end
-
         local findHappyStart = function(tokens)
-            local takeTokensBeforeCount = R.max(1, tokens[1].index - CONNECTED_TOKEN_BORDER)
-            local diffTokens = R.pipe(
-                R.drop(takeTokensBeforeCount - 1),
-                R.take(CONNECTED_TOKEN_BORDER)
+            local dropTokensBeforeCount = R.max(1, tokens[1].index - CONNECTED_TOKEN_BORDER)
+            local tokensBeforeProbablyMiddleInLine = R.pipe(
+                R.drop(dropTokensBeforeCount - 1),
+                R.reject(R.propEq('status', 'in'))
             )(diffData.diffTokens)
+            local tokenTillStartOfLine = R.pipe(
+                R.take(dropTokensBeforeCount - 1),
+                R.reject(R.propEq('status', 'in')),
+                R.takeLastWhile(function(t)
+                    return not R.contains('\n', t.token)
+                end)
+            )(diffData.diffTokens)
+            local validDiffTokens = R.concat(tokenTillStartOfLine, tokensBeforeProbablyMiddleInLine)
+            local diffTokens = R.takeWhile(
+                R.complement(R.propEq('index', tokens[1].index)),
+                validDiffTokens
+            )
             local diffLines = R.pipe(
-                R.drop(takeTokensBeforeCount - 1),
                 R.take(R.min(START_END_COMPARE_COUNT, #tokens + CONNECTED_TOKEN_BORDER)),
                 M.joinTokenText,
                 R.split('\n')
-            )(diffData.diffTokens)
+            )(validDiffTokens)
             local lineCount = R.length(diffLines)
             local baseText =
                 R.pipe(
@@ -162,10 +167,26 @@ M.findConnectedBlocks = function(diffData)
 
             local startMatchesSorted = sortMatches(startMatches)
             local bestMatch = R.head(startMatchesSorted)
-            log.debug(string.format('happy start: found %d matches, the best one has a counter value of %d', #startMatchesSorted, bestMatch.counter))
+            log.debug(
+                string.format(
+                    'happy start: found %d matches, the best one has a counter value of %d',
+                    #startMatchesSorted,
+                    bestMatch.counter
+                )
+            )
+            local startLine = R.pipe(
+                R.takeWhile(R.complement(R.propEq('index', validDiffTokens[1].index))),
+                R.reject(R.propEq('status', 'in')),
+                R.pluck('token'),
+                R.join(''),
+                R.split('\n'),
+                R.length,
+                R.subtract(R.__, 1),
+                R.add(bestMatch.counter)
+            )(diffData.diffTokens)
 
             if bestMatch.counter == 0 then
-                return tokens
+                return startLine, tokens
             end
 
             local newLinesToRemove = bestMatch.counter
@@ -182,7 +203,7 @@ M.findConnectedBlocks = function(diffData)
             end, diffTokens)
 
             if #additionalTokens <= 0 then
-                return tokens
+                return startLine, tokens
             end
 
             local trimToken = R.pipe(
@@ -206,7 +227,7 @@ M.findConnectedBlocks = function(diffData)
             )
             local grouWithHappyStart = R.concat(additionalTokensTrimmed, tokens)
 
-            return grouWithHappyStart
+            return startLine, grouWithHappyStart
         end
 
         local findHappyEnd = function(tokens)
@@ -243,7 +264,13 @@ M.findConnectedBlocks = function(diffData)
 
             local endMatchesSorted = sortMatches(endMatches)
             local bestMatch = R.head(endMatchesSorted)
-            log.debug(string.format('happy end: found %d matches, the best one has a counter value of %d', #endMatchesSorted, bestMatch.counter))
+            log.debug(
+                string.format(
+                    'happy end: found %d matches, the best one has a counter value of %d',
+                    #endMatchesSorted,
+                    bestMatch.counter
+                )
+            )
             if bestMatch.counter == 0 then
                 return tokens
             end
@@ -261,15 +288,19 @@ M.findConnectedBlocks = function(diffData)
                 return false
             end, tokens)
 
+            log.debug('new lines to remove from last token', newLinesToRemove)
             local trimToken = R.pipe(
                 R.splitEvery(1),
                 R.reduceRight(function(char, str)
-                    if char == '\n' and newLinesToRemove > 0 then
-                        newLinesToRemove = newLinesToRemove - 1
-                        return str
+                    if newLinesToRemove <= 0 then
+                        return R.concat(char, str)
                     end
 
-                    return R.concat(char, str)
+                    if char == '\n' then
+                        newLinesToRemove = newLinesToRemove - 1
+                    end
+
+                    return str
                 end, '')
             )
             local groupWithHappyEndingTrimmed = h.over(
@@ -278,18 +309,17 @@ M.findConnectedBlocks = function(diffData)
                 groupWithHappyEnding
             )
 
-            --return h.map(R.omit({ 'tokens' }), endMatchesSorted)
-            --return R.pipe(R.takeLast(CONNECTED_TOKEN_BORDER), M.joinTokenText, R.split('\n'))(group)
-            --return R.pipe(R.takeLast(CONNECTED_TOKEN_BORDER), M.joinTokenText, R.split('\n'))(diffData.newTokens)
-
             return groupWithHappyEndingTrimmed
         end
 
-        local withHappyStart = findHappyStart(group)
+        local startLine, withHappyStart = findHappyStart(group)
         local withHappyEnd = findHappyEnd(withHappyStart)
+        --local withHappyEnd = withHappyStart
 
         return {
             tokens = withHappyEnd,
+            startLine = startLine,
+            --text = '', --M.joinTokenText(withHappyEnd),
             text = M.joinTokenText(withHappyEnd),
         }
     end, validGroups)
@@ -299,16 +329,19 @@ M.findConnectedBlocks = function(diffData)
 end
 
 M.getSeditorDataFromBlocks = function(blocks, diffData)
+    local log = logging.create('getSeditorDataFromBlocks')
     local block, bestMatch, baseText
 
     if #blocks <= 0 then
+        log.debug('no blocks')
         return
     end
 
     if #blocks == 1 then
+        log.debug('one result')
         block = R.head(blocks)
     else
-        baseText = M.joinTokenText(newTokens)
+        baseText = M.joinTokenText(diffData.newTokens)
         bestMatch = R.reduce(function(lastMatch, currentBlock)
             local distance = getEditDistance(baseText, currentBlock.text)
             if not R.isEmpty(lastMatch) and lastMatch.distance <= distance then
@@ -321,19 +354,21 @@ M.getSeditorDataFromBlocks = function(blocks, diffData)
             }
         end, {}, blocks)
 
+        log.debug(
+            string.format(
+                '%d blocks to choos, best one has a distance of %d',
+                #blocks,
+                bestMatch.distance
+            )
+        )
         block = bestMatch.block
     end
 
-    local startLine = R.pipe(
-        R.take(block.tokens[1].index),
-        R.pluck('token'),
-        R.join(''),
-        R.split('\n'),
-        R.length,
-        R.subtract(R.__, 1)
-    )(diffData.oldTokens)
-
-    return { text = block.text, startLine = startLine }
+    log.debug('start line of chosen block is', block.startLine)
+    return {
+        text = block.text,
+        startLine = block.startLine,
+    }
 end
 
 return M

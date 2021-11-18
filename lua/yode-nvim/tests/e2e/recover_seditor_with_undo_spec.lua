@@ -8,7 +8,7 @@ describe('recover seditor with undo', function()
     local fileBufferId = 1
     local seditorBufferId = 2
     local fileLinesBase = 81
-    local fileLinesWithout = fileLinesBase - 14
+    local fileLinesWithout = fileLinesBase - 16
 
     it('- deleting seditor', function()
         vim.cmd('e ./testData/basic.js')
@@ -26,8 +26,9 @@ describe('recover seditor with undo', function()
             [seditorBufferId] = {
                 seditorBufferId = seditorBufferId,
                 fileBufferId = fileBufferId,
-                startLine = 48,
-                indentCount = 4,
+                startLine = 10,
+                indentCount = 0,
+                isZombie = false,
             },
         }, store.getState().seditors)
         eq(1, #store.getState().layout.tabs[1].windows)

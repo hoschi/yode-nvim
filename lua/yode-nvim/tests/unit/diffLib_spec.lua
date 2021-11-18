@@ -28,6 +28,18 @@ async function createSeditor(nvim, text, row, height) {
     return window
 }]]
 
+local text2 = [[
+    plugin.registerCommand(
+        'YodeCreateSeditor',
+        async () => {
+            await createSeditor(nvim, '1111', 0, 20 == 50)
+
+            await createSeditor(nvim, '2222', 21, 10)
+            await createSeditor(nvim, '3333', 32, 15)
+        },
+        { sync: false }
+    )]]
+
 -- FIXME ways to improve:
 -- FIXME try tree thingy of current lib if this is better than the plain getEditDistance function I am using atm
 -- FIXME try fuzzy finding lib, but increase max char limit of 1024?! https://github.com/swarn/fzy-lua/blob/main/src/fzy_lua.lua
@@ -141,13 +153,10 @@ describe('diffLib -', function()
         local blocks = diffLib.findConnectedBlocks(diffData)
         eq(1, #blocks)
         eq(text1 .. '\n', blocks[1].text)
-        eq(87, #blocks[1].tokens)
 
         local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
         eq(text1 .. '\n', seditorData.text)
         eq(10, seditorData.startLine)
-
-        eq(373, #diffData.diffTokens)
     end)
 
     it('leading new lines', function()
@@ -158,14 +167,11 @@ describe('diffLib -', function()
 
         local blocks = diffLib.findConnectedBlocks(diffData)
         eq(1, #blocks)
-        eq('\n\n' .. text1, blocks[1].text)
-        eq(87, #blocks[1].tokens)
+        eq('}\n\n' .. text1, blocks[1].text)
 
         local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
-        eq('\n\n' .. text1, seditorData.text)
-        eq(10, seditorData.startLine)
-
-        eq(372, #diffData.diffTokens)
+        eq('}\n\n' .. text1, seditorData.text)
+        eq(8, seditorData.startLine)
     end)
 
     it('trailing white space', function()
@@ -177,13 +183,10 @@ describe('diffLib -', function()
         local blocks = diffLib.findConnectedBlocks(diffData)
         eq(1, #blocks)
         eq(text1, blocks[1].text)
-        eq(87, #blocks[1].tokens)
 
         local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
         eq(text1, seditorData.text)
         eq(10, seditorData.startLine)
-
-        eq(374, #diffData.diffTokens)
     end)
 
     it('leading white space', function()
@@ -194,14 +197,11 @@ describe('diffLib -', function()
 
         local blocks = diffLib.findConnectedBlocks(diffData)
         eq(1, #blocks)
-        eq('\n' .. text1, blocks[1].text)
-        eq(87, #blocks[1].tokens)
+        eq('}\n\n' .. text1, blocks[1].text)
 
         local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
-        eq('\n' .. text1, seditorData.text)
-        eq(10, seditorData.startLine)
-
-        eq(373, #diffData.diffTokens)
+        eq('}\n\n' .. text1, seditorData.text)
+        eq(8, seditorData.startLine)
     end)
 
     it('removed', function()
@@ -213,5 +213,21 @@ describe('diffLib -', function()
         eq(0, #blocks)
         local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
         eq(nil, seditorData)
+    end)
+
+    it('indentation', function()
+        local file, seditor = readFiles('./testData/diff/indentation')
+
+        local diffData = diffLib.diff(file, seditor)
+        local blocks = diffLib.findConnectedBlocks(diffData)
+        eq(1, #blocks)
+        eq(text2, blocks[1].text)
+        eq(59, #blocks[1].tokens)
+
+        local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
+        eq(text2, seditorData.text)
+        eq(48, seditorData.startLine)
+
+        eq(373, #diffData.diffTokens)
     end)
 end)

@@ -67,7 +67,7 @@ M.getOperationOfBufLinesEvent = function(first, last, data)
         -- e.g. paste one yanked line in normal mode
         return M.BUF_LINES_OP_ADD, #data
     elseif R.isEmpty(data) then
-        return M.BUF_LINES_OP_DELETE, last-first
+        return M.BUF_LINES_OP_DELETE, last - first
     elseif #data == (last - first) then
         -- single line changes as well is visual block changes
         return M.BUF_LINES_OP_CHANGE, #data

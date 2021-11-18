@@ -31,7 +31,7 @@ M.yodeNvim = function()
     --vim.cmd('tabnew')
     --vim.cmd('normal G')
     --vim.cmd('normal gg10j16dd')
-    vim.cmd('normal gg48j10dd')
+    --vim.cmd('normal gg48j10dd')
 end
 
 M.yodeTesting = function()
