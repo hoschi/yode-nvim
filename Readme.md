@@ -36,6 +36,12 @@ map <C-W>K :YodeLayoutShiftWinTop<CR>
 set showtabline=2
 ```
 
+* compatible plugins with current change detection logic
+    * [mhartington/formatter.nvim](https://github.com/mhartington/formatter.nvim)
+        * uses `nvim_buf_set_lines` for one `change/add` event
+    * [tpope/vim-fugitive: fugitive.vim: A Git wrapper so awesome, it should be illegal](https://github.com/tpope/vim-fugitive)
+        * `Gread` works by using one or two change events
+
 ## Development
 
 * [Lamda module help](https://moriyalb.github.io/lamda/)
