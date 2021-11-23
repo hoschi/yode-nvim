@@ -29,7 +29,7 @@ describe('recover seditor with undo', function()
                 fileBufferId = fileBufferId,
                 startLine = 10,
                 indentCount = 0,
-                isZombie = false,
+                zombie = nil,
             },
         }, store.getState().seditors)
         eq(1, #store.getState().layout.tabs[1].windows)

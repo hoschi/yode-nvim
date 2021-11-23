@@ -39,7 +39,7 @@ export default async function () {
                     fileBufferId = fileBufferId,
                     startLine = 3,
                     indentCount = 0,
-                    isZombie = false,
+                    zombie = nil,
                 },
             },
             layout = { tabs = {} },

@@ -5,6 +5,7 @@ local seditorsReducer = require('yode-nvim.redux.seditorsReducer')
 local layoutReducer = require('yode-nvim.redux.layoutReducer')
 local stateLogger = require('yode-nvim.redux.stateLogger')
 local layoutStateToNeovim = require('yode-nvim.redux.layoutStateToNeovim')
+local generalStateToNeovim = require('yode-nvim.redux.generalStateToNeovim')
 local ReduxEnv = require('yode-nvim.deps.redux-lua.src.env')
 ReduxEnv.setDebug(false)
 local h = require('yode-nvim.helper')
@@ -36,7 +37,10 @@ local wrapWithDispatch = h.map(function(action)
     end
 end)
 
-M.store = createStore(reducers, applyMiddleware(stateLogger, layoutStateToNeovim))
+M.store = createStore(
+    reducers,
+    applyMiddleware(stateLogger, layoutStateToNeovim, generalStateToNeovim)
+)
 M.seditors = {
     actions = wrapWithDispatch(seditorsReducer.actions),
     selectors = globalizeSelectors(STATE_PATH_SEDITORS, seditorsReducer.selectors),

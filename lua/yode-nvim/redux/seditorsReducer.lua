@@ -2,7 +2,8 @@ local R = require('yode-nvim.deps.lamda.dist.lamda')
 local createReducer = require('yode-nvim.redux.createReducer')
 local h = require('yode-nvim.helper')
 
-local M = { actions = {}, selectors = {} }
+local M = { actions = {}, selectors = {}, actionNames = {} }
+local ZOMBIE_COUNTDOWN_VALUE = 11
 
 local INIT_SEDITOR = 'INIT_SEDITOR'
 M.actions.initSeditor = R.pipe(R.pick({ 'seditorBufferId', 'data' }), R.assoc('type', INIT_SEDITOR))
@@ -19,13 +20,35 @@ M.actions.changeData = R.pipe(R.pick({ 'seditorBufferId', 'data' }), R.assoc('ty
 local REMOVE_SEDITOR = 'REMOVE_SEDITOR'
 M.actions.removeSeditor = R.pipe(R.pick({ 'seditorBufferId' }), R.assoc('type', REMOVE_SEDITOR))
 
+M.actionNames.SOFTLY_KILL_SEDITOR = 'SOFTLY_KILL_SEDITOR'
+M.actions.softlyKillSeditor = R.pipe(
+    R.pick({ 'seditorBufferId' }),
+    R.assoc('type', M.actionNames.SOFTLY_KILL_SEDITOR),
+    function(action)
+        return R.merge(action, {
+            lines = vim.api.nvim_buf_get_lines(action.seditorBufferId, 0, -1, true),
+        })
+    end
+)
+
+M.actionNames.RESURRECT_SEDITOR = 'RESURRECT_SEDITOR'
+M.actions.resurrectSeditor = R.pipe(
+    R.pick({ 'seditorBufferId' }),
+    R.assoc('type', M.actionNames.RESURRECT_SEDITOR)
+)
+
 M.selectors.getSeditorById = function(id, state)
     return R.prop(id, state)
 end
 M.selectors.getSeditorsConnected = function(fileBufferId, state)
     return R.pipe(
-        R.filter(R.allPass(R.propEq('fileBufferId', fileBufferId), R.propEq('isZombie', false)))
+        R.filter(R.allPass(R.propEq('fileBufferId', fileBufferId), R.complement(R.has('zombie'))))
     )(state)
+end
+M.selectors.getZombieSeditorsConnected = function(fileBufferId, state)
+    return R.pipe(R.filter(R.allPass(R.propEq('fileBufferId', fileBufferId), R.has('zombie'))))(
+        state
+    )
 end
 
 local reducerFunctions = {
@@ -39,7 +62,7 @@ local reducerFunctions = {
                 startLine = nil,
                 fileBufferId = nil,
                 indentCount = nil,
-                isZombie = false,
+                zombie = nil,
             }, a.data),
             state
         )
@@ -52,6 +75,24 @@ local reducerFunctions = {
     end,
     [REMOVE_SEDITOR] = function(state, a)
         return R.dissoc(a.seditorBufferId, state)
+    end,
+    [M.actionNames.SOFTLY_KILL_SEDITOR] = function(state, a)
+        return h.over(h.lensProp(a.seditorBufferId), function(sed)
+            local text = R.pipe(
+                sed.indentCount
+                        and h.map(R.concat(h.createWhiteSpace(sed.indentCount)))
+                    or R.identity,
+                R.join('\n')
+            )(a.lines)
+
+            return R.assoc('zombie', {
+                text = text,
+                countdown = ZOMBIE_COUNTDOWN_VALUE,
+            }, sed)
+        end, state)
+    end,
+    [M.actionNames.RESURRECT_SEDITOR] = function(state, a)
+        return R.dissocPath({ a.seditorBufferId, 'zombie' }, state)
     end,
 }
 M.reducer = createReducer({}, reducerFunctions)
