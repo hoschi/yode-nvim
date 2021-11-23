@@ -12,6 +12,7 @@ local GROUP_LOSS_FACTOR = 0.4
 local isSame = R.propEq('status', 'same')
 local isNotSame = R.complement(isSame)
 local getTokensStartingWithSameOne = R.dropWhile(isNotSame)
+local withoutInTokens = R.reject(R.propEq('status', 'in'))
 local getEditDistance = bkTree.levenshtein_dist
 local sortMatches = R.sort(R.ascend(R.prop('distance')))
 
@@ -121,11 +122,11 @@ M.findConnectedBlocks = function(diffData)
             local dropTokensBeforeCount = R.max(1, tokens[1].index - CONNECTED_TOKEN_BORDER)
             local tokensBeforeProbablyMiddleInLine = R.pipe(
                 R.drop(dropTokensBeforeCount - 1),
-                R.reject(R.propEq('status', 'in'))
+                withoutInTokens
             )(diffData.diffTokens)
             local tokenTillStartOfLine = R.pipe(
                 R.take(dropTokensBeforeCount - 1),
-                R.reject(R.propEq('status', 'in')),
+                withoutInTokens,
                 R.takeLastWhile(function(t)
                     return not R.contains('\n', t.token)
                 end)
@@ -176,7 +177,7 @@ M.findConnectedBlocks = function(diffData)
             )
             local startLine = R.pipe(
                 R.takeWhile(R.complement(R.propEq('index', validDiffTokens[1].index))),
-                R.reject(R.propEq('status', 'in')),
+                withoutInTokens,
                 R.pluck('token'),
                 R.join(''),
                 R.split('\n'),
