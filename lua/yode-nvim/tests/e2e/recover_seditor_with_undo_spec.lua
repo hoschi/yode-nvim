@@ -10,7 +10,8 @@ describe('recover seditor with undo', function()
     local fileLinesBase = 81
     local fileLinesWithout = fileLinesBase - 16
 
-    it('- deleting seditor', function()
+    -- TODO waiting for https://github.com/nvim-lua/plenary.nvim/issues/271
+    pending('- deleting seditor', function()
         vim.cmd('e ./testData/basic.js')
         eq(fileBufferId, vim.fn.bufnr('%'))
         eq(fileLinesBase, #vim.api.nvim_buf_get_lines(fileBufferId, 0, -1, true))
@@ -38,7 +39,6 @@ describe('recover seditor with undo', function()
         vim.cmd('normal gg10j16dd')
         eq(fileLinesWithout, #vim.api.nvim_buf_get_lines(fileBufferId, 0, -1, true))
 
-        -- FIXME when this is answered https://github.com/nvim-lua/plenary.nvim/issues/271
         --eq({
         --[fileBufferId] = './testData/basic.js',
         --}, tutil.getHumanBufferList())

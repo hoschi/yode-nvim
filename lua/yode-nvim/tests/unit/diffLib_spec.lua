@@ -40,11 +40,6 @@ local text2 = [[
         { sync: false }
     )]]
 
--- FIXME ways to improve:
--- FIXME try tree thingy of current lib if this is better than the plain getEditDistance function I am using atm
--- FIXME try fuzzy finding lib, but increase max char limit of 1024?! https://github.com/swarn/fzy-lua/blob/main/src/fzy_lua.lua
--- FIXME checkout how DFM calculates that a pattern is too long and take the maximum of new tokens an pattern to locate it in group again
--- FIXME read the site and implement a better algorithm https://en.wikipedia.org/wiki/Edit_distance
 describe('diffLib -', function()
     it('excerpt', function()
         local file, seditor = readFiles('./testData/diff/excerpt')

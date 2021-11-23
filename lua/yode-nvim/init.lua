@@ -32,6 +32,7 @@ M.yodeNvim = function()
     --vim.cmd('normal G')
     --vim.cmd('normal gg10j16dd')
     --vim.cmd('normal gg48j10dd')
+    vim.cmd('normal gg15j8J')
 end
 
 M.yodeTesting = function()

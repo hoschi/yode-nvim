@@ -19,12 +19,14 @@ local decrementZombie = h.over(h.lensProp('countdown'), R.subtract(R.__, 1))
 
 local handleZombies = function(fileBufferId, editLineCount)
     local log = logging.create('handleZombies')
+    local layoutActions = {}
 
     -- ignoring one line changes for now, doesn't seem worth diffing
-    -- TODO do it for zombies with only one line as well, skipped because of lazyness
+    -- TODO do it for zombies with only one line as well, skipped because of
+    -- lazyness. One line changes are often the fast pace typing events.
     if editLineCount <= 1 then
         log.debug('not processing one line changes')
-        return zombies
+        return zombies, {}
     end
 
     zombiesConnected = R.filter(R.pathEq({ 'seditor', 'fileBufferId' }, fileBufferId))(
@@ -32,17 +34,13 @@ local handleZombies = function(fileBufferId, editLineCount)
     )
     if #zombiesConnected <= 0 then
         log.debug('no zombies for file buffer', fileBufferId)
-        return zombies
+        return zombies, {}
     end
 
     log.trace('processing zombies', zombiesConnected)
     local fileText = R.join('\n', vim.api.nvim_buf_get_lines(fileBufferId, 0, -1, true))
     local updatedZombies = h.map(function(zombie)
         local seditorBufferId = zombie.seditor.seditorBufferId
-        if zombie.countdown == ZOMBIE_COUNTDOWN_VALUE then
-            log.debug('fresh zombie, skipping', seditorBufferId)
-            return zombie
-        end
         local diffData = diffLib.diff(fileText, zombie.text)
         local blocks = diffLib.findConnectedBlocks(diffData)
         if #blocks <= 0 then
@@ -66,10 +64,17 @@ local handleZombies = function(fileBufferId, editLineCount)
 
             vim.api.nvim_buf_set_lines(seditorBufferId, 0, -1, true, cleanedLines)
         end)
+        layoutActions = R.append(
+            sharedLayoutActions.actions.contentChanged({
+                tabId = vim.api.nvim_get_current_tabpage(),
+                bufId = seditorBufferId,
+            }),
+            layoutActions
+        )
         return R.assoc('countdown', 0, zombie)
     end, zombiesConnected)
 
-    return R.reduce(function(newZombies, zombie)
+    local processedZombies = R.reduce(function(newZombies, zombie)
         local updatedZombie = decrementZombie(zombie)
         local sed = seditors.selectors.getSeditorById(updatedZombie.seditor.seditorBufferId)
         if updatedZombie.countdown <= 0 then
@@ -90,6 +95,14 @@ local handleZombies = function(fileBufferId, editLineCount)
         log.debug('updating zombie', updatedZombie)
         return R.assoc(zombie.seditor.seditorBufferId, updatedZombie, newZombies)
     end, zombies, updatedZombies)
+
+    if updateLayout then
+        vim.schedule(function()
+            layout.actions.syncTabLayoutToNeovim()
+        end)
+    end
+
+    return processedZombies, layoutActions
 end
 
 local activeBuffers = {}
@@ -183,8 +196,8 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
         return
     end
 
+    local zombieLayoutActions
     local layoutActions = {}
-
     local linedata = vim.api.nvim_buf_get_lines(bufId, firstline, newLastline, true)
     local lineLength = lastline - firstline
     local dataLength = #linedata
@@ -206,7 +219,10 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
 
     local sedsConnected = seditors.selectors.getSeditorsConnected(bufId)
     if R.isEmpty(sedsConnected) then
-        zombies = handleZombies(bufId, editLineCount)
+        zombies, zombieLayoutActions = handleZombies(bufId, editLineCount)
+        vim.schedule(function()
+            R.forEach(store.dispatch, zombieLayoutActions)
+        end)
         return
     end
 
@@ -277,9 +293,9 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
                 --
                 -- second third OR case: changes spans over the whole window
                 --
-                -- delete: remove sed, relayout
+                -- delete: zombie, relayout
 
-                log.debug('---- add editor to zombie list and delete it', sed.seditorBufferId)
+                log.debug('---- add editor to zombie list (delete op)', sed.seditorBufferId)
                 seditors.actions.changeData({
                     seditorBufferId = sed.seditorBufferId,
                     data = { isZombie = true },
@@ -382,18 +398,34 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
             elseif (firstline < seditorStartLine) and (lastline > seditorEndLine) then
                 -- change encloses sed fully
                 --
-                -- // findOrRemove: check if this window was removed, if yes: remove it from state and relayout
+                -- findOrRemove: check if this window was removed, if yes:
+                -- remove it from state and relayout
                 -- changeAdd: findOrRemove, relayout by return value
                 -- NOTICE I don't know how to trigger this with normal editor
                 -- commands, but it is the case when
                 -- `vim.api.nvim_buf_set_lines` is used, e.g. in a formatter
                 -- plugin
 
-                -- FIXME implement after delete case is testet
-                log.debug('not implemented yet - deleting buffer', sed.seditorBufferId)
-                vim.schedule(function()
-                    vim.cmd('bd! ' .. sed.seditorBufferId)
-                end)
+                log.debug('---- add editor to zombie list (change add op)', sed.seditorBufferId)
+                seditors.actions.changeData({
+                    seditorBufferId = sed.seditorBufferId,
+                    data = { isZombie = true },
+                })
+                zombies = R.assoc(sed.seditorBufferId, {
+                    seditor = sed,
+                    text = R.pipe(
+                        sed.indentCount
+                                and h.map(R.concat(h.createWhiteSpace(sed.indentCount)))
+                            or R.identity,
+                        R.join('\n')
+                    )(
+                        vim.api.nvim_buf_get_lines(sed.seditorBufferId, 0, -1, true)
+                    ),
+                    countdown = ZOMBIE_COUNTDOWN_VALUE,
+                }, zombies)
+                -- FIXME do this in middleware
+                vim.bo[sed.seditorBufferId].modifiable = false
+                return
             end
             log.debug('########## unhandled op ##########')
         elseif operationType == h.BUF_LINES_OP_CHANGE then
@@ -458,20 +490,20 @@ local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, new
         end
     end, sedsConnected)
 
+    zombies, zombieLayoutActions = handleZombies(bufId, editLineCount)
     vim.schedule(function()
         -- NOTICE refresh state, in case some were removed
         R.forEach(seditor.checkIndentCount, seditors.selectors.getSeditorsConnected(bufId))
-        if R.isEmpty(layoutActions) then
+        if R.isEmpty(layoutActions) and R.isEmpty(zombieLayoutActions) then
             log.debug('no relayouting needed')
             -- needs to run in vim.schedule as well, as we need to wait for the
             -- "change buf lines" calls, which are also scheduled
         else
-            log.debug('relayouting!')
-            R.forEach(store.dispatch, layoutActions)
+            local actions = R.concat(layoutActions, zombieLayoutActions)
+            log.debug('relayouting!', #actions)
+            R.forEach(store.dispatch, actions)
         end
     end)
-
-    zombies = handleZombies(bufId, editLineCount)
 end
 
 M.subscribeToBuffer = function()
