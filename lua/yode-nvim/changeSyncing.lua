@@ -11,13 +11,13 @@ local diffLib = require('yode-nvim.diffLib')
 
 local M = {}
 
-local handleZombies = function(fileBufferId, editLineCount)
+local handleZombies = function(fileBufferId, editLineCount, onAction)
     local log = logging.create('handleZombies')
 
     -- ignoring one line changes for now, doesn't seem worth diffing
     -- TODO do it for zombies with only one line as well, skipped because of
     -- lazyness. One line changes are often the fast pace typing events.
-    if editLineCount <= 1 then
+    if editLineCount ~= nil and editLineCount <= 1 then
         log.debug('not processing one line changes')
         return {}
     end
@@ -68,10 +68,14 @@ local handleZombies = function(fileBufferId, editLineCount)
         vim.schedule(function()
             vim.api.nvim_buf_set_lines(seditorBufferId, 0, -1, true, cleanedLines)
         end)
-        return sharedLayoutActions.actions.contentChanged({
-            tabId = vim.api.nvim_get_current_tabpage(),
-            bufId = seditorBufferId,
-        })
+        if onAction then
+            return onAction(seditorBufferId)
+        else
+            return sharedLayoutActions.actions.contentChanged({
+                tabId = vim.api.nvim_get_current_tabpage(),
+                bufId = seditorBufferId,
+            })
+        end
     end, zombiesConnected)
 
     return R.reject(R.isNil, zombieActions)
@@ -83,6 +87,53 @@ local activeBuffers = {}
 -- event. so we need a "current buffer" which is the "current focused by user
 -- buffer"
 local currentBuffer
+
+local deactivateBuffer = function(log, bufId)
+    if activeBuffers[bufId] then
+        log.debug('UNsubscribe from buffer:', bufId)
+        activeBuffers = R.dissoc(bufId, activeBuffers)
+    end
+    if currentBuffer == bufId then
+        currentBuffer = nil
+        log.debug('Reset current buffer')
+    end
+end
+
+local onBufferDetach = function(_event, bufId)
+    local log = logging.create('onBufferDetach')
+    log.debug('detach', bufId)
+    M.unsubscribeFromBuffer(bufId, true)
+end
+
+local onBufferReload = function(_event, bufId)
+    local log = logging.create('onBufferReload')
+    log.debug('reload', bufId)
+
+    local sedsConnected = seditors.selectors.getSeditorsConnected(bufId)
+    if not R.isEmpty(sedsConnected) then
+        R.forEach(function(connectedEditor)
+            log.debug('add editor to zombie list', connectedEditor.seditorBufferId)
+            seditors.actions.softlyKillSeditor({
+                seditorBufferId = connectedEditor.seditorBufferId,
+            })
+        end, sedsConnected)
+
+        handleZombies(bufId, nil, function(seditorBufferId)
+            vim.schedule(function()
+                layout.actions.multiTabContentChanged({
+                    tabId = vim.api.nvim_get_current_tabpage(),
+                    bufId = seditorBufferId,
+                })
+                -- content hasn't changed by the action, it is now on par with
+                -- the file buffer
+                vim.bo[seditorBufferId].modified = false
+            end)
+        end)
+        return
+    end
+
+    log.debug("didn't need to do anything: ", bufId)
+end
 
 local activateBuffer = function(editorType, bufId, onLines)
     local log = logging.create('activateBuffer')
@@ -96,21 +147,8 @@ local activateBuffer = function(editorType, bufId, onLines)
     vim.api.nvim_buf_attach(bufId, false, {
         on_lines = onLines,
         on_detach = onBufferDetach,
+        on_reload = onBufferReload,
     })
-end
-
-local deactivateBuffer = function(log, bufId)
-    log.debug('UNsubscribe from buffer:', bufId)
-    activeBuffers = R.dissoc(bufId, activeBuffers)
-    if currentBuffer == bufId then
-        currentBuffer = nil
-        log.debug('Reset current buffer')
-    end
-end
-
-local onBufferDetach = function(_event, bufId)
-    local log = logging.create('onBufferDetach')
-    deactivateBuffer(log, bufId)
 end
 
 local onSeditorBufferLines = function(_event, bufId, _tick, firstline, lastline, newLastline)
@@ -459,6 +497,11 @@ M.subscribeToBuffer = function()
         return
     end
 
+    local zombieLayoutActions = handleZombies(bufId)
+    vim.schedule(function()
+        R.forEach(store.dispatch, zombieLayoutActions)
+    end)
+
     local sedsConnected = seditors.selectors.getSeditorsConnected(bufId)
     if not R.isEmpty(sedsConnected) then
         activateBuffer('file editor', bufId, onFileBufferLines)
@@ -468,7 +511,7 @@ M.subscribeToBuffer = function()
     log.debug("didn't subscribe to buffer: ", bufId)
 end
 
-M.unsubscribeFromBuffer = function(bufId)
+M.unsubscribeFromBuffer = function(bufId, softKillIt)
     local log = logging.create('unsubscribeFromBuffer')
 
     log.debug('checking:', { bufId = bufId, currentBuffer = currentBuffer })
@@ -476,10 +519,17 @@ M.unsubscribeFromBuffer = function(bufId)
     local sed = seditors.selectors.getSeditorById(bufId)
     if sed then
         deactivateBuffer(log, bufId)
-        seditors.actions.removeSeditor({ seditorBufferId = sed.seditorBufferId })
-        layout.actions.multiTabRemoveSeditor({
-            bufId = sed.seditorBufferId,
-        })
+        if softKillIt then
+            log.debug('add editor to zombie list', bufId)
+            seditors.actions.softlyKillSeditor({
+                seditorBufferId = bufId,
+            })
+        else
+            seditors.actions.removeSeditor({ seditorBufferId = sed.seditorBufferId })
+            layout.actions.multiTabRemoveSeditor({
+                bufId = sed.seditorBufferId,
+            })
+        end
         return
     end
 
@@ -488,18 +538,25 @@ M.unsubscribeFromBuffer = function(bufId)
         deactivateBuffer(log, bufId)
         R.forEach(function(connectedEditor)
             deactivateBuffer(log, connectedEditor.seditorBufferId)
-            seditors.actions.removeSeditor({ seditorBufferId = connectedEditor.seditorBufferId })
-            layout.actions.multiTabRemoveSeditor({
-                bufId = connectedEditor.seditorBufferId,
-            })
-            vim.cmd('bd! ' .. connectedEditor.seditorBufferId)
-            log.debug(
-                string.format(
-                    'after deleting buf %d the buf %d is visible',
-                    connectedEditor.seditorBufferId,
-                    vim.fn.bufnr('%')
+            if softKillIt then
+                log.debug('add editor to zombie list', connectedEditor.seditorBufferId)
+                seditors.actions.softlyKillSeditor({
+                    seditorBufferId = connectedEditor.seditorBufferId,
+                })
+            else
+                seditors.actions.removeSeditor({ seditorBufferId = connectedEditor.seditorBufferId })
+                layout.actions.multiTabRemoveSeditor({
+                    bufId = connectedEditor.seditorBufferId,
+                })
+                vim.cmd('bd! ' .. connectedEditor.seditorBufferId)
+                log.debug(
+                    string.format(
+                        'after deleting buf %d the buf %d is visible',
+                        connectedEditor.seditorBufferId,
+                        vim.fn.bufnr('%')
+                    )
                 )
-            )
+            end
         end, sedsConnected)
         return
     end

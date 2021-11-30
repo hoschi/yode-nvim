@@ -31,13 +31,14 @@ M.yodeNvim = function()
     --vim.cmd('tabnew')
     --vim.cmd('normal G')
     --vim.cmd('normal gg10j16dd')
-    vim.cmd('normal gg48j10dd')
+    --vim.cmd('normal gg48j10dd')
     --vim.cmd('normal gg15j8J')
 end
 
 M.yodeTesting = function()
     local log = logging.create('yodeTesting')
-    log.debug('!!!!!!!!!!', vim.fn.bufnr('%'))
+    local buf = vim.fn.bufnr('%')
+    log.debug('!!!!!!!!!!', buf)
 end
 
 M.createSeditorFloating = function(firstline, lastline)
