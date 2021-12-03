@@ -40,6 +40,14 @@ local text2 = [[
         { sync: false }
     )]]
 
+local text3 = [[
+        relative:
+            'editor' +
+            'fooooooooooooooooooo' +
+            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar' +
+            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar',
+]]
+
 describe('diffLib -', function()
     it('excerpt', function()
         local file, seditor = readFiles('./testData/diff/excerpt')
@@ -224,5 +232,30 @@ describe('diffLib -', function()
         eq(48, seditorData.startLine)
 
         eq(373, #diffData.diffTokens)
+    end)
+
+    it('change in small js', function()
+        local file, seditor = readFiles('./testData/diff/changeInSmallJs')
+        -- TODO make the matching algorithm better to find text3 instead!
+        local foundText = [[
+
+    return {
+        relative:
+            'editor' +
+            'fooooooooooooooooooo' +
+            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar' +
+            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar',]]
+
+        local diffData = diffLib.diff(file, seditor)
+        local blocks = diffLib.findConnectedBlocks(diffData)
+        eq(2, #blocks)
+        eq(foundText, blocks[1].text)
+        eq(21, #blocks[1].tokens)
+
+        local seditorData = diffLib.getSeditorDataFromBlocks(blocks, diffData)
+        eq(foundText, seditorData.text)
+        eq(7, seditorData.startLine)
+
+        eq(81, #diffData.diffTokens)
     end)
 end)

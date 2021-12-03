@@ -102,7 +102,7 @@ M.findConnectedBlocks = function(diffData)
     }, startTokens)
     log.debug(
         string.format(
-            'of %d all tokens we start seaching in %d tokens and found %d groups (%s)',
+            'of %d all tokens we start searching in %d tokens and found %d groups (%s)',
             #allTokens,
             #startTokens,
             #allGroups,
@@ -110,11 +110,29 @@ M.findConnectedBlocks = function(diffData)
         )
     )
 
+    local validUpperBound = R.max(
+        #diffData.newTokens * (1 + GROUP_LOSS_FACTOR),
+        #diffData.newTokens + 2 * CONNECTED_TOKEN_BORDER
+    )
+    local validLowerBound = R.max(
+        0,
+        R.min(
+            #diffData.newTokens * (1 - GROUP_LOSS_FACTOR),
+            #diffData.newTokens - 2 * CONNECTED_TOKEN_BORDER
+        )
+    )
     local validGroups = R.filter(function(group)
-        return #group > R.max(0, #diffData.newTokens * (1 - GROUP_LOSS_FACTOR))
-            and #group < #diffData.newTokens * (1 + GROUP_LOSS_FACTOR)
+        return #group > validLowerBound and #group < validUpperBound
     end, allGroups)
-    log.debug('valid group count', #validGroups)
+    log.debug(
+        string.format(
+            'new token count is %d. valid group count %d, after matching size to > %d and < %d',
+            #diffData.newTokens,
+            #validGroups,
+            validLowerBound,
+            validUpperBound
+        )
+    )
 
     log.debug('searching for line groups')
     local lineGroups = h.map(function(group)
