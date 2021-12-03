@@ -36,6 +36,12 @@ map <C-W>K :YodeLayoutShiftWinTop<CR>
 set showtabline=2
 ```
 
+* compatible plugins with current change detection logic
+    * [mhartington/formatter.nvim](https://github.com/mhartington/formatter.nvim)
+        * uses `nvim_buf_set_lines` for one `change/add` event
+    * [tpope/vim-fugitive: fugitive.vim: A Git wrapper so awesome, it should be illegal](https://github.com/tpope/vim-fugitive)
+        * `Gread` works by using one or two change events
+
 ## Development
 
 * [Lamda module help](https://moriyalb.github.io/lamda/)
@@ -77,3 +83,4 @@ set showtabline=2
     * [more infos, see Plenary docs here](https://github.com/nvim-lua/plenary.nvim#plenarytest_harness)
     * run all tests on file changes `nodemon -e lua,vim --exec 'make test'`
     * run single test on file changes `nodemon -e lua,vim --exec "nvim --headless -c \"PlenaryBustedDirectory lua/yode-nvim/tests/e2e/basic_mosaic_layout_spec.lua {minimal_init = 'lua/yode-nvim/tests/minimal.vim'}\" "`
+    * run single test file and log `DEBUG_YODE='trace' nvim --headless -c "PlenaryBustedDirectory lua/yode-nvim/tests/e2e/recover_seditor_with_undo_spec.lua {minimal_init = 'lua/yode-nvim/tests/minimal.vim'}"`

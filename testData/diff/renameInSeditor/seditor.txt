@@ -1,0 +1,15 @@
+async function createSeditor(vim, text, newRow, newHeight) {
+    const buffer = await vim.createBuffer(false, false)
+
+    const foo = 'bar'
+    const width = await getSeditorWidth(vim)
+    const window = await vim.openWindow(buffer, true, {
+        relative: 'editor',
+        row: newRow,
+        col: width,
+        width,
+        height: newHeight,
+        focusable: true,
+    })
+    return window
+}

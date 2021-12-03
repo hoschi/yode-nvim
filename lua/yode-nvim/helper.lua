@@ -35,6 +35,7 @@ M.maxPositiveNumber = math.pow(2, 1024)
 --M.maxNegative = M.maxPositiveNumber * -1
 
 M.noop = function() end
+M.isNotNil = R.complement(R.isNil)
 
 M.lensPath = R.identity
 M.lensProp = R.of
@@ -64,15 +65,15 @@ M.BUF_LINES_OP_DELETE = 'BUF_LINES_OP_DELETE'
 M.getOperationOfBufLinesEvent = function(first, last, data)
     if first == last then
         -- e.g. paste one yanked line in normal mode
-        return M.BUF_LINES_OP_ADD
+        return M.BUF_LINES_OP_ADD, #data
     elseif R.isEmpty(data) then
-        return M.BUF_LINES_OP_DELETE
+        return M.BUF_LINES_OP_DELETE, last - first
     elseif #data == (last - first) then
         -- single line changes as well is visual block changes
-        return M.BUF_LINES_OP_CHANGE
+        return M.BUF_LINES_OP_CHANGE, #data
     else
         -- NOTICE this is also the case for new lines entered in insert mode
-        return M.BUF_LINES_OP_CHANGE_ADD
+        return M.BUF_LINES_OP_CHANGE_ADD, #data
     end
 end
 
@@ -101,6 +102,13 @@ M.prevIndex = function(idx, data)
     end
 
     return idx - 1 >= 1 and idx - 1 or #data
+end
+
+M.readFile = function(file)
+    local f = assert(io.open(file, 'rb'))
+    local content = f:read('*all')
+    f:close()
+    return content
 end
 
 return M

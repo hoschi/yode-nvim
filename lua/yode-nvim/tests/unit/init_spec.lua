@@ -15,6 +15,7 @@ describe('yode-nvim (init.lua)', function()
                     fileBufferId = 205,
                     startLine = 11 + 6,
                     indentCount = 4,
+                    zombie = nil,
                 },
             },
             layout = { tabs = {} },
