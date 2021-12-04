@@ -497,9 +497,17 @@ M.subscribeToBuffer = function()
         return
     end
 
-    local zombieLayoutActions = handleZombies(bufId)
-    vim.schedule(function()
-        R.forEach(store.dispatch, zombieLayoutActions)
+    local zombieLayoutActions = handleZombies(bufId, nil, function(seditorBufferId)
+        vim.schedule(function()
+            layout.actions.multiTabContentChanged({
+                tabId = vim.api.nvim_get_current_tabpage(),
+                bufId = seditorBufferId,
+            })
+            -- content hasn't changed by the action, under certain circumstances. E.g. reading
+            -- the file buffer with `e!` from disc detaches the buffer and resubscribes to its
+            -- changes where we sync the seditors to the current not modified state.
+            vim.bo[seditorBufferId].modified = vim.bo[bufId].modified
+        end)
     end)
 
     local sedsConnected = seditors.selectors.getSeditorsConnected(bufId)
