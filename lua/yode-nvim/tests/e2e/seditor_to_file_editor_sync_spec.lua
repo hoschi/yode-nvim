@@ -1,3 +1,5 @@
+local async = require('plenary.async')
+async.tests.add_to_env()
 local yodeNvim = require('yode-nvim.init')
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
@@ -9,7 +11,7 @@ local R = require('yode-nvim.deps.lamda.dist.lamda')
 local eq = assert.are.same
 
 describe('seditor sync to file editor sync', function()
-    it('1', function()
+    a.it('1', function()
         eq({ seditors = {}, layout = { tabs = {} } }, store.getState())
         vim.cmd('e ./testData/small.js')
         local fileBufferId = vim.fn.bufnr('%')
@@ -23,6 +25,7 @@ describe('seditor sync to file editor sync', function()
         }, tutil.getHumanBufferList())
 
         vim.cmd('normal jjItest_')
+        async.util.scheduler()
 
         tutil.assertBufferContentString([[
 export default async function () {
@@ -37,33 +40,32 @@ export default async function () {
         vim.cmd('wincmd h')
 
         eq(fileBufferId, vim.fn.bufnr('%'))
-        -- TODO doesn't work, I don't know what is the problem
-        --tutil.assertBufferContentString([[
-        --/**
-        --* My super function!
-        --*/
-        --export default async function () {
-        --return {
-        --test_relative:
-        --'editor' +
-        --'fooooooooooooooooooo' +
-        --'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar' +
-        --'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar',
-        --}
-        --}
+        tutil.assertBufferContentString([[
+/**
+ * My super function!
+ */
+export default async function () {
+    return {
+        test_relative:
+            'editor' +
+            'fooooooooooooooooooo' +
+            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar' +
+            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar',
+    }
+}
 
-        --//
-        --//
-        --//
-        --//
-        --//
-        --//
-        --//
-        --//
-        --//
-        --//
-        --//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
-        --// foo]])
+// foo]])
     end)
 end)

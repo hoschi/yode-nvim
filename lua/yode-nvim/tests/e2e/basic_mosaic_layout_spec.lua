@@ -1,3 +1,5 @@
+local async = require('plenary.async')
+async.tests.add_to_env()
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
 local tutil = require('yode-nvim.tests.util')
@@ -448,8 +450,110 @@ plugin.registerCommand(
         vim.cmd('bd 6')
     end)
 
-    it('changing content height, changes layout', function()
-        -- TODO not possible to test atm
+    a.it('changing content height, changes layout', function()
+        eq({
+            {
+                y = 1,
+                height = 10,
+                id = seditor3Win,
+            },
+            {
+                y = 12,
+                height = 15,
+                id = seditor2Win,
+            },
+            {
+                y = 28,
+                height = 7,
+                id = seditor1Win,
+            },
+        }, h.map(
+            R.pick({ 'y', 'height', 'id' }),
+            store.getState().layout.tabs[1].windows
+        ))
+
+        vim.cmd('wincmd w')
+        eq(seditor2Win, vim.fn.win_getid())
+        vim.cmd('normal ggyypp')
+        async.util.scheduler()
+
+        tutil.assertBufferContentString([[
+async function createSeditor(nvim, text, row, height) {
+async function createSeditor(nvim, text, row, height) {
+async function createSeditor(nvim, text, row, height) {
+    const buffer = await nvim.createBuffer(false, false)
+
+    const foo = 'bar'
+    const width = await getSeditorWidth(nvim)
+    const window = await nvim.openWindow(buffer, true, {
+        relative: 'editor',
+        row,
+        col: width,
+        width,
+        height: height,
+        focusable: true,
+    })
+    return window
+}]])
+        eq({
+            {
+                y = 1,
+                height = 10,
+                id = seditor3Win,
+            },
+            {
+                y = 12,
+                height = 17,
+                id = seditor2Win,
+            },
+            {
+                y = 30,
+                height = 7,
+                id = seditor1Win,
+            },
+        }, h.map(
+            R.pick({ 'y', 'height', 'id' }),
+            store.getState().layout.tabs[1].windows
+        ))
+
+        vim.cmd('undo')
+        async.util.scheduler()
+        tutil.assertBufferContentString([[
+async function createSeditor(nvim, text, row, height) {
+    const buffer = await nvim.createBuffer(false, false)
+
+    const foo = 'bar'
+    const width = await getSeditorWidth(nvim)
+    const window = await nvim.openWindow(buffer, true, {
+        relative: 'editor',
+        row,
+        col: width,
+        width,
+        height: height,
+        focusable: true,
+    })
+    return window
+}]])
+        eq({
+            {
+                y = 1,
+                height = 10,
+                id = seditor3Win,
+            },
+            {
+                y = 12,
+                height = 15,
+                id = seditor2Win,
+            },
+            {
+                y = 28,
+                height = 7,
+                id = seditor1Win,
+            },
+        }, h.map(
+            R.pick({ 'y', 'height', 'id' }),
+            store.getState().layout.tabs[1].windows
+        ))
     end)
 
     it('delete floating buffer', function()
