@@ -148,7 +148,6 @@ M.cloneCurrentIntoFloat = function()
 end
 
 M.bufferDelete = function()
-    local sed
     local log = logging.create('bufferDelete')
     local winId = vim.fn.win_getid()
     local bufId = vim.fn.bufnr('%')
@@ -163,7 +162,7 @@ M.bufferDelete = function()
         return
     end
 
-    sed = seditors.selectors.getSeditorById(bufId)
+    local sed = seditors.selectors.getSeditorById(bufId)
     if sed then
         log.debug('deleting seditor buffer and show file buffer', bufId, winId, sed.fileBufferId)
         vim.cmd('YodeGoToAlternateBuffer t')
@@ -292,6 +291,24 @@ M.layoutShiftWinTop = function()
         tabId = vim.api.nvim_get_current_tabpage(),
         winId = vim.fn.win_getid(),
     })
+end
+
+M.runInFile = function(cmdToRun)
+    local log = logging.create('runInFile')
+    local bufId = vim.fn.bufnr('%')
+    local sed = seditors.selectors.getSeditorById(bufId)
+    if not sed then
+        log.debug('nothing to do, no seditor', bufId, cmdToRun)
+        return
+    end
+    log.debug(string.format('running command "%s" in buffer %d', cmdToRun, sed.fileBufferId))
+    vim.api.nvim_buf_call(sed.fileBufferId, function()
+        log.debug('subscribe to file buffer to sync changes', sed.fileBufferId)
+        changeSyncing.subscribeToBuffer()
+        vim.cmd(cmdToRun)
+    end)
+    log.debug('subscribe to seditor buffer again', bufId)
+    changeSyncing.subscribeToBuffer()
 end
 
 -----------------------

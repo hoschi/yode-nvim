@@ -41,6 +41,8 @@ set showtabline=2
         * uses `nvim_buf_set_lines` for one `change/add` event
     * [tpope/vim-fugitive: fugitive.vim: A Git wrapper so awesome, it should be illegal](https://github.com/tpope/vim-fugitive)
         * `Gread` works by using one or two change events
+* `YodeRunInFile` works only with synchronous commands, e.g. `Gread`. Not with
+  async commands like `FormatWrite`
 
 ## Development
 
