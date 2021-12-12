@@ -10,6 +10,7 @@ command! YodeCloneCurrentIntoFloat lua require'yode-nvim'.cloneCurrentIntoFloat(
 command! YodeBufferDelete lua require'yode-nvim'.bufferDelete()
 command! -nargs=1 YodeRunInFile lua require'yode-nvim'.runInFile(<f-args>)
 command! YodeFormatWrite lua require'yode-nvim.format'.formatWrite()
+command! YodeFloatToMainWindow lua require'yode-nvim'.floatToMainWindow()
 
 command! YodeLayoutShiftWinDown lua require'yode-nvim'.layoutShiftWinDown()
 command! YodeLayoutShiftWinUp lua require'yode-nvim'.layoutShiftWinUp()

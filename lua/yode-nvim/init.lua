@@ -27,7 +27,7 @@ M.yodeNvim = function()
     --testSetup.setup2()
     --testSetup.setup3()
 
-    vim.cmd('wincmd h')
+    --vim.cmd('wincmd h')
     --vim.cmd('tabnew')
     --vim.cmd('normal G')
     --vim.cmd('normal gg10j16dd')
@@ -309,6 +309,31 @@ M.runInFile = function(cmdToRun)
     end)
     log.debug('subscribe to seditor buffer again', bufId)
     changeSyncing.subscribeToBuffer()
+end
+
+M.floatToMainWindow = function()
+    local log = logging.create('floatToMainWindow')
+    local bufId = vim.fn.bufnr('%')
+
+    local sed = seditors.selectors.getSeditorById(bufId)
+    if not sed then
+        log.debug('nothing to do, no seditor', bufId)
+        return
+    end
+
+    local floatWin = layout.selectors.getWindowBySomeId(
+        vim.api.nvim_get_current_tabpage(),
+        { bufId = bufId }
+    )
+    if not floatWin then
+        log.debug('buffer is not floating, nothing to do')
+        return
+    end
+
+    log.debug('close float, move to main window and reopen buffer')
+    vim.cmd('close')
+    vim.cmd('wincmd t')
+    vim.cmd('b ' .. bufId)
 end
 
 -----------------------
