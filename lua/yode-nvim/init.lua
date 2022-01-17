@@ -341,6 +341,13 @@ M.floatToMainWindow = function()
     vim.cmd('b ' .. bufId)
 end
 
+M.yodeNeomakeGetSeditorInfo = function(bufId)
+    local log = logging.create('yodeNeomakeGetSeditorInfo')
+    local sed = seditors.selectors.getSeditorById(bufId)
+    log.debug(bufId, sed)
+    return sed
+end
+
 -----------------------
 -- debug stuff
 -----------------------
@@ -348,13 +355,6 @@ end
 M.yodeArgsLogger = function(...)
     local log = logging.create('yodeArgsLogger')
     log.debug(...)
-end
-
-M.yodeNeomakeGetSeditorInfo = function(bufId)
-    local log = logging.create('yodeNeomakeGetSeditorInfo')
-    local sed = seditors.selectors.getSeditorById(bufId)
-    log.debug(bufId, sed)
-    return sed
 end
 
 M.yodeRedux = function()
