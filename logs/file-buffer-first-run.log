@@ -1,0 +1,30 @@
+
+16:33:22 320623 [D      ] ##### YodeMaker-InitForJob: normal file 1
+16:33:22 320623 [D      ] [1.-:1:1] Running makers: eslintGeneralEditorYode.
+16:33:22 320623 [V      ] [1.1:1:1] Starting async job: eslint -c .eslintrc-editor --format=json --ignore-pattern '!.*.js' testData/basic.js.
+16:33:22 320623 [D      ] [1.1:1:1] cwd: /home/hoschi/repos/nfbe/yode-nvim.
+16:33:23 320623 [D +0.25] [1.1:1:1] output on stdout: ['[{"filePath":"/home/hoschi/repos/nfbe/yode-nvim/testData/basic.js","messages":[{"ruleId":"no-unused-vars","severity":2,"message":"''foo'' is assigned a value but never used.","line":14,"column":11,"nodeType":"Identifier","messageId":"unusedVar","endLine":14,"endColumn":14},{"ruleId":"eqeqeq","severity":1,"message":"Expected ''==='' and instead saw ''==''.","line":52,"column":53,"nodeType":"BinaryExpression","messageId":"unexpected","endLine":52,"endColumn":55,"fix":{"range":[877,879],"text":"==="}}],"errorCount":1,"warningCount":1,"fixableErrorCount":0,"fixableWarningCount":1,"source":"let mainWindowWidth\n\nconst getSeditorWidth = async (nvim) => {\n    if (!mainWindowWidth) {\n        mainWindowWidth = Math.floor((await nvim.getOption(''columns'')) / 2)\n    }\n\n    return mainWindowWidth\n}\n\nasync function createSeditor(nvim, text, row, height) {\n    const buffer = await nvim.createBuffer(false, false)\n\n    const foo = ''bar''\n    const width = await getSeditorWidth(nvim)\n    const window = await nvim.openWindow(buffer, true, {\n        relative: ''editor'',\n        row,\n        col: width,\n        width,\n        height: height,\n        focusable: true,\n    })\n    return window\n}\n\n/*\n *\n *\n *\n *\n *\n *\n *\n *\n *\n *\n *\n *\n *\n *\n *\n */\n\nmodule.exports = (plugin) => {\n    const { nvim } = plugin\n    plugin.setOptions({ dev: true })\n\n    plugin.registerCommand(\n        ''YodeCreateSeditor'',\n        async () => {\n            await createSeditor(nvim, ''1111'', 0, 20 == 50)\n\n            await createSeditor(nvim, ''2222'', 21, 10)\n            await createSeditor(nvim, ''3333'', 32, 15)\n        },\n        { sync: false }\n    )\n\n    const doSomeRecurseStuff = () => {\n        function namedFunction(arg0, arg1, arg2) {\n            const foo = arg2 + ''foo''\n            if (arg0 > 100) {\n                return ''done with: '' + arg0\n            }\n            return {\n                foo,\n                bar: namedFunction(arg0 + arg1, 10, 10),\n            }\n        }\n        return namedFunction(0, 1, 12)\n    }\n\n    plugin.registerAutocmd(\n        ''VimResized'',\n        async () => {\n            return doSomeRecurseStuff()\n        },\n        { pattern: ''*'' }\n    )\n}\n","usedDeprecatedRules":[]}]', ''].
+16:33:23 320623 [D      ] [1.1:1:1] exit: eslintGeneralEditorYode: 1.
+16:33:23 320623 [D      ] [1.1:1:1] Processing 1 lines of output.
+16:33:23 320623 [D      ] [1.1:1:1] Calling maker's process_json method with 1 JSON entries.
+16:33:23 320623 [D      ] ##### YodeMaker-Postprocessing: normal file
+16:33:23 320623 [D      ] ##### YodeMaker-Postprocessing: adding line 14:11
+16:33:23 320623 [D      ] ##### YodeMaker-Postprocessing: adding line 52:53
+16:33:23 320623 [D      ] [1.1:1:1] Processing 2 entries.
+16:33:23 320623 [D      ] [1.-:1:1] Adding 2 list entries.
+16:33:23 320623 [D      ] [1.-:1:1] Creating location list for entries.
+16:33:23 320623 [D      ] list: call: set: [0, [], ' ', {'context': {'neomake': {'make_info': 'make_id=1'}}, 'items': [], 'title': 'Neomake[file]: t/basic.js (eslintGeneralEditorYode...)'}].
+16:33:23 320623 [D      ] list: got qfid (action=set): 1.
+16:33:23 320623 [D      ] list: call: set: [0, [], 'a', {'id': 1, 'items': [{'lnum': 14, 'bufnr': 0, 'col': 11, 'filename': 'testData/basic.js', 'vcol': 0, 'nr': -1, 'type': 'E', 'maker_name': 'eslintGeneralEditorYode', 'length': 3, 'text': '''foo'' is assigned a value but never used.'}, {'lnum': 52, 'bufnr': 0, 'col': 53, 'filename': 'testData/basic.js', 'vcol': 0, 'nr': -1, 'type': 'W', 'maker_name': 'eslintGeneralEditorYode', 'length': 2, 'text': 'Expected ''==='' and instead saw ''==''.'}], 'title': 'Neomake[file]: t/basic.js (eslintGeneralEditorYode...)'}].
+16:33:23 320623 [D      ] list: call: "get", returning items: [['getloclist', [0, {'id': 1, 'items': 1}]]].
+16:33:23 320623 [D      ] [1.1:1:1] Entry 1 differs after adding: {'changed': {'bufnr': [0, 1]}, 'added': {'end_lnum': 0, 'end_col': 0}, 'removed': {'filename': 'testData/basic.js'}}.
+16:33:23 320623 [D      ] [1.1:1:1] Entry 2 differs after adding: {'changed': {'bufnr': [0, 1]}, 'added': {'end_lnum': 0, 'end_col': 0}, 'removed': {'filename': 'testData/basic.js'}}.
+16:33:23 320623 [D      ] Updating entry bufnr: 0 => 1.
+16:33:23 320623 [D      ] Updating entry bufnr: 0 => 1.
+16:33:23 320623 [D      ] [1.-:1:1] File-level errors cleaned.
+16:33:23 320623 [D      ] [-.-:1:1] Placing sign: sign place 5000 line=14 name=neomake_file_err buffer=1.
+16:33:23 320623 [D      ] [-.-:1:1] Placing sign: sign place 5001 line=52 name=neomake_file_warn buffer=1.
+16:33:23 320623 [D      ] [1.1:1:1] eslintGeneralEditorYode: completed with exit code 1.
+16:33:23 320623 [D      ] [1.1:1:1] Cleaning jobinfo.
+16:33:23 320623 [D      ] list: call: "title": [0, [], 'a', {'id': 1, 'title': 'Neomake[file]: t/basic.js (eslintGeneralEditorYode(2))'}].
+16:33:23 320623 [D      ] [1.-:1:1] Cleaning make info.

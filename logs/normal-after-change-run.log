@@ -1,0 +1,25 @@
+
+16:37:16 322343 [D +76.1] [2.-:1:1] Running makers: eslintGeneralEditor.
+16:37:16 322343 [D      ] [2.2:1:1] Using tempfile for modified buffer: "/home/hoschi/repos/nfbe/yode-nvim/testData/.basic.js@neomake_322343_2.js".
+16:37:16 322343 [V      ] [2.2:1:1] Starting async job: eslint -c .eslintrc-editor --format=compact --ignore-pattern '!.*.js' 'testData/.basic.js@neomake_322343_2.js'.
+16:37:16 322343 [D      ] [2.2:1:1] cwd: /home/hoschi/repos/nfbe/yode-nvim.
+16:37:16 322343 [D +0.24] [2.2:1:1] output on stdout: ['/home/hoschi/repos/nfbe/yode-nvim/testData/.basic.js@neomake_322343_2.js: line 14, col 11, Error - ''foo'' is assigned a value but never used. (no-unused-vars)', '/home/hoschi/repos/nfbe/yode-nvim/testData/.basic.js@neomake_322343_2.js: line 53, col 53, Warning - Expected ''==='' and instead saw ''==''. (eqeqeq)', '', '2 problems', ''].
+16:37:16 322343 [D      ] [2.2:1:1] exit: eslintGeneralEditor: 1.
+16:37:16 322343 [D      ] [2.2:1:1] Processing 4 lines of output.
+16:37:16 322343 [D      ] [2.2:1:1] Used bufnr from temporary buffer 6 (/home/hoschi/repos/nfbe/yode-nvim/testData/.basic.js@neomake_322343_2.js) for 2 entries: 1, 2.
+16:37:16 322343 [D      ] [2.-:1:1] Adding 2 list entries.
+16:37:16 322343 [D      ] [2.-:1:1] Creating location list for entries.
+16:37:16 322343 [D      ] list: call: set: [0, [], ' ', {'context': {'neomake': {'make_info': 'make_id=2'}}, 'items': [], 'title': 'Neomake[file]: t/basic.js (eslintGeneralEditor...)'}].
+16:37:16 322343 [D      ] list: got qfid (action=set): 5.
+16:37:16 322343 [D      ] list: call: set: [0, [], 'a', {'id': 5, 'items': [{'lnum': 14, 'bufnr': 1, 'end_lnum': 0, 'valid': 1, 'vcol': 0, 'nr': -1, 'module': '', 'type': 'E', 'col': 11, 'end_col': 0, 'pattern': '', 'text': '''foo'' is assigned a value but never used. (no-unused-vars)'}, {'lnum': 53, 'bufnr': 1, 'end_lnum': 0, 'valid': 1, 'vcol': 0, 'nr': -1, 'module': '', 'type': 'W', 'col': 53, 'end_col': 0, 'pattern': '', 'text': 'Expected ''==='' and instead saw ''==''. (eqeqeq)'}], 'title': 'Neomake[file]: t/basic.js (eslintGeneralEditor...)'}].
+16:37:16 322343 [D      ] list: call: "get", returning items: [['getloclist', [0, {'id': 5, 'items': 1}]]].
+16:37:16 322343 [D      ] [2.2:1:1] Processing 2 entries.
+16:37:16 322343 [D      ] [2.-:1:1] File-level errors cleaned.
+16:37:16 322343 [D      ] [-.-:1:1] Reused 2 signs.
+16:37:16 322343 [D      ] [2.2:1:1] eslintGeneralEditor: completed with exit code 1.
+16:37:16 322343 [D      ] [2.2:1:1] Cleaning jobinfo.
+16:37:16 322343 [D      ] [-.-:1:1] Cleaning 0 old signs.
+16:37:16 322343 [D      ] list: call: "title": [0, [], 'a', {'id': 5, 'title': 'Neomake[file]: t/basic.js (eslintGeneralEditor(2))'}].
+16:37:16 322343 [D      ] [2.-:1:1] Cleaning make info.
+16:37:16 322343 [D      ] Removing temporary file: "/home/hoschi/repos/nfbe/yode-nvim/testData/.basic.js@neomake_322343_2.js".
+16:37:16 322343 [D      ] Wiping out 1 unlisted/remapped buffers: [6].
