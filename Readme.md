@@ -45,6 +45,11 @@ set showtabline=2
     * [mhartington/formatter.nvim](https://github.com/mhartington/formatter.nvim)
         * uses `nvim_buf_set_lines` for one `change/add` event, but is async
         * [adapted version to install](https://github.com/hoschi/formatter.nvim)
+* overlapping/nested seditors
+    * are not supported at the moment
+    * e.g. changing a seditor triggers Neomake only for the connected (visible)
+      file editor. It doesn't check all connected seditors of the file buffers
+      if the seditor change, fixes the errors in sibling seditors
 
 ## Development
 
