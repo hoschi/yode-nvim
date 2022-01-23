@@ -33,8 +33,6 @@ augroup YodeNvim
 
     autocmd VimEnter * au! YodeNvimPreStartup
     autocmd VimResized * lua require'yode-nvim'.onVimResized()
-
-    autocmd User NeomakeJobFinished lua require'yode-nvim'.yodeNeomakeJobFinished()
 augroup END
 
 " execute commands only during startup where some things don't work e.g.

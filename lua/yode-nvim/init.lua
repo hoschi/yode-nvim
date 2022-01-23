@@ -369,38 +369,6 @@ M.yodeNeomakeCheckIgnore = function(bufId)
     return shouldIgnore
 end
 
-M.yodeNeomakeJobFinished = function()
-    local log = logging.create('yodeNeomakeJobFinished')
-
-    local context = vim.g.neomake_hook_context
-    log.debug(
-        string.format(
-            'Neomake Job for maker %s and buffer %d exited with code: %s',
-            context.jobinfo.maker.name,
-            context.jobinfo.bufnr,
-            context.jobinfo.exit_code
-        )
-    )
-
-    local sed = context.jobinfo.seditor
-    if sed then
-        log.debug(
-            string.format(
-                'Neomake finished for seditor %d, now running on file buffer %d',
-                sed.seditorBufferId,
-                sed.fileBufferId
-            )
-        )
-        -- FIXME endless loop, if it would even work
-        --vim.api.nvim_buf_call(sed.fileBufferId, function()
-            --vim.cmd('Neomake')
-        --end)
-        return
-    end
-
-    log.debug('Neomake finished for file editor', context.jobinfo.bufnr)
-end
-
 -----------------------
 -- Integration
 -----------------------
