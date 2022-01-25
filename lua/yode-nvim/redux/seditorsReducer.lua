@@ -42,13 +42,15 @@ M.selectors.getSeditorById = function(id, state)
 end
 M.selectors.getSeditorsConnected = function(fileBufferId, state)
     return R.pipe(
+        R.values,
         R.filter(R.allPass(R.propEq('fileBufferId', fileBufferId), R.complement(R.has('zombie'))))
     )(state)
 end
 M.selectors.getZombieSeditorsConnected = function(fileBufferId, state)
-    return R.pipe(R.filter(R.allPass(R.propEq('fileBufferId', fileBufferId), R.has('zombie'))))(
-        state
-    )
+    return R.pipe(
+        R.values,
+        R.filter(R.allPass(R.propEq('fileBufferId', fileBufferId), R.has('zombie')))
+    )(state)
 end
 
 local reducerFunctions = {

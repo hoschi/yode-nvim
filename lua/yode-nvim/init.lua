@@ -27,11 +27,6 @@ M.yodeNvim = function()
     --testSetup.setup2()
     --testSetup.setup3()
 
-    vim.cmd([[
-        wincmd w
-        wincmd w
-        normal ggjjjj
-    ]])
     --vim.cmd('wincmd h')
     --vim.cmd('tabnew')
     --vim.cmd('normal G')
@@ -345,13 +340,6 @@ end
 -- Neomake
 -----------------------
 
-M.yodeNeomakeGetSeditorInfo = function(bufId)
-    local log = logging.create('yodeNeomakeGetSeditorInfo')
-    local sed = seditors.selectors.getSeditorById(bufId)
-    log.debug(bufId, sed)
-    return sed
-end
-
 M.yodeNeomakeCheckIgnore = function(bufId)
     local log = logging.create('yodeNeomakeCheckIgnore')
     log.debug('checking buffer', bufId)
@@ -367,6 +355,30 @@ M.yodeNeomakeCheckIgnore = function(bufId)
     local shouldIgnore = not R.isEmpty(bufType or '')
     log.debug('no seditor, ignore logic as normal Neovim by buftype:', bufType, shouldIgnore)
     return shouldIgnore
+end
+
+-- FIXME move these methods to "API" file instead
+M.yodeNeomakeGetSeditorInfo = function(bufId)
+    local log = logging.create('yodeNeomakeGetSeditorInfo')
+    local sed = seditors.selectors.getSeditorById(bufId)
+    log.debug(bufId, sed)
+    return sed
+end
+
+M.yodeNeomakeSeditorsConnected = function(bufId)
+    local log = logging.create('yodeNeomakeSeditorsConnected')
+
+    local sedsConnected = seditors.selectors.getSeditorsConnected(bufId)
+    log.debug(bufId, #sedsConnected)
+    return sedsConnected
+end
+
+M.yodeNeomakeGetSeditorById = function(bufId)
+    local log = logging.create('yodeNeomakeGetSeditorById')
+
+    local sed = seditors.selectors.getSeditorById(bufId)
+    log.debug(bufId, sed)
+    return sed
 end
 
 -----------------------
