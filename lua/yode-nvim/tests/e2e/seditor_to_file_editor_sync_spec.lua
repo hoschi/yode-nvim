@@ -10,19 +10,32 @@ local R = require('yode-nvim.deps.lamda.dist.lamda')
 
 local eq = assert.are.same
 
-describe('seditor sync to file editor sync', function()
-    a.it('1', function()
+describe('seditor to file editor sync -', function()
+    local fileBufferId = 1
+    local seditor1 = 2
+    local seditor2 = 3
+
+    a.it('one seditor', function()
         eq({ seditors = {}, layout = { tabs = {} } }, store.getState())
         vim.cmd('e ./testData/small.js')
-        local fileBufferId = vim.fn.bufnr('%')
+        eq(fileBufferId, vim.fn.bufnr('%'))
 
         vim.cmd('4,12YodeCreateSeditorFloating')
-        local seditorBufferId = vim.fn.bufnr('%')
+        eq(seditor1, vim.fn.bufnr('%'))
 
         eq({
             [fileBufferId] = './testData/small.js',
-            [seditorBufferId] = 'yode://./testData/small.js:2.js',
+            [seditor1] = 'yode://./testData/small.js:2.js',
         }, tutil.getHumanBufferList())
+        eq({
+            [seditor1] = {
+                seditorBufferId = seditor1,
+                fileBufferId = fileBufferId,
+                startLine = 3,
+                indentCount = 0,
+                zombie = nil,
+            },
+        }, store.getState().seditors)
 
         vim.cmd('normal jjItest_')
         async.util.scheduler()
@@ -67,5 +80,54 @@ export default async function () {
 //
 
 // foo]])
+    end)
+
+    a.it('add second seditor above', function()
+        vim.cmd('1,2YodeCreateSeditorFloating')
+        eq(seditor2, vim.fn.bufnr('%'))
+        eq({
+            [seditor1] = {
+                seditorBufferId = seditor1,
+                fileBufferId = fileBufferId,
+                startLine = 3,
+                indentCount = 0,
+                zombie = nil,
+            },
+            [seditor2] = {
+                seditorBufferId = seditor2,
+                fileBufferId = fileBufferId,
+                startLine = 0,
+                indentCount = 0,
+                zombie = nil,
+            },
+        }, store.getState().seditors)
+
+        tutil.assertBufferContentString([[
+/**
+ * My super function!]])
+
+        vim.cmd('normal O// start of file')
+        async.util.scheduler()
+
+        tutil.assertBufferContentString([[
+// start of file
+/**
+ * My super function!]])
+        eq({
+            [seditor1] = {
+                seditorBufferId = seditor1,
+                fileBufferId = fileBufferId,
+                startLine = 4,
+                indentCount = 0,
+                zombie = nil,
+            },
+            [seditor2] = {
+                seditorBufferId = seditor2,
+                fileBufferId = fileBufferId,
+                startLine = 0,
+                indentCount = 0,
+                zombie = nil,
+            },
+        }, store.getState().seditors)
     end)
 end)
