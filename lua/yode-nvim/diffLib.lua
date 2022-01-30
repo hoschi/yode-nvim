@@ -28,17 +28,11 @@ M.diff = function(old, new, separator)
 
     local oldTokens = h.mapWithIndex(function(token, i)
         return { index = i, token = token }
-    end, diffLibOrig.split(
-        old,
-        separator
-    ))
+    end, diffLibOrig.split(old, separator))
 
     local newTokens = h.mapWithIndex(function(token, i)
         return { index = i, token = token }
-    end, diffLibOrig.split(
-        new,
-        separator
-    ))
+    end, diffLibOrig.split(new, separator))
 
     return { diffTokens = arr, oldTokens = oldTokens, newTokens = newTokens }
 end
@@ -179,10 +173,7 @@ M.findConnectedBlocks = function(diffData)
                     text = text,
                     distance = distance,
                 }
-            end, R.range(
-                0,
-                lineCount
-            ))
+            end, R.range(0, lineCount))
 
             local startMatchesSorted = sortMatches(startMatches)
             local bestMatch = R.head(startMatchesSorted)
@@ -276,10 +267,7 @@ M.findConnectedBlocks = function(diffData)
                     text = text,
                     distance = distance,
                 }
-            end, R.range(
-                0,
-                trailLineEndingCount
-            ))
+            end, R.range(0, trailLineEndingCount))
 
             local endMatchesSorted = sortMatches(endMatches)
             local bestMatch = R.head(endMatchesSorted)

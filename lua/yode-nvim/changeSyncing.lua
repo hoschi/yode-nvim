@@ -84,14 +84,173 @@ local onSeditorBufferLines = function(_event, bufId, _tick, firstline, lastline,
     })
     -- NOTICE needed, because `:h textlock` is active and you get a E523 without it
     vim.schedule(function()
+        local fileBufferFirstLine = firstline + seditorWindow.startLine
+        local fileBufferLastLine = lastline + seditorWindow.startLine
+        local lineLength = lastline - firstline
+        local dataLength = #linedata
         vim.api.nvim_buf_set_lines(
             seditorWindow.fileBufferId,
-            firstline + seditorWindow.startLine,
-            lastline + seditorWindow.startLine,
+            fileBufferFirstLine,
+            fileBufferLastLine,
             true,
             lineData
         )
         seditor.checkIndentCount(seditorWindow)
+
+        local sedsConnected = seditors.selectors.getSeditorsConnected(seditorWindow.fileBufferId)
+        R.forEach(function(sed)
+            if sed.seditorBufferId == bufId then
+                log.debug('-- SKIP buf:', sed.seditorBufferId)
+                return
+            end
+            local seditorLength = #vim.api.nvim_buf_get_lines(sed.seditorBufferId, 0, -1, true)
+            local seditorStartLine = sed.startLine
+            local seditorEndLine = seditorStartLine + seditorLength
+            log.debug('-- buf:', sed.seditorBufferId, {
+                seditorStartLine = seditorStartLine,
+                seditorEndLine = seditorEndLine,
+                seditorLength = seditorLength,
+            })
+            if operationType == h.BUF_LINES_OP_DELETE then
+                if fileBufferLastLine <= seditorStartLine then
+                    -- change was above sed
+                    --
+                    -- delete: shift
+                    log.debug('---- shift by', -lineLength)
+                    seditors.actions.changeStartLine({
+                        seditorBufferId = sed.seditorBufferId,
+                        amount = -lineLength,
+                    })
+                    return
+                elseif fileBufferFirstLine >= seditorEndLine then
+                    -- change was below window
+                    return
+                elseif
+                    (
+                        (fileBufferFirstLine >= seditorStartLine)
+                        and (fileBufferLastLine <= seditorEndLine)
+                    )
+                    and not (
+                        (fileBufferFirstLine == seditorStartLine)
+                        and (fileBufferLastLine == seditorEndLine)
+                    )
+                then
+                    -- TODO change was in sed, we don't support nested seditors at the moment
+                    return
+                elseif
+                    (
+                        (fileBufferLastLine <= seditorEndLine)
+                        or (fileBufferFirstLine >= seditorStartLine)
+                    )
+                    or (
+                        (fileBufferFirstLine <= seditorStartLine)
+                        and (fileBufferLastLine >= seditorEndLine)
+                    )
+                then
+                    -- TODO we don't support nested seditors at the moment
+                    -- the first two OR cases: changes lay "half" in seditor
+                    -- "half" outside, so boundary was removed
+                    --
+                    -- second third OR case: changes spans over the whole window
+                    return
+                end
+                log.debug('########## unhandled op ##########')
+            elseif operationType == h.BUF_LINES_OP_ADD then
+                if fileBufferFirstLine <= seditorStartLine then
+                    -- change was above sed
+                    --
+                    -- add: shift
+                    log.debug('---- shift by', dataLength)
+                    seditors.actions.changeStartLine({
+                        seditorBufferId = sed.seditorBufferId,
+                        amount = dataLength,
+                    })
+                    return
+                elseif fileBufferFirstLine >= seditorEndLine then
+                    -- change was below window
+                    return
+                elseif
+                    (fileBufferFirstLine > seditorStartLine)
+                    and (fileBufferFirstLine < seditorEndLine)
+                then
+                    -- TODO we don't support nested seditors at the moment
+                    -- change was in sed
+                    return
+                end
+                log.debug('########## unhandled op ##########')
+            elseif operationType == h.BUF_LINES_OP_CHANGE_ADD then
+                if fileBufferLastLine <= seditorStartLine then
+                    -- change was above sed
+                    --
+                    -- changeAdd: shift by added portion
+                    log.debug('---- shift by', dataLength - lineLength)
+                    seditors.actions.changeStartLine({
+                        seditorBufferId = sed.seditorBufferId,
+                        amount = dataLength - lineLength,
+                    })
+                    return
+                elseif fileBufferFirstLine >= seditorEndLine then
+                    -- change was below window
+                    return
+                elseif
+                    (fileBufferFirstLine >= seditorStartLine)
+                    and (fileBufferLastLine <= seditorEndLine)
+                then
+                    -- TODO we don't support nested seditors at the moment
+                    return
+                elseif
+                    (fileBufferFirstLine < seditorStartLine)
+                    and (fileBufferLastLine > seditorEndLine)
+                then
+                    -- TODO we don't support nested seditors at the moment
+                    -- change encloses sed fully
+                    --
+                    -- findOrRemove: check if this window was removed, if yes:
+                    -- remove it from state and relayout
+                    -- changeAdd: findOrRemove, relayout by return value
+                    -- NOTICE I don't know how to trigger this with normal editor
+                    -- commands, but it is the case when
+                    -- `vim.api.nvim_buf_set_lines` is used, e.g. in a formatter
+                    -- plugin
+                    return
+                end
+                log.debug('########## unhandled op ##########')
+            elseif operationType == h.BUF_LINES_OP_CHANGE then
+                if fileBufferLastLine <= seditorStartLine then
+                    -- change was above sed
+                    return
+                elseif fileBufferFirstLine >= seditorEndLine then
+                    -- change was below window
+                    return
+                elseif
+                    (fileBufferFirstLine >= seditorStartLine)
+                    and (fileBufferLastLine <= seditorEndLine)
+                then
+                    -- TODO we don't support nested seditors at the moment
+                    -- change was in sed
+                    return
+                elseif
+                    (
+                        (fileBufferLastLine <= seditorEndLine)
+                        or (fileBufferFirstLine >= seditorStartLine)
+                    )
+                    or (
+                        (fileBufferFirstLine <= seditorStartLine)
+                        and (fileBufferLastLine >= seditorEndLine)
+                    )
+                then
+                    -- TODO we don't support nested seditors at the moment
+                    -- the first two OR cases: changes lay "half" in seditor
+                    -- "half" outside, so boundary was removed
+                    --
+                    -- second and third OR case: changes spans over the whole window
+                    --
+                    -- change: apply changes for the lines of swindow
+                    return
+                end
+                log.debug('########## unhandled op ##########')
+            end
+        end, sedsConnected)
 
         -- NOTICE this event is ignored at the moment for performance reasons
         -- as we don't need to handle it with the default layout!
@@ -460,7 +619,9 @@ M.unsubscribeFromBuffer = function(bufId, softKillIt)
                     seditorBufferId = connectedEditor.seditorBufferId,
                 })
             else
-                seditors.actions.removeSeditor({ seditorBufferId = connectedEditor.seditorBufferId })
+                seditors.actions.removeSeditor({
+                    seditorBufferId = connectedEditor.seditorBufferId,
+                })
                 layout.actions.multiTabRemoveSeditor({
                     bufId = connectedEditor.seditorBufferId,
                 })

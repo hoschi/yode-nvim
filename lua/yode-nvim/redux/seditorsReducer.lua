@@ -79,8 +79,7 @@ local reducerFunctions = {
     [M.actionNames.SOFTLY_KILL_SEDITOR] = function(state, a)
         return h.over(h.lensProp(a.seditorBufferId), function(sed)
             local text = R.pipe(
-                sed.indentCount
-                        and h.map(R.concat(h.createWhiteSpace(sed.indentCount)))
+                sed.indentCount and h.map(R.concat(h.createWhiteSpace(sed.indentCount)))
                     or R.identity,
                 R.join('\n')
             )(a.lines)

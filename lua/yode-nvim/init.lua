@@ -27,6 +27,11 @@ M.yodeNvim = function()
     --testSetup.setup2()
     --testSetup.setup3()
 
+    vim.cmd([[
+        wincmd w
+        wincmd w
+        normal ggjjjj
+    ]])
     --vim.cmd('wincmd h')
     --vim.cmd('tabnew')
     --vim.cmd('normal G')

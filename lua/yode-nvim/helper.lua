@@ -18,9 +18,7 @@ end
 local mapWithObjectKey = function(fn, data)
     return R.reduce(function(acc, key)
         return R.assoc(key, fn(data[key], key, data), acc)
-    end, {}, R.keys(
-        data
-    ))
+    end, {}, R.keys(data))
 end
 
 M.mapWithIndex = R.curry2(function(fn, data)

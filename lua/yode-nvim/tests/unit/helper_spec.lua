@@ -73,11 +73,7 @@ describe('helper', function()
             bar = 'now you see me',
             baz = 'even more foo!',
             l = list,
-        }, h.set(
-            bar,
-            'now you see me',
-            tbl
-        ))
+        }, h.set(bar, 'now you see me', tbl))
         eq({
             foo = 'my foo',
             bar = 'other foo',
@@ -89,11 +85,7 @@ describe('helper', function()
                 77,
                 40,
             },
-        }, h.set(
-            deep,
-            77,
-            tbl
-        ))
+        }, h.set(deep, 77, tbl))
 
         eq({ 10, 120, 30, 40 }, h.over(second, R.add(100), list))
         eq({
@@ -102,11 +94,7 @@ describe('helper', function()
             bar = 'this is other foo',
             baz = 'even more foo!',
             l = list,
-        }, h.over(
-            bar,
-            R.concat('this is '),
-            tbl
-        ))
+        }, h.over(bar, R.concat('this is '), tbl))
         eq({
             foo = 'my foo',
             bar = 'other foo',
@@ -118,11 +106,7 @@ describe('helper', function()
                 130,
                 40,
             },
-        }, h.over(
-            deep,
-            R.add(100),
-            tbl
-        ))
+        }, h.over(deep, R.add(100), tbl))
     end)
 
     it('createWhiteSpace', function()

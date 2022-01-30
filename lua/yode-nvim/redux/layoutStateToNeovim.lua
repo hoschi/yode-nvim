@@ -20,8 +20,7 @@ local layoutStateToNeovim = function(store)
                 end
 
                 if
-                    action.type
-                        == layoutReducer.actionNames.SYNC_TAB_LAYOUT_TO_NEOVIM
+                    action.type == layoutReducer.actionNames.SYNC_TAB_LAYOUT_TO_NEOVIM
                     and tabState.isDirty == false
                 then
                     log.trace("tab isn't dirty, aborting")

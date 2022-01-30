@@ -45,10 +45,7 @@ const getSeditorWidth = async (nvim) => {
             data = {},
             name = 'mosaic',
             isDirty = false,
-        }, R.omit(
-            { 'windows' },
-            store.getState().layout.tabs[1]
-        ))
+        }, R.omit({ 'windows' }, store.getState().layout.tabs[1]))
         eq(
             {
                 {
@@ -232,10 +229,7 @@ plugin.registerCommand(
                 height = 7,
                 id = seditor1Win,
             },
-        }, h.map(
-            R.pick({ 'y', 'height', 'id' }),
-            store.getState().layout.tabs[1].windows
-        ))
+        }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
 
         vim.cmd('YodeLayoutShiftWinDown')
         eq(seditor3Win, vim.fn.win_getid())
@@ -255,10 +249,7 @@ plugin.registerCommand(
                 height = 7,
                 id = seditor1Win,
             },
-        }, h.map(
-            R.pick({ 'y', 'height', 'id' }),
-            store.getState().layout.tabs[1].windows
-        ))
+        }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
 
         vim.cmd('YodeLayoutShiftWinDown')
         eq(seditor3Win, vim.fn.win_getid())
@@ -278,10 +269,7 @@ plugin.registerCommand(
                 height = 10,
                 id = seditor3Win,
             },
-        }, h.map(
-            R.pick({ 'y', 'height', 'id' }),
-            store.getState().layout.tabs[1].windows
-        ))
+        }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
 
         vim.cmd('YodeLayoutShiftWinTop')
         eq(seditor3Win, vim.fn.win_getid())
@@ -301,10 +289,7 @@ plugin.registerCommand(
                 height = 7,
                 id = seditor1Win,
             },
-        }, h.map(
-            R.pick({ 'y', 'height', 'id' }),
-            store.getState().layout.tabs[1].windows
-        ))
+        }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
 
         vim.cmd('YodeLayoutShiftWinBottom')
         eq(seditor3Win, vim.fn.win_getid())
@@ -324,10 +309,7 @@ plugin.registerCommand(
                 height = 10,
                 id = seditor3Win,
             },
-        }, h.map(
-            R.pick({ 'y', 'height', 'id' }),
-            store.getState().layout.tabs[1].windows
-        ))
+        }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
 
         vim.cmd('YodeLayoutShiftWinUp')
         eq(seditor3Win, vim.fn.win_getid())
@@ -347,10 +329,7 @@ plugin.registerCommand(
                 height = 7,
                 id = seditor1Win,
             },
-        }, h.map(
-            R.pick({ 'y', 'height', 'id' }),
-            store.getState().layout.tabs[1].windows
-        ))
+        }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
 
         vim.cmd('YodeLayoutShiftWinUp')
         eq(seditor3Win, vim.fn.win_getid())
@@ -370,10 +349,7 @@ plugin.registerCommand(
                 height = 7,
                 id = seditor1Win,
             },
-        }, h.map(
-            R.pick({ 'y', 'height', 'id' }),
-            store.getState().layout.tabs[1].windows
-        ))
+        }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
 
         vim.cmd('YodeLayoutShiftWinUp')
         eq(seditor3Win, vim.fn.win_getid())
@@ -393,10 +369,7 @@ plugin.registerCommand(
                 height = 10,
                 id = seditor3Win,
             },
-        }, h.map(
-            R.pick({ 'y', 'height', 'id' }),
-            store.getState().layout.tabs[1].windows
-        ))
+        }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
 
         vim.cmd('YodeLayoutShiftWinDown')
         eq(seditor3Win, vim.fn.win_getid())
@@ -416,10 +389,7 @@ plugin.registerCommand(
                 height = 7,
                 id = seditor1Win,
             },
-        }, h.map(
-            R.pick({ 'y', 'height', 'id' }),
-            store.getState().layout.tabs[1].windows
-        ))
+        }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
     end)
 
     it('should use tab handles, not tab numbers', function()
@@ -467,10 +437,7 @@ plugin.registerCommand(
                 height = 7,
                 id = seditor1Win,
             },
-        }, h.map(
-            R.pick({ 'y', 'height', 'id' }),
-            store.getState().layout.tabs[1].windows
-        ))
+        }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
 
         vim.cmd('wincmd w')
         eq(seditor2Win, vim.fn.win_getid())
@@ -511,10 +478,7 @@ async function createSeditor(nvim, text, row, height) {
                 height = 7,
                 id = seditor1Win,
             },
-        }, h.map(
-            R.pick({ 'y', 'height', 'id' }),
-            store.getState().layout.tabs[1].windows
-        ))
+        }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
 
         vim.cmd('undo')
         async.util.scheduler()
@@ -550,10 +514,7 @@ async function createSeditor(nvim, text, row, height) {
                 height = 7,
                 id = seditor1Win,
             },
-        }, h.map(
-            R.pick({ 'y', 'height', 'id' }),
-            store.getState().layout.tabs[1].windows
-        ))
+        }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
     end)
 
     it('delete floating buffer', function()
