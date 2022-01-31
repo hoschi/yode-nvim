@@ -45,6 +45,9 @@ set showtabline=2
     * [mhartington/formatter.nvim](https://github.com/mhartington/formatter.nvim)
         * uses `nvim_buf_set_lines` for one `change/add` event, but is async
         * [adapted version to install](https://github.com/hoschi/formatter.nvim)
+* overlapping/nested seditors are not supported at the moment
+    * see TODO statements in `onSeditorBufferLines`
+    * other parts of code as well, probably not documented
 
 ## Development
 

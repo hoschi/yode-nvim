@@ -109,4 +109,10 @@ M.readFile = function(file)
     return content
 end
 
+M.makeVimTable = function(data)
+    return R.reduce(function(acc, key)
+        return R.assoc(R.toString(key), data[key], acc)
+    end, {}, R.keys(data or {}))
+end
+
 return M

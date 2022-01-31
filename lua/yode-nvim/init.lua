@@ -27,11 +27,6 @@ M.yodeNvim = function()
     --testSetup.setup2()
     --testSetup.setup3()
 
-    vim.cmd([[
-        wincmd w
-        wincmd w
-        normal ggjjjj
-    ]])
     --vim.cmd('wincmd h')
     --vim.cmd('tabnew')
     --vim.cmd('normal G')
@@ -342,7 +337,28 @@ M.floatToMainWindow = function()
 end
 
 -----------------------
--- debug stuff
+-- Neomake
+-----------------------
+
+M.yodeNeomakeCheckIgnore = function(bufId)
+    local log = logging.create('yodeNeomakeCheckIgnore')
+    log.debug('checking buffer', bufId)
+    local sed = seditors.selectors.getSeditorById(bufId)
+    if sed then
+        log.debug(
+            'found seditor, Neomake should not ignore this type of buffer and proceed with checking'
+        )
+        return false
+    end
+    local bufType = vim.bo[bufId].buftype
+    -- normal buffers have an empty buftype setting, ignore every non empty buftypes
+    local shouldIgnore = not R.isEmpty(bufType or '')
+    log.debug('no seditor, ignore logic as normal Neovim by buftype:', bufType, shouldIgnore)
+    return shouldIgnore
+end
+
+-----------------------
+-- Integration
 -----------------------
 
 M.yodeArgsLogger = function(...)
@@ -350,12 +366,9 @@ M.yodeArgsLogger = function(...)
     log.debug(...)
 end
 
-M.yodeNeomakeGetSeditorInfo = function(bufId)
-    local log = logging.create('yodeNeomakeGetSeditorInfo')
-    local sed = seditors.selectors.getSeditorById(bufId)
-    log.debug(bufId, sed)
-    return sed
-end
+-----------------------
+-- debug stuff
+-----------------------
 
 M.yodeRedux = function()
     local log = logging.create('yodeRedux')

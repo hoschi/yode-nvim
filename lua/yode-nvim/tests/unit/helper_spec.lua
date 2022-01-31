@@ -152,4 +152,15 @@ describe('helper', function()
         eq(1, h.prevIndex(2, data))
         eq(2, h.prevIndex(3, data))
     end)
+
+    it('convert table with number keys to VimL compatiblle dict', function()
+        local data = { [5] = { foo = 'bar' }, [100] = 'test', [2] = { 10, 11, 12 } }
+
+        eq(
+            { ['5'] = { foo = 'bar' }, ['100'] = 'test', ['2'] = { 10, 11, 12 } },
+            h.makeVimTable(data)
+        )
+        eq({ ['1'] = 1, ['2'] = 2, ['3'] = 3 }, h.makeVimTable({ 1, 2, 3 }))
+        eq({}, h.makeVimTable())
+    end)
 end)
