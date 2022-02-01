@@ -14,6 +14,7 @@ M.writeFileEditor = function()
 
     local bufId = vim.fn.bufnr('%')
     local sedsConnected = seditors.selectors.getSeditorsConnected(bufId)
+    log.debug(bufId, #sedsConnected)
     R.forEach(function(sed)
         vim.bo[sed.seditorBufferId].modified = false
     end, sedsConnected)
@@ -30,7 +31,7 @@ M.handleZombies = function(fileBufferId, editLineCount, onAction)
         return {}
     end
 
-    zombiesConnected = R.values(seditors.selectors.getZombieSeditorsConnected(fileBufferId))
+    local zombiesConnected = R.values(seditors.selectors.getZombieSeditorsConnected(fileBufferId))
     if #zombiesConnected <= 0 then
         log.debug('no zombies for file buffer', fileBufferId)
         return {}

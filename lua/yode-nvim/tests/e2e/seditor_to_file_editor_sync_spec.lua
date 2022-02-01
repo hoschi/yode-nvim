@@ -1,12 +1,8 @@
 local async = require('plenary.async')
 async.tests.add_to_env()
-local yodeNvim = require('yode-nvim.init')
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
-local createSeditor = require('yode-nvim.createSeditor')
-local h = require('yode-nvim.helper')
 local tutil = require('yode-nvim.tests.util')
-local R = require('yode-nvim.deps.lamda.dist.lamda')
 
 local eq = assert.are.same
 

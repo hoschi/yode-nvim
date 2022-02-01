@@ -1,7 +1,6 @@
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
 local tutil = require('yode-nvim.tests.util')
-local h = require('yode-nvim.helper')
 
 local eq = assert.are.same
 

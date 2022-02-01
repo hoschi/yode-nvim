@@ -1,4 +1,3 @@
-local tutil = require('yode-nvim.tests.util')
 local diffLib = require('yode-nvim.diffLib')
 local h = require('yode-nvim.helper')
 local R = require('yode-nvim.deps.lamda.dist.lamda')
@@ -40,13 +39,13 @@ local text2 = [[
         { sync: false }
     )]]
 
-local text3 = [[
-        relative:
-            'editor' +
-            'fooooooooooooooooooo' +
-            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar' +
-            'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar',
-]]
+--local text3 = [[
+--relative:
+--'editor' +
+--'fooooooooooooooooooo' +
+--'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar' +
+--'baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar',
+--]]
 
 describe('diffLib -', function()
     it('excerpt', function()

@@ -1,15 +1,17 @@
 local logging = require('yode-nvim.logging')
 local layoutMap = require('yode-nvim.layout.layoutMap')
 local layoutReducer = require('yode-nvim.redux.layoutReducer')
-local logMemo
+local log
 
 local layoutStateToNeovim = function(store)
     return function(nextDispatch)
         return function(action)
-            local layout, tabStateNeovim
+            local layout, tabStateNeovim, tabState, status, err
             local normalRet = nextDispatch(action)
             local state = store.getState()
-            local log = logMemo and logMemo or logging.create('layoutStateToNeovim')
+            if not log then
+                log = logging.create('layoutStateToNeovim')
+            end
 
             if action.syncToNeovim == true then
                 log.trace('trying it with state', state)

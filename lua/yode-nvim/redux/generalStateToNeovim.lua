@@ -1,14 +1,16 @@
 local logging = require('yode-nvim.logging')
 local seditorsReducer = require('yode-nvim.redux.seditorsReducer')
-local logMemo
+local log
 
-local generalStateToNeovim = function(store)
+local generalStateToNeovim = function() -- function(store)
     return function(nextDispatch)
         return function(action)
-            local log = logMemo and logMemo or logging.create('generalStateToNeovim')
-            local stateBefore = store.getState()
+            if not log then
+                log = logging.create('generalStateToNeovim')
+            end
+            --local stateBefore = store.getState()
             local normalRet = nextDispatch(action)
-            local state = store.getState()
+            --local state = store.getState()
 
             if action.type == seditorsReducer.actionNames.SOFTLY_KILL_SEDITOR then
                 log.trace(seditorsReducer.SOFTLY_KILL_SEDITOR)

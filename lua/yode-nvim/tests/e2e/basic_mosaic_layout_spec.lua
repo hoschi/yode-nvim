@@ -200,6 +200,8 @@ plugin.registerCommand(
                 })
             )
         )
+
+        eq(true, nil == layout.selectors.getWindowBySomeId(9, { winId = seditor1Win }))
     end)
 
     it("can't switch buffer to non seditor buffer in floating window", function()

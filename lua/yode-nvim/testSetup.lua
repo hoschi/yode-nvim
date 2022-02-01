@@ -20,7 +20,7 @@ M.setup2 = function()
 end
 
 M.setup3 = function()
-    local fileBuffer1, seditor1, seditor2, seditor3
+    local fileBuffer1, seditor1, seditor2
 
     vim.cmd('e ./testData/basic.js')
     fileBuffer1 = vim.fn.bufnr('%')
@@ -34,7 +34,6 @@ M.setup3 = function()
     vim.cmd('wincmd h')
 
     vim.cmd('49,58YodeCreateSeditorFloating')
-    seditor3 = vim.fn.bufnr('%')
     vim.cmd('wincmd h')
 
     vim.cmd('tab split')

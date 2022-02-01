@@ -1,10 +1,12 @@
 local logging = require('yode-nvim.logging')
-local logMemo
+local log
 
 local stateLogger = function(store)
     return function(nextDispatch)
         return function(action)
-            local log = logMemo and logMemo or logging.create('state')
+            if not log then
+                log = logging.create('state')
+            end
             log.trace('will dispatch:', action)
             local ret = nextDispatch(action)
             log.trace('after dispatch:', store.getState())

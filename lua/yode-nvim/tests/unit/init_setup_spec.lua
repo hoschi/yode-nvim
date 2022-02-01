@@ -1,7 +1,5 @@
 local defaultConfig = require('yode-nvim.defaultConfig')
 local yodeNvim = require('yode-nvim.init')
-local storeBundle = require('yode-nvim.redux.index')
-local store = storeBundle.store
 
 local eq = assert.are.same
 

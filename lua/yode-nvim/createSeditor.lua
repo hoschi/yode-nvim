@@ -3,9 +3,6 @@ local logging = require('yode-nvim.logging')
 local storeBundle = require('yode-nvim.redux.index')
 local seditors = storeBundle.seditors
 local R = require('yode-nvim.deps.lamda.dist.lamda')
-local changeSyncing = require('yode-nvim.changeSyncing')
-
-local M = {}
 
 local getFileBufferName = function(fileBufferId, seditorBufferId)
     local ext = vim.fn.expand('#' .. fileBufferId .. ':e')

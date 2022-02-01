@@ -29,13 +29,13 @@ local deactivateBuffer = function(log, bufId)
     end
 end
 
-local onBufferDetach = function(_event, bufId)
+local onBufferDetach = function(_, bufId)
     local log = logging.create('onBufferDetach')
     log.debug('detach', bufId)
     M.unsubscribeFromBuffer(bufId, true)
 end
 
-local onBufferReload = function(_event, bufId)
+local onBufferReload = function(_, bufId)
     local log = logging.create('onBufferReload')
     log.debug('reload', bufId)
 
@@ -59,7 +59,7 @@ local activateBuffer = function(editorType, bufId, onLines)
     })
 end
 
-local onSeditorBufferLines = function(_event, bufId, _tick, firstline, lastline, newLastline)
+local onSeditorBufferLines = function(_, bufId, _, firstline, lastline, newLastline)
     local log = logging.create('onSeditorBufferLines')
     if currentBuffer ~= bufId then
         deactivateBuffer(log, bufId)
@@ -263,7 +263,7 @@ local onSeditorBufferLines = function(_event, bufId, _tick, firstline, lastline,
     end)
 end
 
-local onFileBufferLines = function(_event, bufId, tick, firstline, lastline, newLastline)
+local onFileBufferLines = function(_, bufId, tick, firstline, lastline, newLastline)
     local log = logging.create('onFileBufferLines')
     if currentBuffer ~= bufId then
         deactivateBuffer(log, bufId)
@@ -564,7 +564,7 @@ M.subscribeToBuffer = function()
         return
     end
 
-    local zombieLayoutActions = fileEditor.handleZombies(bufId, nil, function(seditorBufferId)
+    fileEditor.handleZombies(bufId, nil, function(seditorBufferId)
         vim.schedule(function()
             layout.actions.multiTabContentChanged({
                 tabId = vim.api.nvim_get_current_tabpage(),

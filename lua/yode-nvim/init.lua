@@ -1,6 +1,5 @@
 local defaultConfig = require('yode-nvim.defaultConfig')
 local logging = require('yode-nvim.logging')
-local h = require('yode-nvim.helper')
 local R = require('yode-nvim.deps.lamda.dist.lamda')
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
@@ -22,7 +21,7 @@ M.setup = function(options)
 end
 
 M.yodeNvim = function()
-    local log = logging.create('yodeNvim')
+    --local log = logging.create('yodeNvim')
     testSetup.setup1()
     --testSetup.setup2()
     --testSetup.setup3()
@@ -122,7 +121,6 @@ M.cloneCurrentIntoFloat = function()
     local log = logging.create('cloneCurrentIntoFloat')
     local bufId = vim.fn.bufnr('%')
     local winId = vim.fn.win_getid()
-    local config = vim.api.nvim_win_get_config(0)
 
     local floatWin = layout.selectors.getWindowBySomeId(
         vim.api.nvim_get_current_tabpage(),
@@ -197,7 +195,7 @@ M.onTabEnter = function()
 end
 
 M.onTabClosed = function()
-    local log = logging.create('onTabClosed')
+    --local log = logging.create('onTabClosed')
     layout.actions.onTabClosed({
         -- TODO can't find a conversion of tab number to tab id. You can
         -- get tab nr as arg when you eval <afile>, see help.

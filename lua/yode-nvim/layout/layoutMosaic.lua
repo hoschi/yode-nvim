@@ -108,7 +108,7 @@ local shiftWinTop = function(log, state, currentWinIndex)
     )
 end
 
-M.selectors.getWindowBySomeId = function(tabId, selectorArgs, state)
+M.selectors.getWindowBySomeId = function(_, selectorArgs, state)
     local idx = findWindowIndexBySomeId(state, selectorArgs)
     return idx ~= nil and R.path({ 'windows', idx }, state)
 end
@@ -165,7 +165,7 @@ local reducerFunctions = {
     [sharedActions.actionNames.SHIFT_WIN_DOWN] = function(state, a)
         local log = logging.create('shiftWinDown')
         if #state.windows <= 1 then
-            log.trace('not possible', #state.windows, currentWinIndex, otherWinIndex)
+            log.trace('not possible', #state.windows)
             return state
         end
         local currentWinIndex = findWindowIndexBySomeId(state, a)
@@ -193,7 +193,7 @@ local reducerFunctions = {
     [sharedActions.actionNames.SHIFT_WIN_UP] = function(state, a)
         local log = logging.create('shiftWinUp')
         if #state.windows <= 1 then
-            log.trace('not possible', #state.windows, currentWinIndex, otherWinIndex)
+            log.trace('not possible', #state.windows)
             return state
         end
         local currentWinIndex = findWindowIndexBySomeId(state, a)
@@ -289,7 +289,7 @@ M.stateToNeovim = function(state)
 
         if window.data.visible then
             if window.id == nil then
-                id = h.showBufferInFloatingWindow(
+                local id = h.showBufferInFloatingWindow(
                     window.bufId,
                     R.merge(window.data.initialConfig, winConfig)
                 )

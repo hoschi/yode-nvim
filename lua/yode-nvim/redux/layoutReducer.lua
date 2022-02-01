@@ -1,13 +1,12 @@
 local R = require('yode-nvim.deps.lamda.dist.lamda')
 local logging = require('yode-nvim.logging')
-local createReducer = require('yode-nvim.redux.createReducer')
 local layoutMap = require('yode-nvim.layout.layoutMap')
 local h = require('yode-nvim.helper')
 local sharedActions = require('yode-nvim.layout.sharedActions')
 
 local M = { actions = {}, actionNames = {}, selectors = {} }
 
-initialState = {
+local initialState = {
     tabs = {},
 }
 
