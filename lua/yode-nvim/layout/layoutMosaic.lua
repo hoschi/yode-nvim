@@ -282,10 +282,7 @@ M.stateToNeovim = function(state)
             col = x,
             row = window.y,
             width = width,
-        }, R.pick(
-            { 'relative', 'height', 'border' },
-            window
-        ))
+        }, R.pick({ 'relative', 'height', 'border' }, window))
 
         if window.data.visible then
             if window.id == nil then
