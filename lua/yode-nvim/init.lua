@@ -8,6 +8,7 @@ local layout = storeBundle.layout
 local createSeditor = require('yode-nvim.createSeditor')
 local changeSyncing = require('yode-nvim.changeSyncing')
 local testSetup = require('yode-nvim.testSetup')
+local updateFloatStatusLineText = require('yode-nvim.updateFloatStatusLineText')
 
 local M = {
     config = {},
@@ -26,18 +27,12 @@ M.yodeNvim = function()
     --testSetup.setup2()
     --testSetup.setup3()
 
-    --vim.cmd('wincmd h')
+    vim.cmd('YodeBufferDelete')
     --vim.cmd('tabnew')
     --vim.cmd('normal G')
     --vim.cmd('normal gg10j16dd')
     --vim.cmd('normal gg48j10dd')
     --vim.cmd('normal gg15j8J')
-end
-
-M.yodeTesting = function()
-    local log = logging.create('yodeTesting')
-    local buf = vim.fn.bufnr('%')
-    log.debug('!!!!!!!!!!', buf)
 end
 
 M.createSeditorFloating = function(firstline, lastline)
@@ -174,10 +169,25 @@ end
 M.onWindowClosed = function(winId)
     local log = logging.create('onWindowClosed')
     log.debug(winId)
-    layout.actions.removeFloatingWindow({
-        tabId = vim.api.nvim_get_current_tabpage(),
-        winId = winId,
-    })
+
+    local floatWins = layout.selectors.getWindowBySomeId(false, { winId = winId })
+    if R.isEmpty(floatWins) then
+        log.debug(string.format('%s is no floating window, done', winId))
+        return
+    end
+
+    local floatWin = R.head(floatWins)
+    M.tryWinClose(floatWin.statusId)
+
+    -- WARNING doing this without schedule breaks the behaviour of deleting a
+    -- floating buffer. My best bet is that you can't manipulate other windows
+    -- while vim processes a window event?!
+    vim.schedule(function()
+        layout.actions.removeFloatingWindow({
+            tabId = vim.api.nvim_get_current_tabpage(),
+            winId = winId,
+        })
+    end)
 end
 
 M.onVimResized = function()
@@ -221,6 +231,35 @@ M.onBufWinEnter = function()
         vim.cmd('e #')
         return
     end
+end
+
+M.onBufModifiedSet = function(bufId)
+    local log = logging.create('onBufModifiedSet')
+    local isModified = vim.bo[bufId].modified
+    -- FIXME remove hashes everywhere in here
+    log.debug('#####', bufId, isModified)
+
+    if isModified then
+        return
+    end
+
+    local sedsConnected = seditors.selectors.getSeditorsConnected(bufId)
+    R.forEach(function(sed)
+        log.debug('######', sed.seditorBufferId, false)
+        vim.bo[sed.seditorBufferId].modified = false
+    end, sedsConnected)
+end
+
+M.onOptionSetModifed = function()
+    local log = logging.create('onOptionSetModifed')
+    local bufId = vim.fn.bufnr('%')
+    -- FIXME remove hashes everywhere in here
+    log.debug('#####', bufId)
+
+    local floatWins = layout.selectors.getWindowBySomeId(false, { bufId = bufId })
+    R.forEach(function(win)
+        updateFloatStatusLineText(bufId, win.statusBufferId)
+    end, floatWins)
 end
 
 M.layoutShiftWinDown = function()
@@ -334,6 +373,24 @@ M.floatToMainWindow = function()
     vim.cmd('b ' .. bufId)
 end
 
+M.tryWinClose = function(winId, force)
+    local log = logging.create('tryWinClose')
+    log.debug(winId, force)
+
+    if force == nil then
+        force = true
+    end
+
+    if vim.api.nvim_win_is_valid(winId) then
+        local status, ret = pcall(vim.api.nvim_win_close, winId, force)
+        log.debug(
+            string.format('closed window %d with status %s and return value %s', winId, status, ret)
+        )
+    else
+        log.debug('windown not valid!', winId)
+    end
+end
+
 -----------------------
 -- Neomake
 -----------------------
@@ -356,17 +413,13 @@ M.yodeNeomakeCheckIgnore = function(bufId)
 end
 
 -----------------------
--- Integration
+-- debug stuff
 -----------------------
 
 M.yodeArgsLogger = function(...)
     local log = logging.create('yodeArgsLogger')
-    log.debug(...)
+    log.debug('#########', ...)
 end
-
------------------------
--- debug stuff
------------------------
 
 M.yodeRedux = function()
     local log = logging.create('yodeRedux')

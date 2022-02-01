@@ -12,11 +12,17 @@ local eq = assert.are.same
 describe('basic mosaic layout', function()
     local fileBufferId = 1
     local seditor1 = 2
-    local seditor2 = 3
-    local seditor3 = 4
+    local seditor1StatusBufferId = 3
+    local seditor2 = 4
+    local seditor2StatusBufferId = 5
+    local seditor3 = 6
+    local seditor3StatusBufferId = 7
     local seditor1Win = 1002
-    local seditor2Win = 1003
-    local seditor3Win = 1004
+    local seditor1WinStatus = 1003
+    local seditor2Win = 1004
+    local seditor2WinStatus = 1005
+    local seditor3Win = 1006
+    local seditor3WinStatus = 1007
 
     it('create floating seditors', function()
         eq({ seditors = {}, layout = { tabs = {} } }, store.getState())
@@ -55,10 +61,21 @@ const getSeditorWidth = async (nvim) => {
                     bufId = seditor1,
                     relative = 'editor',
                     data = { visible = true },
+                    statusBufferId = seditor1StatusBufferId,
+                    statusId = seditor1WinStatus,
                 },
             },
             h.map(
-                R.pick({ 'id', 'data', 'height', 'relative', 'y', 'bufId' }),
+                R.pick({
+                    'id',
+                    'data',
+                    'height',
+                    'relative',
+                    'y',
+                    'bufId',
+                    'statusId',
+                    'statusBufferId',
+                }),
                 store.getState().layout.tabs[1].windows
             )
         )
@@ -89,7 +106,7 @@ async function createSeditor(nvim, text, row, height) {
         eq({
             [fileBufferId] = './testData/basic.js',
             [seditor1] = 'yode://./testData/basic.js:2.js',
-            [seditor2] = 'yode://./testData/basic.js:3.js',
+            [seditor2] = 'yode://./testData/basic.js:4.js',
         }, tutil.getHumanBufferList())
         eq(
             {
@@ -100,6 +117,8 @@ async function createSeditor(nvim, text, row, height) {
                     bufId = seditor2,
                     relative = 'editor',
                     data = { visible = true },
+                    statusBufferId = seditor2StatusBufferId,
+                    statusId = seditor2WinStatus,
                 },
                 {
                     y = 17,
@@ -108,10 +127,21 @@ async function createSeditor(nvim, text, row, height) {
                     bufId = seditor1,
                     relative = 'editor',
                     data = { visible = true },
+                    statusBufferId = seditor1StatusBufferId,
+                    statusId = seditor1WinStatus,
                 },
             },
             h.map(
-                R.pick({ 'id', 'data', 'height', 'relative', 'y', 'bufId' }),
+                R.pick({
+                    'id',
+                    'data',
+                    'height',
+                    'relative',
+                    'y',
+                    'bufId',
+                    'statusId',
+                    'statusBufferId',
+                }),
                 store.getState().layout.tabs[1].windows
             )
         )
@@ -137,8 +167,8 @@ plugin.registerCommand(
         eq({
             [fileBufferId] = './testData/basic.js',
             [seditor1] = 'yode://./testData/basic.js:2.js',
-            [seditor2] = 'yode://./testData/basic.js:3.js',
-            [seditor3] = 'yode://./testData/basic.js:4.js',
+            [seditor2] = 'yode://./testData/basic.js:4.js',
+            [seditor3] = 'yode://./testData/basic.js:6.js',
         }, tutil.getHumanBufferList())
         eq(
             {
@@ -149,6 +179,8 @@ plugin.registerCommand(
                     bufId = seditor3,
                     relative = 'editor',
                     data = { visible = true },
+                    statusBufferId = seditor3StatusBufferId,
+                    statusId = seditor3WinStatus,
                 },
                 {
                     y = 12,
@@ -157,6 +189,8 @@ plugin.registerCommand(
                     bufId = seditor2,
                     relative = 'editor',
                     data = { visible = true },
+                    statusBufferId = seditor2StatusBufferId,
+                    statusId = seditor2WinStatus,
                 },
                 {
                     y = 28,
@@ -165,10 +199,21 @@ plugin.registerCommand(
                     bufId = seditor1,
                     relative = 'editor',
                     data = { visible = true },
+                    statusBufferId = seditor1StatusBufferId,
+                    statusId = seditor1WinStatus,
                 },
             },
             h.map(
-                R.pick({ 'id', 'data', 'height', 'relative', 'y', 'bufId' }),
+                R.pick({
+                    'id',
+                    'data',
+                    'height',
+                    'relative',
+                    'y',
+                    'bufId',
+                    'statusId',
+                    'statusBufferId',
+                }),
                 store.getState().layout.tabs[1].windows
             )
         )
@@ -404,10 +449,8 @@ plugin.registerCommand(
         eq({
             [fileBufferId] = './testData/basic.js',
             [seditor1] = 'yode://./testData/basic.js:2.js',
-            [seditor2] = 'yode://./testData/basic.js:3.js',
-            [seditor3] = 'yode://./testData/basic.js:4.js',
-            [5] = '',
-            [6] = '',
+            [seditor2] = 'yode://./testData/basic.js:4.js',
+            [seditor3] = 'yode://./testData/basic.js:6.js',
         }, tutil.getHumanBufferList())
         -- with tab numbers it would be {1, 2}
         eq({ 1, 3 }, R.keys(store.getState().layout.tabs))
@@ -416,10 +459,6 @@ plugin.registerCommand(
     it('tab close is handled', function()
         vim.cmd('tabclose')
         eq({ 1 }, R.keys(store.getState().layout.tabs))
-
-        -- cleanup
-        vim.cmd('bd 5')
-        vim.cmd('bd 6')
     end)
 
     a.it('changing content height, changes layout', function()
@@ -519,7 +558,17 @@ async function createSeditor(nvim, text, row, height) {
         }, h.map(R.pick({ 'y', 'height', 'id' }), store.getState().layout.tabs[1].windows))
     end)
 
-    it('delete floating buffer', function()
+    pending('resizing vim changes width of main and statusbar windows')
+
+    a.it('delete floating buffer', function()
+        local wins = {
+            seditor1Win,
+            seditor1WinStatus,
+            seditor2Win,
+            seditor2WinStatus,
+            seditor3Win,
+            seditor3WinStatus,
+        }
         vim.cmd('tab split')
         vim.cmd('b ' .. seditor2)
         vim.cmd('YodeCloneCurrentIntoFloat')
@@ -530,8 +579,8 @@ async function createSeditor(nvim, text, row, height) {
         eq({
             [fileBufferId] = './testData/basic.js',
             [seditor1] = 'yode://./testData/basic.js:2.js',
-            [seditor2] = 'yode://./testData/basic.js:3.js',
-            [seditor3] = 'yode://./testData/basic.js:4.js',
+            [seditor2] = 'yode://./testData/basic.js:4.js',
+            [seditor3] = 'yode://./testData/basic.js:6.js',
         }, tutil.getHumanBufferList())
         eq(seditor1, vim.fn.bufnr('%'))
         eq({ 1, 4 }, R.keys(store.getState().layout.tabs))
@@ -541,13 +590,19 @@ async function createSeditor(nvim, text, row, height) {
             R.pluck('bufId', store.getState().layout.tabs[1].windows)
         )
         eq({ seditor1, seditor2 }, R.pluck('bufId', store.getState().layout.tabs[4].windows))
+        eq({ true, true, true, true, true, true }, h.map(R.unary(vim.api.nvim_win_is_valid), wins))
 
         vim.cmd('bd')
+        async.util.scheduler()
         eq(fileBufferId, vim.fn.bufnr('%'))
         eq({ 1, 4 }, R.keys(store.getState().layout.tabs))
         eq({ [1] = true, [4] = false }, R.pluck('isDirty', store.getState().layout.tabs))
         eq({ seditor3, seditor2 }, R.pluck('bufId', store.getState().layout.tabs[1].windows))
         eq({ seditor2 }, R.pluck('bufId', store.getState().layout.tabs[4].windows))
+        eq(
+            { false, false, true, true, true, true },
+            h.map(R.unary(vim.api.nvim_win_is_valid), wins)
+        )
 
         vim.cmd('tabnext')
         eq({ [1] = false, [4] = false }, R.pluck('isDirty', store.getState().layout.tabs))
@@ -557,10 +612,15 @@ async function createSeditor(nvim, text, row, height) {
         eq(seditor2, vim.fn.bufnr('%'))
 
         vim.cmd('bd')
+        async.util.scheduler()
         eq(fileBufferId, vim.fn.bufnr('%'))
         eq({ 1, 4 }, R.keys(store.getState().layout.tabs))
         eq({ seditor3 }, R.pluck('bufId', store.getState().layout.tabs[1].windows))
         eq({}, R.pluck('bufId', store.getState().layout.tabs[4].windows))
+        eq(
+            { false, false, false, false, true, true },
+            h.map(R.unary(vim.api.nvim_win_is_valid), wins)
+        )
 
         -- TODO change window layout before deleting last buffer, when we have
         -- more of them. Should keep tab state. Assert layout name is still

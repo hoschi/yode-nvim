@@ -17,8 +17,10 @@ M.formatWrite = function()
 
     local sed = seditors.selectors.getSeditorById(bufId)
     if not sed then
-        log.debug('normal buffer ,formatting with normal cmd')
-        vim.cmd('FormatWrite')
+        log.debug('normal buffer, formatting with normal cmd')
+        -- NOTICE FormatWrite didn't write in some cases!
+        vim.cmd('Format')
+        vim.cmd('write')
         return
     end
 

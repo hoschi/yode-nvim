@@ -8,7 +8,7 @@ describe('buffer delete', function()
     local smallBufId = 1
     local fileBufferId = 2
     local seditor1 = 3
-    local seditor2 = 4
+    local seditor2 = 5
 
     it('1', function()
         vim.cmd('e ./testData/small.js')
@@ -30,7 +30,7 @@ describe('buffer delete', function()
             [smallBufId] = './testData/small.js',
             [fileBufferId] = './testData/basic.js',
             [seditor1] = 'yode://./testData/basic.js:3.js',
-            [seditor2] = 'yode://./testData/basic.js:4.js',
+            [seditor2] = 'yode://./testData/basic.js:5.js',
         }, tutil.getHumanBufferList())
         eq(2, #store.getState().layout.tabs[1].windows)
 

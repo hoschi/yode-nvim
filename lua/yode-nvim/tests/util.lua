@@ -32,12 +32,23 @@ end
 
 M.getHumanBufferList = function(showHidden)
     local bufIds = h.getBuffers(showHidden)
-    return R.zipObj(
-        bufIds,
-        h.map(function(bufId)
-            return vim.fn.bufname(bufId)
-        end, bufIds)
-    )
+    -- R.reject returns an array instead of a map, if the buffer ids look like array keys ...
+    return R.reduce(function (obj, id)
+        local name = vim.fn.bufname(id)
+        if R.isEmpty(name) then
+            return obj
+        else
+            return R.assoc(id, name, obj)
+        end
+    end, {}, bufIds)
+end
+
+M.getBuffersModifiedState = function(showHidden)
+    local bufIds = h.getBuffers(showHidden)
+    -- R.reject returns an array instead of a map, if the buffer ids look like array keys ...
+    return R.reduce(function (obj, id)
+        return R.assoc(id, vim.bo[id].modified, obj)
+    end, {}, bufIds)
 end
 
 return M

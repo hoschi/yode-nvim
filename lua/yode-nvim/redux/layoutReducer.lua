@@ -88,10 +88,20 @@ end
 
 M.selectors = R.reduce(function(selectors, selectorName)
     local selector = function(tabId, selectorArgs, state)
-        local tabState = state.tabs[tabId] or {}
-        local layoutSelector = R.path({ tabState.name, 'selectors', selectorName }, layoutMap)
-            or h.noop
-        return layoutSelector(tabId, selectorArgs, tabState)
+        if tabId == false then
+            return R.chain(function(tabState)
+                local layoutSelector = R.path(
+                    { tabState.name, 'selectors', selectorName },
+                    layoutMap
+                ) or R.always({})
+                return layoutSelector(tabState.id, selectorArgs, tabState)
+            end, state.tabs)
+        else
+            local tabState = state.tabs[tabId] or {}
+            local layoutSelector = R.path({ tabState.name, 'selectors', selectorName }, layoutMap)
+                or h.noop
+            return layoutSelector(tabId, selectorArgs, tabState)
+        end
     end
     return R.assoc(selectorName, selector, selectors)
 end, {}, {

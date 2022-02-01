@@ -1,3 +1,5 @@
+local async = require('plenary.async')
+async.tests.add_to_env()
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
 local tutil = require('yode-nvim.tests.util')
@@ -10,9 +12,9 @@ describe('float to main window -', function()
     local fileBufferId = 1
     local mainWin = 1000
     local seditor1 = 2
-    local seditor2 = 3
+    local seditor2 = 4
     local seditor1Win = 1002
-    local seditor2Win = 1003
+    local seditor2Win = 1004
 
     it('setup', function()
         vim.cmd('e ./testData/basic.js')
@@ -30,7 +32,7 @@ describe('float to main window -', function()
         eq({
             [fileBufferId] = './testData/basic.js',
             [seditor1] = 'yode://./testData/basic.js:2.js',
-            [seditor2] = 'yode://./testData/basic.js:3.js',
+            [seditor2] = 'yode://./testData/basic.js:4.js',
         }, tutil.getHumanBufferList())
         eq(
             {
@@ -67,7 +69,7 @@ describe('float to main window -', function()
         eq({
             [fileBufferId] = './testData/basic.js',
             [seditor1] = 'yode://./testData/basic.js:2.js',
-            [seditor2] = 'yode://./testData/basic.js:3.js',
+            [seditor2] = 'yode://./testData/basic.js:4.js',
         }, tutil.getHumanBufferList())
         eq(
             {
@@ -93,17 +95,18 @@ describe('float to main window -', function()
         )
     end)
 
-    it('move seditor2 to main window', function()
+    a.it('move seditor2 to main window', function()
         vim.cmd('wincmd w')
         eq(seditor2, vim.fn.bufnr('%'))
         eq(seditor2Win, vim.fn.win_getid())
 
         vim.cmd('YodeFloatToMainWindow')
+        async.util.scheduler()
         eq(mainWin, vim.fn.win_getid())
         eq({
             [fileBufferId] = './testData/basic.js',
             [seditor1] = 'yode://./testData/basic.js:2.js',
-            [seditor2] = 'yode://./testData/basic.js:3.js',
+            [seditor2] = 'yode://./testData/basic.js:4.js',
         }, tutil.getHumanBufferList())
         eq(
             {
@@ -130,7 +133,7 @@ describe('float to main window -', function()
         eq({
             [fileBufferId] = './testData/basic.js',
             [seditor1] = 'yode://./testData/basic.js:2.js',
-            [seditor2] = 'yode://./testData/basic.js:3.js',
+            [seditor2] = 'yode://./testData/basic.js:4.js',
         }, tutil.getHumanBufferList())
         eq(
             {

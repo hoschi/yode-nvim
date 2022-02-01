@@ -26,6 +26,8 @@ augroup YodeNvim
     autocmd BufWinEnter * lua require'yode-nvim'.onBufWinEnter()
 
     autocmd TabEnter * lua require'yode-nvim'.onTabEnter()
+    autocmd BufModifiedSet * nested call luaeval("require'yode-nvim'.onBufModifiedSet(tonumber(_A))", expand('<abuf>'))
+    autocmd OptionSet modified lua require'yode-nvim'.onOptionSetModifed()
     autocmd TabLeave * lua require'yode-nvim'.onTabLeave()
     autocmd TabClosed * lua require'yode-nvim'.onTabClosed()
 
