@@ -1,3 +1,6 @@
+lint:
+	luacheck lua
+
 test:
 	nvim --headless -c "PlenaryBustedDirectory lua/yode-nvim/tests/ {minimal_init = 'lua/yode-nvim/tests/minimal.vim'}"
 
