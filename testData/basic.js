@@ -11,7 +11,7 @@ const getSeditorWidth = async (nvim) => {
 async function createSeditor(nvim, text, row, height) {
     const buffer = await nvim.createBuffer(false, false)
 
-    const foo = 'br'
+    const foo = 'bar'
     const width = await getSeditorWidth(nvim)
     const window = await nvim.openWindow(buffer, true, {
         relative: 'editor',
