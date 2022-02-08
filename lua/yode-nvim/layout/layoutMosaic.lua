@@ -50,6 +50,15 @@ local findWindowIndexBySomeId = function(state, a)
         state.windows
     )
 end
+local createStatusBarWinConfig = R.mergeDeepRight({
+    relative = 'win',
+    height = 1,
+    col = 0,
+    focusable = false,
+    style = 'minimal',
+    -- keep it above main window
+    zindex = 51,
+})
 
 local setDirty = function(state)
     return R.assoc('isDirty', state.id ~= vim.api.nvim_get_current_tabpage(), state)
@@ -70,19 +79,12 @@ end)
 
 local createStatusBar = function(seditorWindowId, seditorBufferId, seditorWindowConfig)
     local log = logging.create('createStatusBar')
-    local winConfig = {
-        relative = 'win',
+    local winConfig = createStatusBarWinConfig({
         win = seditorWindowId,
-        height = 1,
         width = seditorWindowConfig.width + 1,
         row = seditorWindowConfig.height,
-        col = 0,
-        focusable = false,
         noautocmd = true,
-        style = 'minimal',
-        -- keep it above main window
-        zindex = 51,
-    }
+    })
     log.debug(winConfig)
     local statusBufId = vim.api.nvim_create_buf(false, true)
 
@@ -91,7 +93,6 @@ local createStatusBar = function(seditorWindowId, seditorBufferId, seditorWindow
     vim.wo[id].wrap = false
     vim.wo[id].winhl = 'Normal:Tabline'
 
-    -- FIXME add another autocomd for file buffer, this one is for seditor, probably it helps?!
     vim.cmd(
         string.format(
             "autocmd BufModifiedSet <buffer=%s> :lua require('yode-nvim.updateFloatStatusLineText')(%s, %s)",
@@ -352,7 +353,14 @@ M.stateToNeovim = function(state)
                 end
 
                 if vim.api.nvim_win_is_valid(window.statusId) then
-                    vim.api.nvim_win_set_config(window.statusId, { width = winConfig.width + 1 })
+                    vim.api.nvim_win_set_config(
+                        window.statusId,
+                        createStatusBarWinConfig({
+                            width = winConfig.width + 1,
+                            row = winConfig.height,
+                            win = window.id,
+                        })
+                    )
                 else
                     log.debug('windown not valid!', window.statusId)
                 end
