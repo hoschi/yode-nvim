@@ -1,0 +1,8 @@
+{
+    "rules": {
+        "no-console": 0,
+        "no-debugger": 0,
+        // require the use of === and !==
+        "eqeqeq": "warn"
+    }
+}

@@ -1,0 +1,65 @@
+let mainWindowWidth
+
+const getSeditorWidth = async (nvim) => {
+    if (!mainWindowWidth) {
+        mainWindowWidth = Math.floor((await nvim.getOption('columns')) / 2)
+    }
+
+    return mainWindowWidth
+}
+
+/*
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+module.exports = (plugin) => {
+    const { nvim } = plugin
+    plugin.setOptions({ dev: true })
+
+    plugin.registerCommand(
+        'YodeCreateSeditor',
+        async () => {
+            await createSeditor(nvim, '1111', 0, 20 == 50)
+
+            await createSeditor(nvim, '2222', 21, 10)
+            await createSeditor(nvim, '3333', 32, 15)
+        },
+        { sync: false }
+    )
+
+    const doSomeRecurseStuff = () => {
+        function namedFunction(arg0, arg1, arg2) {
+            const foo = arg2 + 'foo'
+            if (arg0 > 100) {
+                return 'done with: ' + arg0
+            }
+            return {
+                foo,
+                bar: namedFunction(arg0 + arg1, 10, 10),
+            }
+        }
+        return namedFunction(0, 1, 12)
+    }
+
+    plugin.registerAutocmd(
+        'VimResized',
+        async () => {
+            return doSomeRecurseStuff()
+        },
+        { pattern: '*' }
+    )
+}

@@ -1,0 +1,15 @@
+const createSeditor = (nvim) => {
+    const buffer = await nvim.createBuffer(false, false)
+
+    const foo = 'bar'
+    const width = await getSeditorWidth(nvim)
+    const window = await nvim.openWindow(buffer, true, {
+        relative: 'editor',
+        row,
+        col: width,
+        width,
+        height: height,
+        focusable: true,
+    })
+    return window // NOTICE stuff!
+}

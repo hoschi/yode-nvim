@@ -1,0 +1,12 @@
+[submodule "lua/yode-nvim/deps/lamda"]
+	path = lua/yode-nvim/deps/lamda
+	url = https://github.com/moriyalb/lamda.git
+[submodule "lua/yode-nvim/deps/redux-lua"]
+	path = lua/yode-nvim/deps/redux-lua
+	url = https://github.com/pyericz/redux-lua.git
+[submodule "lua/yode-nvim/deps/diff"]
+	path = lua/yode-nvim/deps/diff
+	url = https://github.com/LuaDist/diff.git
+[submodule "lua/yode-nvim/deps/bk-tree"]
+	path = lua/yode-nvim/deps/bk-tree
+	url = https://github.com/profan/lua-bk-tree.git

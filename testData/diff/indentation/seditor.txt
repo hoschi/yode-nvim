@@ -1,0 +1,10 @@
+    plugin.registerCommand(
+        'YodeCreateSeditor',
+        async () => {
+            await createSeditor(nvim, '1111', 0, 20 == 50)
+
+            await createSeditor(nvim, '2222', 21, 10)
+            await createSeditor(nvim, '3333', 32, 15)
+        },
+        { sync: false }
+    )
