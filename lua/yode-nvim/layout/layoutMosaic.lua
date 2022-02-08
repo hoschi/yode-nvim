@@ -3,6 +3,7 @@ local R = require('yode-nvim.deps.lamda.dist.lamda')
 local logging = require('yode-nvim.logging')
 local createReducer = require('yode-nvim.redux.createReducer')
 local sharedActions = require('yode-nvim.layout.sharedActions')
+local updateFloatStatusLineText = require('yode-nvim.updateFloatStatusLineText')
 
 local M = { name = 'mosaic', actions = {}, selectors = {} }
 
@@ -49,6 +50,15 @@ local findWindowIndexBySomeId = function(state, a)
         state.windows
     )
 end
+local createStatusBarWinConfig = R.mergeDeepRight({
+    relative = 'win',
+    height = 1,
+    col = 0,
+    focusable = false,
+    style = 'minimal',
+    -- keep it above main window
+    zindex = 51,
+})
 
 local setDirty = function(state)
     return R.assoc('isDirty', state.id ~= vim.api.nvim_get_current_tabpage(), state)
@@ -66,6 +76,34 @@ local setBorderStyle = h.mapWithIndex(function(win, i, all)
     return i < #all and R.assoc('border', normalBorderStyle, win)
         or R.assoc('border', lastBorderStyle, win)
 end)
+
+local createStatusBar = function(seditorWindowId, seditorBufferId, seditorWindowConfig)
+    local log = logging.create('createStatusBar')
+    local winConfig = createStatusBarWinConfig({
+        win = seditorWindowId,
+        width = seditorWindowConfig.width + 1,
+        row = seditorWindowConfig.height,
+        noautocmd = true,
+    })
+    log.debug(winConfig)
+    local statusBufId = vim.api.nvim_create_buf(false, true)
+
+    updateFloatStatusLineText(seditorBufferId, statusBufId)
+    local id = vim.api.nvim_open_win(statusBufId, false, winConfig)
+    vim.wo[id].wrap = false
+    vim.wo[id].winhl = 'Normal:Tabline'
+
+    vim.cmd(
+        string.format(
+            "autocmd BufModifiedSet <buffer=%s> :lua require('yode-nvim.updateFloatStatusLineText')(%s, %s)",
+            seditorBufferId,
+            seditorBufferId,
+            statusBufId
+        )
+    )
+
+    return id, statusBufId
+end
 
 local shiftWinBottom = function(log, state, currentWinIndex)
     local otherWinIndex = #state.windows
@@ -282,41 +320,58 @@ M.stateToNeovim = function(state)
             col = x,
             row = window.y,
             width = width,
-        }, R.pick(
-            { 'relative', 'height', 'border' },
-            window
-        ))
+        }, R.pick({ 'relative', 'height', 'border' }, window))
 
         if window.data.visible then
             if window.id == nil then
-                local id = h.showBufferInFloatingWindow(
-                    window.bufId,
-                    R.merge(window.data.initialConfig, winConfig)
-                )
-                log.debug('created window', id)
-                return R.pipe(R.assoc('id', id), R.dissocPath({ 'data', 'initialConfig' }))(window)
+                local winConfigFinal = R.merge(window.data.initialConfig, winConfig)
+                local id = h.showBufferInFloatingWindow(window.bufId, winConfigFinal)
+                vim.wo[id].winhl = 'FloatBorder:Tabline'
+                vim.cmd('redraw')
+                local statusId, statusBufferId = createStatusBar(id, window.bufId, winConfigFinal)
+                log.debug('created window', id, statusId)
+                return R.pipe(
+                    R.assoc('id', id),
+                    R.assoc('statusId', statusId),
+                    R.assoc('statusBufferId', statusBufferId),
+                    R.dissocPath({ 'data', 'initialConfig' })
+                )(window)
             else
                 log.debug('updating window', window.id)
-                vim.api.nvim_win_set_config(window.id, winConfig)
-                if window.id == currentWinId then
-                    -- NOTICE this is needed when a dirty tab gets visible, the
-                    -- cursor is in a floating window and the height grows. As
-                    -- the window is always as big as the content scrolling to
-                    -- the bottom sets the very top at the first line again.
-                    vim.cmd('normal zb')
+                if vim.api.nvim_win_is_valid(window.id) then
+                    vim.api.nvim_win_set_config(window.id, winConfig)
+                    vim.cmd('redraw')
+                    if window.id == currentWinId then
+                        -- NOTICE this is needed when a dirty tab gets visible, the
+                        -- cursor is in a floating window and the height grows. As
+                        -- the window is always as big as the content scrolling to
+                        -- the bottom sets the very top at the first line again.
+                        vim.cmd('normal zb')
+                    end
+                else
+                    log.debug('windown not valid!', window.id)
                 end
+
+                if vim.api.nvim_win_is_valid(window.statusId) then
+                    vim.api.nvim_win_set_config(
+                        window.statusId,
+                        createStatusBarWinConfig({
+                            width = winConfig.width + 1,
+                            row = winConfig.height,
+                            win = window.id,
+                        })
+                    )
+                else
+                    log.debug('windown not valid!', window.statusId)
+                end
+
                 return window
             end
         else
-            if window.id == nil then
-                vim.api.nvim_win_hide(window.id)
-                log.debug('hide window', window.id)
-                return R.dissoc('id', window)
-            else
-                log.debug('nothing todo')
-                return window
-            end
+            log.error('`visible` is not implemented yet!')
         end
+
+        return window
     end, state.windows)
 
     return R.pipe(R.assoc('windows', windowsUpdated), R.assoc('isDirty', false))(state)

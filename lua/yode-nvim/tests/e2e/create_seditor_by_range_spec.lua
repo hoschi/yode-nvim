@@ -68,7 +68,7 @@ const getSeditorWidth = async (nvim) => {
         eq({
             [fileBufferId] = './testData/basic.js',
             [2] = 'yode://./testData/basic.js:2.js',
-            [seditorBufferId] = 'yode://./testData/basic.js:3.js',
+            [seditorBufferId] = 'yode://./testData/basic.js:4.js',
         }, tutil.getHumanBufferList())
         eq({
             [2] = {

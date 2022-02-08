@@ -163,4 +163,6 @@ describe('helper', function()
         eq({ ['1'] = 1, ['2'] = 2, ['3'] = 3 }, h.makeVimTable({ 1, 2, 3 }))
         eq({}, h.makeVimTable())
     end)
+
+    pending('showBufferInFloatingWindow')
 end)

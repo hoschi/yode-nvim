@@ -302,6 +302,12 @@ local onFileBufferLines = function(_, bufId, tick, firstline, lastline, newLastl
         end)
         return
     end
+    local syncModified = function(seditorBufferId)
+        local isModified = vim.bo[bufId].modified
+        -- FIXME remove hashes
+        log.debug('############### set modified', seditorBufferId, isModified)
+        vim.bo[seditorBufferId].modified = isModified
+    end
 
     R.forEach(function(sed)
         local seditorLength = #vim.api.nvim_buf_get_lines(sed.seditorBufferId, 0, -1, true)
@@ -352,6 +358,7 @@ local onFileBufferLines = function(_, bufId, tick, firstline, lastline, newLastl
                         true,
                         linedata
                     )
+                    syncModified(sed.seditorBufferId)
                 end)
                 layoutActions = R.append(
                     sharedLayoutActions.actions.contentChanged({
@@ -408,6 +415,7 @@ local onFileBufferLines = function(_, bufId, tick, firstline, lastline, newLastl
                         true,
                         lineData
                     )
+                    syncModified(sed.seditorBufferId)
                 end)
                 layoutActions = R.append(
                     sharedLayoutActions.actions.contentChanged({
@@ -497,6 +505,7 @@ local onFileBufferLines = function(_, bufId, tick, firstline, lastline, newLastl
                         true,
                         lineData
                     )
+                    syncModified(sed.seditorBufferId)
                 end)
                 return
             elseif
@@ -530,6 +539,7 @@ local onFileBufferLines = function(_, bufId, tick, firstline, lastline, newLastl
                         true,
                         restrictedLineData
                     )
+                    syncModified(sed.seditorBufferId)
                 end)
                 return
             end

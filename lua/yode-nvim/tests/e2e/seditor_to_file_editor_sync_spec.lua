@@ -9,7 +9,7 @@ local eq = assert.are.same
 describe('seditor to file editor sync -', function()
     local fileBufferId = 1
     local seditor1 = 2
-    local seditor2 = 3
+    local seditor2 = 4
 
     a.it('one seditor', function()
         eq({ seditors = {}, layout = { tabs = {} } }, store.getState())
