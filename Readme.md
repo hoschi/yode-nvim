@@ -67,7 +67,7 @@ https://user-images.githubusercontent.com/163128/153627156-00f69076-d614-49ed-b0
 
 ## Installation
 
-You need at least Neovim 6. Add Plenary and Yode-Nvim to your config, e.g.
+You need at least Neovim 0.6. Add Plenary and Yode-Nvim to your config, e.g.
 with
 [vim-plug](https://github.com/junegunn/vim-plug):
 
