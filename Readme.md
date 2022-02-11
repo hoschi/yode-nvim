@@ -1,15 +1,97 @@
-# yode-nvim
+# Yode-Nvim
 
-Yode plugin for Neovim.
+[Yode](https://github.com/hoschi/yode) plugin for [NeoVim](https://neovim.io/).
 
-## interim help
+Focus on the important parts of the code. Hide the rest, literally. With
+Yode-Nvim you can go deeper than the file level, picking out the lines that are
+important for the current task. Whether you want to focus on important parts of
+a large file, or collect small parts of many files, you can see everything at a
+glance. Zoom from the focused part back into the file to briefly expand your
+context or adjust your focus. Everything happens in the editor, the rest of the
+tool chain still works, this makes Yode-Nvim work for any programming language,
+framework, etc.
+
+For the past six months, I've been using this MVP in its various stages in
+development for Yode-Nvim itself. Currently I am working on fixing minor bugs
+and integrating more plugins.
+
+## Introduction Video
+
+[![Yode Introduction Video](./media/demo-thumb.png)](https://www.youtube.com/watch?v=4jXGKmBrD5g)
+
+For a more in-depth introduction to the idea of Yode, check out the
+[video of the proof of concept](https://github.com/hoschi/yode)!
+
+## GIFs
+
+Neomake error linting with correct error placement:
+
+
+https://user-images.githubusercontent.com/163128/153627026-e346eb0c-b7e9-4bef-986f-79cb64dadfac.mp4
+
+
+Code formatter changes file buffer and seditor:
+
+
+https://user-images.githubusercontent.com/163128/153627139-d93ab368-0270-4bff-9c81-dc1441a2c934.mp4
+
+
+`Gread` to restore file with git:
+
+
+https://user-images.githubusercontent.com/163128/153627156-00f69076-d614-49ed-b066-b83b2dfcfe73.mp4
+
+
+## Features & Commands
+
+* `YodeCreateSeditorFloating` focus on a code part and make it floating, stay
+  at the current (main) view
+* `YodeCreateSeditorReplace` focus on a code part and replace it with the
+  current buffer
+* `YodeBufferDelete` delete the current buffer and jump back to file, if it is
+  a seditor
+* `YodeGoToAlternateBuffer` Yode-Nvim creates buffer local mappings for these
+  commands, see `lua/yode-nvim/createSeditor.lua` for all mappings
+* `YodeCloneCurrentIntoFloat` clone seditor into float
+* `YodeFloatToMainWindow` is the opposite
+* `YodeFormatWrite` formats and writes a buffer, no matter which type
+* `YodeRunInFile` can run a command in the current file or the file buffer of
+  the current seditor
+* changes from outside are tried to be applied as good as possible. If this
+  does not work so well, seditors can change the size 
+* in general there are different layouts for the floating windows, but at the
+  moment there is only one
+* see the next section for more details
+
+## Installation
+
+You need at least Neovim 6. Add Plenary and Yode-Nvim to your config, e.g.
+with
+[vim-plug](https://github.com/junegunn/vim-plug):
+
+```viml
+Plug 'nvim-lua/plenary.nvim'
+Plug 'hoschi/yode-nvim'
+```
+
+Important is that this repo is cloned with submodules, which happens automatically
+when you use vim-plug. The minimal setup is this:
+
+```viml
+lua require('yode-nvim').setup({})
+```
+
+Check out the help section for a more sophisticated configuration.
+
+## Interim Help
 
 **TODO** move this to Vim help syntax `./doc/yode-nvim.txt`.
 [kdheepak/panvimdoc: Write documentation in pandoc markdown. Generate documentation in vimdoc.](https://github.com/kdheepak/panvimdoc)
 
 * install
+    * use your favorite plugin manager, important is to include the git submodules
     * clone with submodules: `git clone --recurse-submodules git@github.com:hoschi/yode-nvim.git`
-* log is written to cache dir of stdpaths
+* log is written to cache dir of `stdpaths`
     * the default level is 'warn', but can be configured. Level can also be
       overwritten with an environment variable, see the Development section for
       more info.
@@ -18,12 +100,8 @@ Yode plugin for Neovim.
 * example setup:
 
 ```viml
-" toggle between last buffer, matches buffer mappings of seditors
-nmap <Leader>bll <C-^>
-imap <Leader>bll <esc><C-^>
-
 lua require('yode-nvim').setup({})
-map <Leader>yc :YodeCreateSeditorFloating<CR>
+map <Leader>yc      :YodeCreateSeditorFloating<CR>
 map <Leader>yr :YodeCreateSeditorReplace<CR>
 nmap <Leader>bd :YodeBufferDelete<cr>
 imap <Leader>bd <esc>:YodeBufferDelete<cr>
@@ -46,7 +124,7 @@ set showtabline=2
         * uses `nvim_buf_set_lines` for one `change/add` event, but is async
         * [adapted version to install](https://github.com/hoschi/formatter.nvim)
     * [neomake/neomake: Asynchronous linting and make framework for Neovim/Vim](https://github.com/neomake/neomake)
-        * usses API methods of `api.lua` to be aware of file vs seditor buffers
+        * uses API methods of `api.lua` to be aware of file vs seditor buffers
         * [adapted version to install](https://github.com/hoschi/neomake)
 * overlapping/nested seditors are not supported at the moment
     * see TODO statements in `onSeditorBufferLines`
@@ -64,6 +142,9 @@ set showtabline=2
 * format files
     * install `stylua`
     * `make format`
+* lint files
+    * install `luacheck`
+    * `make lint`
 * see `local.vimrc` for enhancements
     * rename to `.local.vimrc` to use it
     * [install nvim plugin for it](https://github.com/thinca/vim-localrc)
@@ -72,8 +153,8 @@ set showtabline=2
     * install [Hererocks](https://github.com/mpeterv/hererocks)
     * setup environment with `hererocks env -l5.1 -rlatest`
     * source environment with `source env/bin/activate`
-    * install packages you want to use in repl, e.g. `luarocks install inspect`
-* repl
+    * install packages you want to use in REPL, e.g. `luarocks install inspect`
+* REPL
     * source environment as showed above
     * `cd lua` to go into the same path Neovim saves Lua files
     * start a REPL with `lua`

@@ -236,8 +236,7 @@ end
 M.onBufModifiedSet = function(bufId)
     local log = logging.create('onBufModifiedSet')
     local isModified = vim.bo[bufId].modified
-    -- FIXME remove hashes everywhere in here
-    log.debug('#####', bufId, isModified)
+    log.debug(bufId, isModified)
 
     if isModified then
         return
@@ -245,7 +244,7 @@ M.onBufModifiedSet = function(bufId)
 
     local sedsConnected = seditors.selectors.getSeditorsConnected(bufId)
     R.forEach(function(sed)
-        log.debug('######', sed.seditorBufferId, false)
+        log.debug(sed.seditorBufferId, false)
         vim.bo[sed.seditorBufferId].modified = false
     end, sedsConnected)
 end
@@ -253,8 +252,7 @@ end
 M.onOptionSetModifed = function()
     local log = logging.create('onOptionSetModifed')
     local bufId = vim.fn.bufnr('%')
-    -- FIXME remove hashes everywhere in here
-    log.debug('#####', bufId)
+    log.debug(bufId)
 
     local floatWins = layout.selectors.getWindowBySomeId(false, { bufId = bufId })
     R.forEach(function(win)

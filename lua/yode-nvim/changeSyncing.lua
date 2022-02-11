@@ -304,8 +304,7 @@ local onFileBufferLines = function(_, bufId, tick, firstline, lastline, newLastl
     end
     local syncModified = function(seditorBufferId)
         local isModified = vim.bo[bufId].modified
-        -- FIXME remove hashes
-        log.debug('############### set modified', seditorBufferId, isModified)
+        log.debug('set modified', seditorBufferId, isModified)
         vim.bo[seditorBufferId].modified = isModified
     end
 
