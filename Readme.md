@@ -1,6 +1,8 @@
 # Yode-Nvim
 
-[Yode](https://github.com/hoschi/yode) plugin for [NeoVim](https://neovim.io/).
+| [HackerNews](https://news.ycombinator.com/item?id=30305011) | [reddit](https://www.reddit.com/r/neovim/comments/sq5yfn/yodenvim_focused_code_editing_for_neovim/) |
+
+[Yode](https://github.com/hoschi/yode) plugin for [NeoVim](https://neovim.io/)
 
 Focus on the important parts of the code. Hide the rest, literally. With
 Yode-Nvim you can go deeper than the file level, picking out the lines that are
