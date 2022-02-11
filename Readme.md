@@ -63,6 +63,26 @@ https://user-images.githubusercontent.com/163128/153627156-00f69076-d614-49ed-b0
   moment there is only one
 * see the next section for more details
 
+## Installation
+
+You need at least Neovim 6. Add Plenary and Yode-Nvim to your config, e.g.
+with
+[vim-plug](https://github.com/junegunn/vim-plug):
+
+```viml
+Plug 'nvim-lua/plenary.nvim'
+Plug 'hoschi/yode-nvim'
+```
+
+Important is that this repo is cloned with submodules, which happens automatically
+when you use vim-plug. The minimal setup is this:
+
+```viml
+lua require('yode-nvim').setup({})
+```
+
+Check out the help section for a more sophisticated configuration.
+
 ## Interim Help
 
 **TODO** move this to Vim help syntax `./doc/yode-nvim.txt`.
