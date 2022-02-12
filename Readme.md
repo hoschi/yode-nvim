@@ -68,6 +68,8 @@ https://user-images.githubusercontent.com/163128/153627156-00f69076-d614-49ed-b0
   does not work so well, seditors can change the size 
 * in general there are different layouts for the floating windows, but at the
   moment there is only one
+* jump between windows by using `<C-W>w` or have a deeper look at 
+  [window movement](https://neovim.io/doc/user/windows.html#window-move-cursor)
 * see the next section for more details
 
 ## Installation
