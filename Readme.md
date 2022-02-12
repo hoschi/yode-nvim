@@ -132,6 +132,15 @@ set showtabline=2
     * see TODO statements in `onSeditorBufferLines`
     * other parts of code as well, probably not documented
 
+## Contribution
+
+Integration with the LSP client to be able to use all the features in seditors
+as well is definitely one of my top priorities. Contributions that improve the
+collaboration with the rest of the NeoVim universe would help a lot. The
+integration of Neomake and Formatter.nvim can be taken as examples. Other
+plugins may be easier to integrate, check this ticket:
+[Collection of tips to get Yode-Nvim working with other plugins](https://github.com/hoschi/yode-nvim/issues/2)
+
 ## Development
 
 * [Lamda module help](https://moriyalb.github.io/lamda/)
