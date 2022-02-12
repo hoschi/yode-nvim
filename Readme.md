@@ -31,17 +31,22 @@ Neomake error linting with correct error placement:
 
 https://user-images.githubusercontent.com/163128/153627026-e346eb0c-b7e9-4bef-986f-79cb64dadfac.mp4
 
+[Watch on Youtube instead](https://youtu.be/2njtODvxJek)
 
 Code formatter changes file buffer and seditor:
 
 
 https://user-images.githubusercontent.com/163128/153627139-d93ab368-0270-4bff-9c81-dc1441a2c934.mp4
 
+[Watch on Youtube instead](https://youtu.be/tJn28q0FRrw)
+
 
 `Gread` to restore file with git:
 
 
 https://user-images.githubusercontent.com/163128/153627156-00f69076-d614-49ed-b066-b83b2dfcfe73.mp4
+
+[Watch on Youtube instead](https://youtu.be/GiHhVtWs9Rc)
 
 
 ## Features & Commands
