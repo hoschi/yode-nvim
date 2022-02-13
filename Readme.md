@@ -1,6 +1,8 @@
 # Yode-Nvim
 
-[Yode](https://github.com/hoschi/yode) plugin for [NeoVim](https://neovim.io/).
+| [HackerNews](https://news.ycombinator.com/item?id=30305011) | [reddit](https://www.reddit.com/r/neovim/comments/sq5yfn/yodenvim_focused_code_editing_for_neovim/) |
+
+[Yode](https://github.com/hoschi/yode) plugin for [NeoVim](https://neovim.io/)
 
 Focus on the important parts of the code. Hide the rest, literally. With
 Yode-Nvim you can go deeper than the file level, picking out the lines that are
@@ -29,17 +31,22 @@ Neomake error linting with correct error placement:
 
 https://user-images.githubusercontent.com/163128/153627026-e346eb0c-b7e9-4bef-986f-79cb64dadfac.mp4
 
+[Watch on Youtube instead](https://youtu.be/2njtODvxJek)
 
 Code formatter changes file buffer and seditor:
 
 
 https://user-images.githubusercontent.com/163128/153627139-d93ab368-0270-4bff-9c81-dc1441a2c934.mp4
 
+[Watch on Youtube instead](https://youtu.be/tJn28q0FRrw)
+
 
 `Gread` to restore file with git:
 
 
 https://user-images.githubusercontent.com/163128/153627156-00f69076-d614-49ed-b066-b83b2dfcfe73.mp4
+
+[Watch on Youtube instead](https://youtu.be/GiHhVtWs9Rc)
 
 
 ## Features & Commands
@@ -61,11 +68,13 @@ https://user-images.githubusercontent.com/163128/153627156-00f69076-d614-49ed-b0
   does not work so well, seditors can change the size 
 * in general there are different layouts for the floating windows, but at the
   moment there is only one
+* jump between windows by using `<C-W>w` or have a deeper look at 
+  [window movement](https://neovim.io/doc/user/windows.html#window-move-cursor)
 * see the next section for more details
 
 ## Installation
 
-You need at least Neovim 6. Add Plenary and Yode-Nvim to your config, e.g.
+You need at least Neovim 0.6. Add Plenary and Yode-Nvim to your config, e.g.
 with
 [vim-plug](https://github.com/junegunn/vim-plug):
 
@@ -129,6 +138,15 @@ set showtabline=2
 * overlapping/nested seditors are not supported at the moment
     * see TODO statements in `onSeditorBufferLines`
     * other parts of code as well, probably not documented
+
+## Contribution
+
+Integration with the LSP client to be able to use all the features in seditors
+as well is definitely one of my top priorities. Contributions that improve the
+collaboration with the rest of the NeoVim universe would help a lot. The
+integration of Neomake and Formatter.nvim can be taken as examples. Other
+plugins may be easier to integrate, check this ticket:
+[Collection of tips to get Yode-Nvim working with other plugins](https://github.com/hoschi/yode-nvim/issues/2)
 
 ## Development
 

@@ -45,6 +45,9 @@ augroup YodeNvimPreStartup
     " of things, so I leave it here for a while
 augroup END
 
+" initialice everything with defaults, in case user didn't do it
+lua require'yode-nvim'.setup({})
+
 let s:save_cpo = &cpo
 set cpo&vim
 
