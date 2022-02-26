@@ -36,7 +36,7 @@ https://user-images.githubusercontent.com/163128/153627026-e346eb0c-b7e9-4bef-98
 Code formatter changes file buffer and seditor:
 
 
-https://user-images.githubusercontent.com/163128/153627139-d93ab368-0270-4bff-9c81-dc1441a2c934.mp4
+https://user-images.githubusercontent.com/163128/155854806-d8c8d006-96e2-4c8f-a23c-5ba1f18fd692.mp4
 
 [Watch on Youtube instead](https://youtu.be/tJn28q0FRrw)
 
