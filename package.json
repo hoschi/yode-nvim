@@ -5,11 +5,10 @@
   "main": "index.js",
   "scripts": {},
   "devDependencies": {
-    "eslint": "7.2.0",
-    "eslint-config-prettier": "6.11.0",
-    "eslint-plugin-jest": "23.13.2",
-    "nodemon": "2.0.12",
-    "prettier": "2.0.5"
+    "eslint": "8.13.0",
+    "eslint-config-prettier": "8.5.0",
+    "nodemon": "2.0.15",
+    "prettier": "2.6.2"
   },
   "repository": {
     "type": "git",
