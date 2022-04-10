@@ -29,14 +29,14 @@ For a more in-depth introduction to the idea of Yode, check out the
 Neomake error linting with correct error placement:
 
 
-https://user-images.githubusercontent.com/163128/153627026-e346eb0c-b7e9-4bef-986f-79cb64dadfac.mp4
+https://user-images.githubusercontent.com/163128/155854870-0efdebf9-f1b3-41ee-948f-845c026b0b46.mp4
 
 [Watch on Youtube instead](https://youtu.be/2njtODvxJek)
 
 Code formatter changes file buffer and seditor:
 
 
-https://user-images.githubusercontent.com/163128/153627139-d93ab368-0270-4bff-9c81-dc1441a2c934.mp4
+https://user-images.githubusercontent.com/163128/155854806-d8c8d006-96e2-4c8f-a23c-5ba1f18fd692.mp4
 
 [Watch on Youtube instead](https://youtu.be/tJn28q0FRrw)
 
@@ -44,7 +44,7 @@ https://user-images.githubusercontent.com/163128/153627139-d93ab368-0270-4bff-9c
 `Gread` to restore file with git:
 
 
-https://user-images.githubusercontent.com/163128/153627156-00f69076-d614-49ed-b066-b83b2dfcfe73.mp4
+https://user-images.githubusercontent.com/163128/155854880-a538f9c0-752c-4098-a6fd-c81f204fdb0c.mp4
 
 [Watch on Youtube instead](https://youtu.be/GiHhVtWs9Rc)
 
