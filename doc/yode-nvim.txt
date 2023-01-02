@@ -1,4 +1,4 @@
-*yode-nvim*      focused code editing *yode-nvim* *yodenvim* *yode_nvim* *yode*
+*yode-nvim*      focused code editing *yodenvim* *yode_nvim* *yode*
 
 Author: hoschi (https://github.com/hoschi)
 License: MIT License
