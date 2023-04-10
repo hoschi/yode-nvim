@@ -48,10 +48,8 @@ M.checkLineDataIndentCount = function(sed, lineData)
         data = { indentCount = indentCount },
     })
     local currentLines = vim.api.nvim_buf_get_lines(sed.seditorBufferId, 0, -1, true)
-    local changedLines = h.map(
-        R.concat(h.createWhiteSpace(sed.indentCount - indentCount)),
-        currentLines
-    )
+    local changedLines =
+        h.map(R.concat(h.createWhiteSpace(sed.indentCount - indentCount)), currentLines)
 
     vim.schedule(function()
         vim.api.nvim_buf_set_lines(sed.seditorBufferId, 0, -1, true, changedLines)

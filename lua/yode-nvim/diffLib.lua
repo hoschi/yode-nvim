@@ -132,10 +132,8 @@ M.findConnectedBlocks = function(diffData)
     local lineGroups = h.map(function(group)
         local findHappyStart = function(tokens)
             local dropTokensBeforeCount = R.max(1, tokens[1].index - CONNECTED_TOKEN_BORDER)
-            local tokensBeforeProbablyMiddleInLine = R.pipe(
-                R.drop(dropTokensBeforeCount - 1),
-                withoutInTokens
-            )(diffData.diffTokens)
+            local tokensBeforeProbablyMiddleInLine =
+                R.pipe(R.drop(dropTokensBeforeCount - 1), withoutInTokens)(diffData.diffTokens)
             local tokenTillStartOfLine = R.pipe(
                 R.take(dropTokensBeforeCount - 1),
                 withoutInTokens,
@@ -144,10 +142,8 @@ M.findConnectedBlocks = function(diffData)
                 end)
             )(diffData.diffTokens)
             local validDiffTokens = R.concat(tokenTillStartOfLine, tokensBeforeProbablyMiddleInLine)
-            local diffTokens = R.takeWhile(
-                R.complement(R.propEq('index', tokens[1].index)),
-                validDiffTokens
-            )
+            local diffTokens =
+                R.takeWhile(R.complement(R.propEq('index', tokens[1].index)), validDiffTokens)
             local diffLines = R.pipe(
                 R.take(R.min(START_END_COMPARE_COUNT, #tokens + CONNECTED_TOKEN_BORDER)),
                 M.joinTokenText,
@@ -155,16 +151,12 @@ M.findConnectedBlocks = function(diffData)
             )(validDiffTokens)
             local lineCount = R.length(diffLines)
             local baseText =
-                R.pipe(
-                    M.joinTokenText,
-                    R.split('\n'),
-                    R.take(lineCount),
-                    R.join('\n')
-                )(diffData.newTokens)
-            local startMatches = h.map(function(counter)
-                local diffLinesMatch = R.pipe(R.drop(counter), R.take(lineCount - counter))(
-                    diffLines
+                R.pipe(M.joinTokenText, R.split('\n'), R.take(lineCount), R.join('\n'))(
+                    diffData.newTokens
                 )
+            local startMatches = h.map(function(counter)
+                local diffLinesMatch =
+                    R.pipe(R.drop(counter), R.take(lineCount - counter))(diffLines)
                 local text = R.join('\n', diffLinesMatch)
                 local distance = getEditDistance(baseText, text)
 
@@ -230,11 +222,8 @@ M.findConnectedBlocks = function(diffData)
                 end),
                 R.join('')
             )
-            local additionalTokensTrimmed = h.over(
-                h.lensIndex(1),
-                h.over(h.lensProp('token'), trimToken),
-                additionalTokens
-            )
+            local additionalTokensTrimmed =
+                h.over(h.lensIndex(1), h.over(h.lensProp('token'), trimToken), additionalTokens)
             local grouWithHappyStart = R.concat(additionalTokensTrimmed, tokens)
 
             return startLine, grouWithHappyStart

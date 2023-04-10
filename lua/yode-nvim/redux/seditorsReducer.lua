@@ -9,10 +9,8 @@ local INIT_SEDITOR = 'INIT_SEDITOR'
 M.actions.initSeditor = R.pipe(R.pick({ 'seditorBufferId', 'data' }), R.assoc('type', INIT_SEDITOR))
 
 local CHANGE_START_LINE = 'CHANGE_START_LINE'
-M.actions.changeStartLine = R.pipe(
-    R.pick({ 'seditorBufferId', 'amount' }),
-    R.assoc('type', CHANGE_START_LINE)
-)
+M.actions.changeStartLine =
+    R.pipe(R.pick({ 'seditorBufferId', 'amount' }), R.assoc('type', CHANGE_START_LINE))
 
 local CHANGE_DATA = 'CHANGE_DATA'
 M.actions.changeData = R.pipe(R.pick({ 'seditorBufferId', 'data' }), R.assoc('type', CHANGE_DATA))
@@ -32,10 +30,8 @@ M.actions.softlyKillSeditor = R.pipe(
 )
 
 M.actionNames.RESURRECT_SEDITOR = 'RESURRECT_SEDITOR'
-M.actions.resurrectSeditor = R.pipe(
-    R.pick({ 'seditorBufferId' }),
-    R.assoc('type', M.actionNames.RESURRECT_SEDITOR)
-)
+M.actions.resurrectSeditor =
+    R.pipe(R.pick({ 'seditorBufferId' }), R.assoc('type', M.actionNames.RESURRECT_SEDITOR))
 
 M.selectors.getSeditorById = function(id, state)
     return R.prop(id, state)

@@ -37,10 +37,8 @@ local wrapWithDispatch = h.map(function(action)
     end
 end)
 
-M.store = createStore(
-    reducers,
-    applyMiddleware(stateLogger, layoutStateToNeovim, generalStateToNeovim)
-)
+M.store =
+    createStore(reducers, applyMiddleware(stateLogger, layoutStateToNeovim, generalStateToNeovim))
 M.seditors = {
     actions = wrapWithDispatch(seditorsReducer.actions),
     selectors = globalizeSelectors(STATE_PATH_SEDITORS, seditorsReducer.selectors),
