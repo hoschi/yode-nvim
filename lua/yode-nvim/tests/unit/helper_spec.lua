@@ -8,13 +8,23 @@ describe('helper', function()
         assert.True(h.maxPositiveNumber > 999999999999999999999999)
     end)
 
+    it('keysSorted', function()
+        eq({ 'bar', 'foo' }, h.keysSorted({ foo = 101, bar = 102 }))
+        eq({ 'bar', 'foo' }, h.keysSorted({ bar = 101, foo = 102 }))
+
+        eq({}, h.keysSorted({}))
+    end)
+
     it('map', function()
         eq({ 11, 12, 13 }, h.map(R.add(10), { 1, 2, 3 }))
         eq({ foo = 101, bar = 102 }, h.map(R.add(100), { foo = 1, bar = 2 }))
 
+        -- WARNING seems R.map doesn't gurantees in which order keys get mapped
+        local sort = R.sort(R.lt)
+
         -- for comparision what `R.map` does, which is not the behaviour of
         -- Ramda.map
-        eq({ 101, 102 }, R.map(R.add(100), { foo = 1, bar = 2 }))
+        eq(sort({ 101, 102 }), sort(R.map(R.add(100), { foo = 1, bar = 2 })))
     end)
 
     it('mapWithIndex', function()
@@ -30,9 +40,9 @@ describe('helper', function()
         )
 
         eq(
-            { foo = '10:foo:1020', bar = '20:bar:1020' },
-            h.mapWithIndex(function(data, i, all)
-                return data .. ':' .. i .. ':' .. R.join('', all)
+            { foo = '10:foo', bar = '20:bar' },
+            h.mapWithIndex(function(data, i)
+                return data .. ':' .. i
             end, {
                 foo = 10,
                 bar = 20,
@@ -41,9 +51,9 @@ describe('helper', function()
 
         -- this only works when props have values
         eq(
-            { bar = '20:bar:20' },
-            h.mapWithIndex(function(data, i, all)
-                return data .. ':' .. i .. ':' .. R.join('', all)
+            { bar = '20:bar' },
+            h.mapWithIndex(function(data, i)
+                return data .. ':' .. i
             end, {
                 foo = nil,
                 bar = 20,
