@@ -18,7 +18,7 @@ end
 local mapWithObjectKey = function(fn, data)
     return R.reduce(function(acc, key)
         return R.assoc(key, fn(data[key], key, data), acc)
-    end, {}, R.keys(data))
+    end, {}, M.keysSorted(data))
 end
 
 M.mapWithIndex = R.curry2(function(fn, data)
@@ -28,6 +28,8 @@ M.mapWithIndex = R.curry2(function(fn, data)
 
     return mapWithObjectKey(fn, data)
 end)
+
+M.keysSorted = R.pipe(R.keys, R.sort(R.lt))
 
 M.maxPositiveNumber = math.pow(2, 1024)
 --M.maxNegative = M.maxPositiveNumber * -1

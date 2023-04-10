@@ -70,10 +70,7 @@ local onSeditorBufferLines = function(_, bufId, _, firstline, lastline, newLastl
     local seditorWindow = seditors.selectors.getSeditorById(bufId)
     local operationType = h.getOperationOfBufLinesEvent(firstline, lastline, linedata)
     local lineData = seditorWindow.indentCount
-            and h.map(
-                R.concat(h.createWhiteSpace(seditorWindow.indentCount)),
-                linedata
-            )
+            and h.map(R.concat(h.createWhiteSpace(seditorWindow.indentCount)), linedata)
         or linedata
 
     log.debug(bufId, operationType, {
@@ -278,11 +275,8 @@ local onFileBufferLines = function(_, bufId, tick, firstline, lastline, newLastl
     local linedata = vim.api.nvim_buf_get_lines(bufId, firstline, newLastline, true)
     local lineLength = lastline - firstline
     local dataLength = #linedata
-    local operationType, editLineCount = h.getOperationOfBufLinesEvent(
-        firstline,
-        lastline,
-        linedata
-    )
+    local operationType, editLineCount =
+        h.getOperationOfBufLinesEvent(firstline, lastline, linedata)
     log.debug(
         bufId,
         'lines:',

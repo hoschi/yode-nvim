@@ -1,4 +1,5 @@
 local defaultConfig = require('yode-nvim.defaultConfig')
+local R = require('yode-nvim.deps.lamda.dist.lamda')
 local yodeNvim = require('yode-nvim.init')
 
 local eq = assert.are.same
@@ -15,6 +16,7 @@ describe('yode-nvim (init.lua)', function()
 
     it('setup with overrides', function()
         yodeNvim.setup({ log = { level = 'debug' } })
-        eq({ log = { level = 'debug' } }, yodeNvim.config)
+        eq({ log = { level = 'debug' } }, R.omit({ 'handlers' }, yodeNvim.config))
+        eq({ 'onSeditorBufCal' }, R.keys(yodeNvim.config.handlers))
     end)
 end)

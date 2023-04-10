@@ -1,5 +1,6 @@
 local defaultConfig = require('yode-nvim.defaultConfig')
 local logging = require('yode-nvim.logging')
+local handlers = require('yode-nvim.handlers')
 local R = require('yode-nvim.deps.lamda.dist.lamda')
 local storeBundle = require('yode-nvim.redux.index')
 local store = storeBundle.store
@@ -17,8 +18,17 @@ local M = {
 local lastTabId = 1
 
 M.setup = function(options)
+    if not R.isEmpty(M.config) then
+        local log = logging.create('setup')
+        log.debug('already configured', M.config)
+        return
+    end
+
     M.config = vim.tbl_deep_extend('force', defaultConfig, options or {})
     logging.setup(M.config.log)
+    handlers.setup(M.config.handlers)
+    local log = logging.create('setup')
+    log.debug('configured with options', options, 'to', M.config)
 end
 
 M.yodeNvim = function()
@@ -27,7 +37,7 @@ M.yodeNvim = function()
     --testSetup.setup2()
     --testSetup.setup3()
 
-    vim.cmd('YodeBufferDelete')
+    --vim.cmd('YodeBufferDelete')
     --vim.cmd('tabnew')
     --vim.cmd('normal G')
     --vim.cmd('normal gg10j16dd')
@@ -117,10 +127,8 @@ M.cloneCurrentIntoFloat = function()
     local bufId = vim.fn.bufnr('%')
     local winId = vim.fn.win_getid()
 
-    local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_get_current_tabpage(),
-        { bufId = bufId }
-    )
+    local floatWin =
+        layout.selectors.getWindowBySomeId(vim.api.nvim_get_current_tabpage(), { bufId = bufId })
     if floatWin then
         log.warn('buffer is already visible as floating window!')
         return
@@ -144,10 +152,8 @@ M.bufferDelete = function()
     local log = logging.create('bufferDelete')
     local winId = vim.fn.win_getid()
     local bufId = vim.fn.bufnr('%')
-    local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_get_current_tabpage(),
-        { winId = winId }
-    )
+    local floatWin =
+        layout.selectors.getWindowBySomeId(vim.api.nvim_get_current_tabpage(), { winId = winId })
 
     if floatWin then
         log.debug('deleting floating window', bufId, winId)
@@ -216,10 +222,8 @@ end
 M.onBufWinEnter = function()
     local log = logging.create('onBufWinEnter')
     local winId = vim.fn.win_getid()
-    local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_get_current_tabpage(),
-        { winId = winId }
-    )
+    local floatWin =
+        layout.selectors.getWindowBySomeId(vim.api.nvim_get_current_tabpage(), { winId = winId })
     if floatWin == nil then
         return
     end
@@ -262,10 +266,8 @@ end
 
 M.layoutShiftWinDown = function()
     local winId = vim.fn.win_getid()
-    local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_get_current_tabpage(),
-        { winId = winId }
-    )
+    local floatWin =
+        layout.selectors.getWindowBySomeId(vim.api.nvim_get_current_tabpage(), { winId = winId })
     if floatWin == nil then
         vim.cmd('wincmd r')
         return
@@ -279,10 +281,8 @@ end
 
 M.layoutShiftWinUp = function()
     local winId = vim.fn.win_getid()
-    local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_get_current_tabpage(),
-        { winId = winId }
-    )
+    local floatWin =
+        layout.selectors.getWindowBySomeId(vim.api.nvim_get_current_tabpage(), { winId = winId })
     if floatWin == nil then
         vim.cmd('wincmd R')
         return
@@ -296,10 +296,8 @@ end
 
 M.layoutShiftWinBottom = function()
     local winId = vim.fn.win_getid()
-    local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_get_current_tabpage(),
-        { winId = winId }
-    )
+    local floatWin =
+        layout.selectors.getWindowBySomeId(vim.api.nvim_get_current_tabpage(), { winId = winId })
     if floatWin == nil then
         vim.cmd('wincmd J')
         return
@@ -313,10 +311,8 @@ end
 
 M.layoutShiftWinTop = function()
     local winId = vim.fn.win_getid()
-    local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_get_current_tabpage(),
-        { winId = winId }
-    )
+    local floatWin =
+        layout.selectors.getWindowBySomeId(vim.api.nvim_get_current_tabpage(), { winId = winId })
     if floatWin == nil then
         vim.cmd('wincmd K')
         return
@@ -356,10 +352,8 @@ M.floatToMainWindow = function()
         return
     end
 
-    local floatWin = layout.selectors.getWindowBySomeId(
-        vim.api.nvim_get_current_tabpage(),
-        { bufId = bufId }
-    )
+    local floatWin =
+        layout.selectors.getWindowBySomeId(vim.api.nvim_get_current_tabpage(), { bufId = bufId })
     if not floatWin then
         log.debug('buffer is not floating, nothing to do')
         return
